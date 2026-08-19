@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conchita — Brainstorming Session · Aug 17, 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --paper: #f5f0e8;
+    --paper-dark: #ede8dc;
+    --ink: #1a1510;
+    --ink-faded: #4a4035;
+    --ink-ghost: #9a9080;
+    --red: #8b2c1a;
+    --red-light: #c94f35;
+    --teal: #1a5c5a;
+    --teal-light: #2e8d8a;
+    --gold: #8b6914;
+    --gold-light: #c4971e;
+    --blue: #1a3a5c;
+    --blue-light: #2a5a8b;
+    --purple: #4a1a6b;
+    --purple-light: #7a3aab;
+    --border: #c8bfa8;
+    --shadow: rgba(26,21,16,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: #2a2520;
+    font-family: 'Courier Prime', 'Courier New', monospace;
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(139,105,20,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(26,92,90,0.06) 0%, transparent 60%);
+  }
+
+  /* ── COVER ── */
+  #cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--paper);
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 31px,
+        var(--border) 31px,
+        var(--border) 32px
+      );
+    position: relative;
+    overflow: hidden;
+    padding: 60px 40px;
+  }
+
+  #cover::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 80px;
+    width: 2px; height: 100%;
+    background: rgba(139,44,26,0.25);
+  }
+
+  .cover-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-ghost);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    text-align: center;
+  }
+
+  .cover-title {
+    font-family: 'Special Elite', serif;
+    font-size: clamp(64px, 10vw, 110px);
+    color: var(--ink);
+    line-height: 0.9;
+    text-align: center;
+    position: relative;
+    margin-bottom: 8px;
+  }
+
+  .cover-title .struck {
+    text-decoration: line-through;
+    color: var(--ink-ghost);
+    font-size: 0.7em;
+  }
+
+  .cover-subtitle {
+    font-family: 'Special Elite', serif;
+    font-size: clamp(28px, 4vw, 48px);
+    color: var(--red);
+    text-align: center;
+    margin-bottom: 36px;
+    letter-spacing: 0.05em;
+  }
+
+  .cover-tagline {
+    font-family: 'Courier Prime', monospace;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--ink-faded);
+    text-align: center;
+    max-width: 480px;
+    line-height: 1.7;
+    margin-bottom: 60px;
+  }
+
+  .cover-stats {
+    display: flex;
+    gap: 48px;
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-ghost);
+  }
+
+  .cover-stats span { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .cover-stats strong { font-size: 22px; color: var(--ink-faded); font-weight: 500; }
+
+  .typewriter-cursor {
+    display: inline-block;
+    width: 3px;
+    height: 1em;
+    background: var(--red);
+    margin-left: 4px;
+    vertical-align: text-bottom;
+    animation: blink 1.1s step-end infinite;
+  }
+
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(26,21,16,0.95);
+    backdrop-filter: blur(8px);
+    padding: 12px 32px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow-x: auto;
+    border-bottom: 1px solid rgba(200,191,168,0.15);
+  }
+
+  nav a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-ghost);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 2px;
+    white-space: nowrap;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s, background 0.2s;
+  }
+
+  nav a:hover { color: var(--paper); background: rgba(200,191,168,0.1); }
+  nav .nav-title {
+    font-family: 'Special Elite', serif;
+    font-size: 15px;
+    color: var(--paper);
+    margin-right: auto;
+  }
+
+  /* ── SECTION WRAPPER ── */
+  .section {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 80px 32px;
+  }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-ghost);
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Special Elite', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.05;
+    margin-bottom: 48px;
+  }
+
+  /* ── PAPER CARD ── */
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    box-shadow: 4px 4px 0 var(--shadow), 8px 8px 0 rgba(26,21,16,0.04);
+    padding: 40px;
+    position: relative;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  /* ── TECHNIQUE 1: EMPATHY MAP ── */
+  #empathy { background: #1e1a15; }
+  #empathy .section-title { color: var(--paper); }
+  #empathy .section-label { color: #6a6055; }
+
+  .empathy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 2px;
+    background: #2a2520;
+    border: 2px solid #2a2520;
+  }
+
+  .empathy-cell {
+    background: var(--paper);
+    padding: 28px 32px;
+    position: relative;
+  }
+
+  .empathy-cell::before {
+    content: attr(data-icon) ' ' attr(data-label);
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-ghost);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .empathy-cell.center {
+    grid-column: 1 / -1;
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+  }
+
+  .empathy-center-name {
+    font-family: 'Special Elite', serif;
+    font-size: 42px;
+    color: var(--paper);
+  }
+
+  .empathy-center-desc {
+    font-family: 'Courier Prime', monospace;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-ghost);
+    max-width: 380px;
+    line-height: 1.6;
+    text-align: left;
+  }
+
+  .empathy-items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .empathy-items li {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-faded);
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .empathy-items li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--ink-ghost);
+  }
+
+  .empathy-items li strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* color accents per quadrant */
+  .empathy-cell[data-q="thinks"] { border-top: 3px solid var(--teal); }
+  .empathy-cell[data-q="feels"] { border-top: 3px solid var(--red); }
+  .empathy-cell[data-q="says"] { border-top: 3px solid var(--gold); }
+  .empathy-cell[data-q="does"] { border-top: 3px solid var(--blue); }
+  .empathy-cell[data-q="pains"] { border-top: 3px solid var(--purple); }
+  .empathy-cell[data-q="gains"] { border-top: 3px solid var(--teal-light); }
+
+  /* ── TECHNIQUE 2: SCAMPER ── */
+  #scamper { background: #f5f0e8; }
+
+  .scamper-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+
+  .scamper-row {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .scamper-row:last-child { border-bottom: none; }
+  .scamper-row:hover { background: rgba(200,191,168,0.15); }
+
+  .scamper-letter {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 0 24px 0;
+    font-family: 'Special Elite', serif;
+    font-size: 36px;
+    border-right: 1px solid var(--border);
+    background: var(--paper-dark);
+    color: var(--ink);
+  }
+
+  .scamper-body {
+    padding: 20px 28px;
+  }
+
+  .scamper-word {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-ghost);
+    margin-bottom: 6px;
+  }
+
+  .scamper-idea {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--ink-faded);
+  }
+
+  .scamper-idea strong {
+    color: var(--ink);
+    background: rgba(139,105,20,0.12);
+    padding: 0 3px;
+  }
+
+  .scamper-tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--paper);
+    padding: 2px 8px;
+    border-radius: 1px;
+    letter-spacing: 0.08em;
+  }
+  .tag-teal { background: var(--teal); }
+  .tag-red { background: var(--red); }
+  .tag-gold { background: var(--gold); }
+  .tag-blue { background: var(--blue); }
+  .tag-purple { background: var(--purple); }
+
+  /* ── TECHNIQUE 3: WHAT IF SCENARIOS ── */
+  #whatif { background: #16191e; }
+  #whatif .section-title { color: var(--paper); }
+  #whatif .section-label { color: #5a6070; }
+
+  .whatif-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .whatif-card {
+    border: 1px solid rgba(200,191,168,0.18);
+    padding: 28px;
+    position: relative;
+    background: rgba(245,240,232,0.04);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .whatif-card:hover {
+    border-color: rgba(200,191,168,0.35);
+    background: rgba(245,240,232,0.07);
+  }
+
+  .whatif-q {
+    font-family: 'Special Elite', serif;
+    font-size: 17px;
+    color: var(--paper);
+    margin-bottom: 14px;
+    line-height: 1.3;
+  }
+
+  .whatif-q::before {
+    content: '"';
+    color: var(--red-light);
+    font-size: 1.3em;
+    margin-right: 2px;
+  }
+
+  .whatif-a {
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    color: rgba(245,240,232,0.55);
+    line-height: 1.6;
+  }
+
+  .whatif-num {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: rgba(200,191,168,0.25);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── TECHNIQUE 4: LOTUS BLOSSOM ── */
+  #lotus { background: var(--paper-dark); }
+
+  .lotus-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .lotus-diagram {
+    width: 100%;
+    max-width: 720px;
+    aspect-ratio: 1;
+    position: relative;
+    margin: 0 auto 40px;
+  }
+
+  .lotus-cell {
+    position: absolute;
+    width: calc(100% / 3 - 6px);
+    height: calc(100% / 3 - 6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px;
+    border: 1px solid var(--border);
+    font-size: 12px;
+    line-height: 1.4;
+    background: var(--paper);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+
+  .lotus-cell:hover {
+    transform: scale(1.04);
+    box-shadow: 0 4px 16px var(--shadow);
+    z-index: 10;
+  }
+
+  /* 3x3 grid positions */
+  .lotus-cell:nth-child(1) { top: 0; left: 0; }
+  .lotus-cell:nth-child(2) { top: 0; left: calc(100% / 3 + 3px); }
+  .lotus-cell:nth-child(3) { top: 0; right: 0; }
+  .lotus-cell:nth-child(4) { top: calc(100% / 3 + 3px); left: 0; }
+  .lotus-cell:nth-child(5) { top: calc(100% / 3 + 3px); left: calc(100% / 3 + 3px); }
+  .lotus-cell:nth-child(6) { top: calc(100% / 3 + 3px); right: 0; }
+  .lotus-cell:nth-child(7) { bottom: 0; left: 0; }
+  .lotus-cell:nth-child(8) { bottom: 0; left: calc(100% / 3 + 3px); }
+  .lotus-cell:nth-child(9) { bottom: 0; right: 0; }
+
+  .lotus-cell.center {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .lotus-cell.core {
+    background: rgba(139,105,20,0.1);
+    border-color: var(--gold);
+  }
+
+  .lotus-cell-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-ghost);
+    margin-bottom: 6px;
+  }
+
+  .lotus-cell.center .lotus-cell-label { color: rgba(245,240,232,0.5); }
+
+  .lotus-cell-text {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11.5px;
+    color: var(--ink-faded);
+    line-height: 1.45;
+  }
+
+  .lotus-cell.center .lotus-cell-text {
+    color: var(--paper);
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  .lotus-cell.core .lotus-cell-text { color: var(--ink); }
+
+  /* ── TECHNIQUE 5: BACKCASTING ── */
+  #backcasting { background: #1a1510; }
+  #backcasting .section-title { color: var(--paper); }
+  #backcasting .section-label { color: #5a5040; }
+
+  .timeline {
+    position: relative;
+    padding-left: 48px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 12px;
+    bottom: 12px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--red) 0%, var(--gold) 50%, var(--teal) 100%);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 40px;
+  }
+
+  .timeline-item:last-child { margin-bottom: 0; }
+
+  .timeline-dot {
+    position: absolute;
+    left: -38px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--paper);
+    background: var(--red);
+  }
+
+  .timeline-item.mid .timeline-dot { background: var(--gold); }
+  .timeline-item.far .timeline-dot { background: var(--teal); }
+  .timeline-item.north-star .timeline-dot {
+    width: 18px;
+    height: 18px;
+    left: -41px;
+    top: 3px;
+    background: var(--paper);
+    border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(196,151,30,0.5);
+  }
+
+  .timeline-period {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-ghost);
+    margin-bottom: 8px;
+  }
+
+  .timeline-heading {
+    font-family: 'Special Elite', serif;
+    font-size: 20px;
+    color: var(--paper);
+    margin-bottom: 10px;
+  }
+
+  .timeline-item.north-star .timeline-heading {
+    font-size: 26px;
+    color: var(--gold-light);
+  }
+
+  .timeline-body {
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    color: rgba(245,240,232,0.55);
+    line-height: 1.65;
+  }
+
+  .timeline-body strong { color: rgba(245,240,232,0.85); }
+
+  /* ── SYNTHESIS ── */
+  #synthesis {
+    background: var(--ink);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #synthesis::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse at 30% 40%, rgba(139,105,20,0.12) 0%, transparent 55%),
+      radial-gradient(ellipse at 75% 70%, rgba(26,92,90,0.10) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  #synthesis .section-label { color: #5a5040; }
+  #synthesis .section-title { color: var(--paper); }
+
+  .synthesis-reveal {
+    position: relative;
+    z-index: 1;
+  }
+
+  .insight-block {
+    border-left: 3px solid var(--gold);
+    padding: 32px 36px;
+    margin-bottom: 3px;
+    background: rgba(245,240,232,0.03);
+    transition: background 0.3s;
+  }
+
+  .insight-block:hover { background: rgba(245,240,232,0.06); }
+
+  .insight-block.primary {
+    border-left-color: var(--red-light);
+    padding: 48px 36px;
+    background: rgba(139,44,26,0.08);
+  }
+
+  .insight-block.primary:hover { background: rgba(139,44,26,0.13); }
+
+  .insight-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--ink-ghost);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .insight-headline {
+    font-family: 'Special Elite', serif;
+    font-size: clamp(22px, 3.5vw, 34px);
+    color: var(--paper);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .insight-block.primary .insight-headline {
+    font-size: clamp(28px, 4.5vw, 46px);
+    color: var(--gold-light);
+  }
+
+  .insight-body {
+    font-family: 'Courier Prime', monospace;
+    font-size: 14px;
+    color: rgba(245,240,232,0.55);
+    line-height: 1.7;
+    max-width: 640px;
+  }
+
+  .insight-body strong { color: rgba(245,240,232,0.9); }
+
+  .strategy-chain {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin-top: 32px;
+    border: 1px solid rgba(200,191,168,0.12);
+  }
+
+  .chain-step {
+    flex: 1;
+    min-width: 120px;
+    padding: 20px 16px;
+    text-align: center;
+    border-right: 1px solid rgba(200,191,168,0.12);
+    position: relative;
+  }
+
+  .chain-step:last-child { border-right: none; }
+
+  .chain-step-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(200,191,168,0.35);
+    margin-bottom: 6px;
+  }
+
+  .chain-step-text {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    color: rgba(245,240,232,0.6);
+    line-height: 1.4;
+  }
+
+  .chain-arrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: rgba(200,191,168,0.2);
+    padding: 0 0;
+    align-self: center;
+    display: none;
+  }
+
+  .widget-callout {
+    margin-top: 48px;
+    padding: 40px;
+    border: 1px solid rgba(200,191,168,0.15);
+    background: rgba(245,240,232,0.03);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .widget-icon {
+    width: 72px;
+    height: 72px;
+    border: 1px solid rgba(200,191,168,0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: rgba(245,240,232,0.05);
+    flex-shrink: 0;
+  }
+
+  .widget-icon-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+
+  .widget-icon-line {
+    width: 36px;
+    height: 1px;
+    background: rgba(200,191,168,0.3);
+  }
+
+  .widget-icon-line-short {
+    width: 24px;
+    height: 1px;
+    background: rgba(200,191,168,0.2);
+  }
+
+  .widget-callout-heading {
+    font-family: 'Special Elite', serif;
+    font-size: 22px;
+    color: var(--paper);
+    margin-bottom: 10px;
+  }
+
+  .widget-callout-body {
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    color: rgba(245,240,232,0.5);
+    line-height: 1.65;
+  }
+
+  /* ── COLOPHON ── */
+  #colophon {
+    background: #111009;
+    padding: 60px 32px;
+    text-align: center;
+  }
+
+  .colophon-title {
+    font-family: 'Special Elite', serif;
+    font-size: 28px;
+    color: rgba(245,240,232,0.2);
+    margin-bottom: 12px;
+  }
+
+  .colophon-body {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: rgba(245,240,232,0.15);
+    line-height: 1.8;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .empathy-grid { grid-template-columns: 1fr; }
+    .empathy-cell.center { flex-direction: column; text-align: center; }
+    .empathy-center-desc { text-align: center; }
+    .lotus-diagram { max-width: 340px; }
+    .lotus-cell-text { font-size: 9.5px; }
+    .widget-callout { grid-template-columns: 1fr; }
+    .cover-stats { gap: 24px; }
+    .strategy-chain { flex-direction: column; }
+    .chain-step { border-right: none; border-bottom: 1px solid rgba(200,191,168,0.12); }
+    .chain-step:last-child { border-bottom: none; }
+  }
+
+  /* ── PRINT / STATIC FALLBACK for Google Fonts ── */
+  @font-face {
+    font-family: 'FallbackMono';
+    src: local('Courier New'), local('Courier');
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ COVER -->
+<section id="cover">
+  <div class="cover-meta">Brainstorming Session · 17 August 2026 · Partner Mode</div>
+  <h1 class="cover-title">
+    <span class="struck">Conchi</span><br>Conchita
+  </h1>
+  <div class="cover-subtitle">Your AI Accountant<span class="typewriter-cursor"></span></div>
+  <p class="cover-tagline">
+    An old-school typewriter mind inside a modern phone.<br>
+    She processes your receipts. She never judges your spending.<br>
+    She just types.
+  </p>
+  <div class="cover-stats">
+    <span><strong>5</strong>Techniques</span>
+    <span><strong>28+</strong>Ideas</span>
+    <span><strong>6</strong>Insights</span>
+    <span><strong>2</strong>Sessions</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ NAV -->
+<nav>
+  <span class="nav-title">Conchita</span>
+  <a href="#empathy">Empathy Map</a>
+  <a href="#scamper">SCAMPER</a>
+  <a href="#whatif">What If</a>
+  <a href="#lotus">Lotus Blossom</a>
+  <a href="#backcasting">Backcasting</a>
+  <a href="#synthesis">Synthesis</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ EMPATHY MAP -->
+<section id="empathy">
+  <div class="section">
+    <div class="section-label">Technique 01 — Empathy Map</div>
+    <h2 class="section-title" style="color:var(--paper)">Who Is Marc<br>Right Now?</h2>
+
+    <div class="empathy-grid">
+      <!-- CENTER -->
+      <div class="empathy-cell center">
+        <div>
+          <div class="empathy-center-name">Marc</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(245,240,232,0.35);letter-spacing:0.15em;text-transform:uppercase;margin-top:4px;">The user</div>
+        </div>
+        <div class="empathy-center-desc">
+          Developer building his own personal finance app — both a daily tool he actually needs
+          and a portfolio piece that demonstrates he can take a product from idea to production.
+        </div>
+      </div>
+
+      <!-- THINKS -->
+      <div class="empathy-cell" data-q="thinks" data-icon="◎" data-label="Thinks">
+        <ul class="empathy-items">
+          <li><strong>Telegram works,</strong> but it's clunky for finance — no way to see, fix, or query what Conchita registered.</li>
+          <li>The app must be <strong>as fast or faster</strong> to open as Telegram, or he won't use it.</li>
+          <li>It needs to be <strong>portfolio-grade</strong> — CI/CD, tests, docs, the full stack — not just working code.</li>
+          <li>Conchita's personality needs to be <strong>coherent across every screen</strong>, not a skin slapped on.</li>
+        </ul>
+      </div>
+
+      <!-- FEELS -->
+      <div class="empathy-cell" data-q="feels" data-icon="♥" data-label="Feels">
+        <ul class="empathy-items">
+          <li><strong>Friction</strong> when Conchita misclassifies — can't fix it without digging through Telegram history.</li>
+          <li><strong>Satisfaction</strong> when logging an expense becomes as natural as taking a photo.</li>
+          <li>Slightly <strong>anxious</strong> about the analytics side — what if the data is messy from past misclassifications?</li>
+          <li><strong>Pride</strong> in the typewriter concept — it's distinctive, it's his.</li>
+        </ul>
+      </div>
+
+      <!-- SAYS -->
+      <div class="empathy-cell" data-q="says" data-icon="☞" data-label="Says & Does">
+        <ul class="empathy-items">
+          <li>"Entry must be <strong>as fast as or faster than Telegram</strong>."</li>
+          <li>"I want a <strong>drum roller</strong>, like an iOS time picker — consistent with the typewriter feel."</li>
+          <li>"Conchita should be <strong>patiently waiting</strong> for receipts. Never pushy. Never predictive."</li>
+          <li>"The <strong>empty state</strong> needs personality — Conchita's funny lines, muted so it feels secondary."</li>
+        </ul>
+      </div>
+
+      <!-- PAINS -->
+      <div class="empathy-cell" data-q="pains" data-icon="✕" data-label="Pains">
+        <ul class="empathy-items">
+          <li>Can't <strong>see what Conchita registered</strong> without scrolling through Telegram.</li>
+          <li>Can't <strong>correct misclassifications</strong> after the fact without manual DB edits.</li>
+          <li>No way to <strong>tag expenses to a trip or context</strong> — 'Italy holiday' is just noise in the feed.</li>
+          <li><strong>Timeout / failure</strong> means re-typing the whole expense from scratch.</li>
+          <li>Gmail invoices arrive but there's no clean flow to <strong>review or assign them</strong>.</li>
+        </ul>
+      </div>
+
+      <!-- GAINS -->
+      <div class="empathy-cell" data-q="gains" data-icon="★" data-label="Gains">
+        <ul class="empathy-items">
+          <li>Open the app <strong>instinctively after every expense</strong> — it becomes a habit, not a chore.</li>
+          <li>A journal that's <strong>pleasant to browse on the couch</strong>: clean, muted, honest.</li>
+          <li>Analytics that let him conclude: <strong>"I'm spending too much on subscriptions."</strong></li>
+          <li>A <strong>showcase project</strong> a recruiter can clone, read, and actually run.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SCAMPER -->
+<section id="scamper">
+  <div class="section">
+    <div class="section-label">Technique 02 — SCAMPER</div>
+    <h2 class="section-title">Redesigning the Flow,<br>Letter by Letter</h2>
+
+    <div class="scamper-list">
+
+      <div class="scamper-row">
+        <div class="scamper-letter" style="color:var(--teal);">S</div>
+        <div class="scamper-body">
+          <div class="scamper-word">Substitute — input method</div>
+          <div class="scamper-idea">
+            Replace structured forms with <strong>natural language + photo + voice</strong>. Conchita interprets; the user only sees what she understood.
+            If she's wrong, one tap opens a confirmation card with defaults already filled — a drum roller for category, a number pad for amount.
+            No form the user has to fill cold.
+          </div>
+          <span class="scamper-tag tag-teal">resolved by user</span>
+        </div>
+      </div>
+
+      <div class="scamper-row">
+        <div class="scamper-letter" style="color:var(--blue);">C</div>
+        <div class="scamper-body">
+          <div class="scamper-word">Combine — two flows into one</div>
+          <div class="scamper-idea">
+            <strong>Context creation + expense log in one breath.</strong> Mention "add to Barcelona trip" while logging — Conchita creates the context and assigns the expense simultaneously.
+            No separate context management screen. Also: Gmail invoice review + context assignment combined in a single deep-linked card.
+          </div>
+          <span class="scamper-tag tag-blue">coach idea</span>
+        </div>
+      </div>
+
+      <div class="scamper-row">
+        <div class="scamper-letter" style="color:var(--gold);">A</div>
+        <div class="scamper-body">
+          <div class="scamper-word">Adapt — the waiting state</div>
+          <div class="scamper-idea">
+            The n8n → Gemini round-trip takes time. Rather than a dead spinner, show <strong>rotating personality copy</strong>:
+            "Conchita is working…", "Conchita is processing your info…" — keeps the typewriter character alive during the only moment of silence in the app.
+          </div>
+          <span class="scamper-tag tag-gold">user idea</span>
+        </div>
+      </div>
+
+      <div class="scamper-row">
+        <div class="scamper-letter" style="color:var(--red);">M</div>
+        <div class="scamper-body">
+          <div class="scamper-word">Modify — magnify the exit, minify the app</div>
+          <div class="scamper-idea">
+            Three magnify/minify candidates explored. The winner: <strong>home screen widget as primary log interface.</strong>
+            Tap widget → speak or type → push notification confirms what Conchita registered.
+            No need to open the app most days. App becomes the power tool for history, dashboard, context management.
+          </div>
+          <span class="scamper-tag tag-red">pivotal decision</span>
+        </div>
+      </div>
+
+      <div class="scamper-row">
+        <div class="scamper-letter" style="color:var(--purple);">P</div>
+        <div class="scamper-body">
+          <div class="scamper-word">Put to other uses — the existing data</div>
+          <div class="scamper-idea">
+            Conchita is currently write-only. The data just sits in PostgreSQL.
+            Repurpose it for <strong>flexible self-serve analytics</strong>: filter by category + period, trend graphs, monthly breakdown, custom category groups.
+            Requires a new n8n analytics agent: query params → SQL → structured response to app.
+          </div>
+          <span class="scamper-tag tag-purple">architecture impact</span>
+        </div>
+      </div>
+
+      <div class="scamper-row">
+        <div class="scamper-letter" style="color:var(--ink-faded);">E</div>
+        <div class="scamper-body">
+          <div class="scamper-word">Eliminate — the origin field</div>
+          <div class="scamper-idea">
+            The <code>origen</code> field (telegram / gmail / app) is irrelevant to the user. <strong>Never surface it in the UI.</strong>
+            Keep it in the DB for backend integrity, but hide it completely from every app screen. Eliminate the noise.
+          </div>
+          <span class="scamper-tag tag-gold">user decision</span>
+        </div>
+      </div>
+
+      <div class="scamper-row">
+        <div class="scamper-letter" style="color:var(--teal-light);">R</div>
+        <div class="scamper-body">
+          <div class="scamper-word">Reverse — who initiates</div>
+          <div class="scamper-idea">
+            The Gmail invoice flow is already reversed: <strong>Conchita initiates, not the user.</strong>
+            She detects invoices, processes and saves to Drive, then pushes a notification to the user.
+            App surfaces this as push notification with deep-linked card: PDF preview, context assignment, delete — all in one place.
+          </div>
+          <span class="scamper-tag tag-teal">user idea</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ WHAT IF -->
+<section id="whatif">
+  <div class="section">
+    <div class="section-label">Technique 03 — What If Scenarios</div>
+    <h2 class="section-title" style="color:var(--paper);">Stress-Testing<br>the Assumptions</h2>
+
+    <div class="whatif-grid">
+
+      <div class="whatif-card">
+        <div class="whatif-num">01</div>
+        <div class="whatif-q">What if Conchita misclassifies your supermarket as a restaurant?</div>
+        <div class="whatif-a">
+          Confirmation card with drum roller — wrong category is one scroll away.
+          Analytics correction layer: manually deselect individual entries from a view.
+          Swipe-to-reveal edit on every list item, always.
+        </div>
+      </div>
+
+      <div class="whatif-card">
+        <div class="whatif-num">02</div>
+        <div class="whatif-q">What if the n8n → Gemini round-trip times out completely?</div>
+        <div class="whatif-a">
+          Keep the input content. Surface a retry button immediately — no retyping.
+          Failure state is recoverable, never punishing.
+        </div>
+      </div>
+
+      <div class="whatif-card">
+        <div class="whatif-num">03</div>
+        <div class="whatif-q">What if Marc doesn't open the app for a week?</div>
+        <div class="whatif-a">
+          A reminder notification fires after N days of inactivity.
+          Gentle, not pushy — Conchita is <em>patiently waiting</em>, but she can knock once.
+        </div>
+      </div>
+
+      <div class="whatif-card">
+        <div class="whatif-num">04</div>
+        <div class="whatif-q">What if he goes on a two-week trip to Italy?</div>
+        <div class="whatif-a">
+          Activate "Italy trip" context. Every expense auto-tags while active.
+          A persistent indicator is always visible. On return: deactivate, archive.
+          Next year, reactivate the same context and all history is preserved.
+        </div>
+      </div>
+
+      <div class="whatif-card">
+        <div class="whatif-num">05</div>
+        <div class="whatif-q">What if three Gmail invoices arrive from an unknown sender?</div>
+        <div class="whatif-a">
+          Notification always fires for unknown senders — Conchita is asking for input, not informing.
+          User can add sender to known list or delete. Settings: 2 toggles max, no UX maze.
+        </div>
+      </div>
+
+      <div class="whatif-card">
+        <div class="whatif-num">06</div>
+        <div class="whatif-q">What if Marc wants to understand his heating costs each winter?</div>
+        <div class="whatif-a">
+          Analytics screen: filter by utility category, set a recurring seasonal date range.
+          Trend graph over multiple years reveals the spike pattern.
+          Conclusion-oriented, not just numbers.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ LOTUS BLOSSOM -->
+<section id="lotus">
+  <div class="section">
+    <div class="section-label">Technique 04 — Lotus Blossom</div>
+    <h2 class="section-title">Expanding from<br>the Core Idea</h2>
+
+    <div class="lotus-wrap">
+      <div class="lotus-diagram">
+
+        <!-- Petal 1: Log fast -->
+        <div class="lotus-cell core">
+          <div class="lotus-cell-label">Petal 1</div>
+          <div class="lotus-cell-text">Log fast &amp; frictionlessly</div>
+        </div>
+
+        <!-- Petal 2: Analytics -->
+        <div class="lotus-cell">
+          <div class="lotus-cell-label">Sub-petal 1.1</div>
+          <div class="lotus-cell-text">Widget as primary entry — no app open needed</div>
+        </div>
+
+        <!-- Petal 3 -->
+        <div class="lotus-cell core">
+          <div class="lotus-cell-label">Petal 2</div>
+          <div class="lotus-cell-text">Self-serve analytics</div>
+        </div>
+
+        <!-- Sub 1.2 -->
+        <div class="lotus-cell">
+          <div class="lotus-cell-label">Sub-petal 1.2</div>
+          <div class="lotus-cell-text">Natural input: text / voice / photo → Conchita interprets</div>
+        </div>
+
+        <!-- CENTER -->
+        <div class="lotus-cell center">
+          <div class="lotus-cell-label">Core Goal</div>
+          <div class="lotus-cell-text">Help Marc improve his home economy</div>
+        </div>
+
+        <!-- Sub 2.1 -->
+        <div class="lotus-cell">
+          <div class="lotus-cell-label">Sub-petal 2.1</div>
+          <div class="lotus-cell-text">Filter by category + period, trend graphs</div>
+        </div>
+
+        <!-- Sub 1.3 -->
+        <div class="lotus-cell">
+          <div class="lotus-cell-label">Sub-petal 1.3</div>
+          <div class="lotus-cell-text">Confirmation card: drum roller edit, no cold-fill forms</div>
+        </div>
+
+        <!-- Sub 2.2 -->
+        <div class="lotus-cell">
+          <div class="lotus-cell-label">Sub-petal 2.2</div>
+          <div class="lotus-cell-text">Configure exactly the view you want: monthly groceries over a year</div>
+        </div>
+
+        <!-- Sub 2.3 -->
+        <div class="lotus-cell">
+          <div class="lotus-cell-label">Sub-petal 2.3</div>
+          <div class="lotus-cell-text">Inline correction from analytics — deselect misclassified entries</div>
+        </div>
+
+      </div>
+
+      <div class="card" style="width:100%;max-width:720px;">
+        <p style="font-family:'Courier Prime',monospace;font-size:14px;color:var(--ink-faded);line-height:1.7;">
+          <strong>Scope decision made here:</strong> Start simple — effortless logging + self-serve analytics only.
+          No AI insights in v1. Core advantage over Telegram: <em>cleaner UI + faster entry</em>.
+          AI pattern recognition (e.g. "you're spending 40% more on groceries this quarter") deferred to a future release.
+          The lotus blossom revealed only two petals actually matter at launch: <strong>log fast</strong> and <strong>see clearly</strong>.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ BACKCASTING -->
+<section id="backcasting">
+  <div class="section">
+    <div class="section-label">Technique 05 — Backcasting</div>
+    <h2 class="section-title" style="color:var(--paper);">Working<br>Backwards<br>from Habit</h2>
+
+    <div class="timeline">
+
+      <div class="timeline-item north-star">
+        <div class="timeline-dot"></div>
+        <div class="timeline-period">North Star — Future State</div>
+        <div class="timeline-heading">Opening the app instinctively after every expense</div>
+        <div class="timeline-body">
+          Quick photo of a receipt. A sentence about a coffee. Done — without thinking about it.
+          The app has become <strong>a reflex, not a decision</strong>. The expense journal is a pleasant artifact to browse on the couch.
+        </div>
+      </div>
+
+      <div class="timeline-item far">
+        <div class="timeline-dot"></div>
+        <div class="timeline-period">Late milestone — Habit formed</div>
+        <div class="timeline-heading">The journal is worth browsing</div>
+        <div class="timeline-body">
+          Analytics are populated with months of real data. Trends are visible —
+          <strong>heating cost spikes in December, subscriptions creeping up, groceries stable.</strong>
+          Browsing the journal delivers genuine insight, which rewards continued logging.
+        </div>
+      </div>
+
+      <div class="timeline-item mid">
+        <div class="timeline-dot"></div>
+        <div class="timeline-period">Mid milestone — Data trust</div>
+        <div class="timeline-heading">The data is trustworthy</div>
+        <div class="timeline-body">
+          Correction flows work. Misclassifications are caught and fixed.
+          Context tagging means that "Italy trip" data is cleanly separated from everyday spend.
+          <strong>Consistent data entry is the foundation</strong> — good journal requires good data, good data requires habit.
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-period">Early milestone — Friction eliminated</div>
+        <div class="timeline-heading">Entry beats Telegram</div>
+        <div class="timeline-body">
+          Widget tapped. Expense spoken or typed. Push notification confirms.
+          <strong>No app opened, no form filled.</strong>
+          The speed bar Telegram set is cleared — so Marc reaches for the app instead.
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-period">Root — What must be true on day one</div>
+        <div class="timeline-heading">The widget exists and is instant</div>
+        <div class="timeline-body">
+          The home screen widget is the first thing Marc ships.
+          Everything else — analytics, contexts, Gmail cards — is built after the entry habit exists.
+          <strong>Habit is the precondition for everything downstream.</strong>
+          Future: reminder notification if app unused for N days, a gentle knock from Conchita.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SYNTHESIS -->
+<section id="synthesis">
+  <div class="section synthesis-reveal">
+    <div class="section-label">Synthesis — The Climax</div>
+    <h2 class="section-title">What This Session<br>Actually Decided</h2>
+
+    <div class="insight-block">
+      <div class="insight-num">Insight 01 — Identity</div>
+      <div class="insight-headline">Conchita's character is one coherent identity</div>
+      <div class="insight-body">
+        The typewriter aesthetic, drum rollers, muted category colors, rotating loading copy,
+        personality-filled empty states — these are <strong>not separate design choices.</strong>
+        They are one thing. A recruiter looking at the app should feel a single author's hand
+        throughout. Every screen either reinforces the identity or breaks it.
+        There is no neutral.
+      </div>
+    </div>
+
+    <div class="insight-block primary">
+      <div class="insight-num">Insight 02 — Product Strategy</div>
+      <div class="insight-headline">The widget is the primary product.<br>The app is the power tool.</div>
+      <div class="insight-body">
+        This reframes the entire information architecture. The app is not the thing Marc uses every day —
+        the widget is. The app is what Marc opens when something went wrong, when he wants to browse history,
+        when he's doing analytics on a Sunday afternoon.
+        <strong>Build the widget first. Ship the habit loop. Then build the rest.</strong>
+      </div>
+    </div>
+
+    <div class="insight-block">
+      <div class="insight-num">Insight 03 — Product Funnel</div>
+      <div class="insight-headline">The product strategy is a causal chain</div>
+      <div class="insight-body">
+        Five steps, each one unlocking the next. You cannot skip ahead.
+      </div>
+      <div class="strategy-chain">
+        <div class="chain-step">
+          <div class="chain-step-label">Step 1</div>
+          <div class="chain-step-text">Frictionless entry<br>(widget + instant)</div>
+        </div>
+        <div class="chain-step">
+          <div class="chain-step-label">Step 2</div>
+          <div class="chain-step-text">Consistent data<br>(habit + correction)</div>
+        </div>
+        <div class="chain-step">
+          <div class="chain-step-label">Step 3</div>
+          <div class="chain-step-text">Trustworthy journal<br>(clean, accurate)</div>
+        </div>
+        <div class="chain-step">
+          <div class="chain-step-label">Step 4</div>
+          <div class="chain-step-text">Pleasant browsing<br>(design + context)</div>
+        </div>
+        <div class="chain-step">
+          <div class="chain-step-label">Step 5</div>
+          <div class="chain-step-text">The habit<br>(reflex, not decision)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-block">
+      <div class="insight-num">Insight 04 — Architecture</div>
+      <div class="insight-headline">Conchita is request-response — and that's a constraint, not a flaw</div>
+      <div class="insight-body">
+        n8n → Gemini is synchronous. No streaming, no live parse.
+        The confirmation card appears after a full round-trip.
+        <strong>The loading state must do real work</strong> — it is the only moment of character
+        the app has while waiting. Use it. Conchita's personality copy in the loading spinner
+        is not decoration; it is load-bearing UX.
+      </div>
+    </div>
+
+    <div class="insight-block">
+      <div class="insight-num">Insight 05 — Scope</div>
+      <div class="insight-headline">V1 is two petals, not nine</div>
+      <div class="insight-body">
+        Log fast. See clearly. That is version one.
+        AI-generated insights, spending predictions, proactive coaching —
+        <strong>all deferred.</strong> Conchita is patiently waiting for receipts,
+        never proactive, never pushy. The lotus blossom showed the full possibility space
+        so we could confidently choose to ignore most of it.
+      </div>
+    </div>
+
+    <div class="widget-callout">
+      <div class="widget-icon">
+        <div class="widget-icon-dot"></div>
+        <div class="widget-icon-line"></div>
+        <div class="widget-icon-line-short"></div>
+      </div>
+      <div>
+        <div class="widget-callout-heading">The Widget</div>
+        <div class="widget-callout-body">
+          Tap. Speak or type. Done.<br>
+          A push notification confirms what Conchita registered.<br>
+          No app opened. No form. No friction.<br><br>
+          This is where the habit is built or broken.<br>
+          <strong style="color:rgba(245,240,232,0.75);">Ship this first. Everything else is downstream.</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ COLOPHON -->
+<div id="colophon">
+  <div class="colophon-title">Conchita</div>
+  <div class="colophon-body">
+    Brainstorming session · 17 August 2026 · Partner Mode<br>
+    Techniques: Empathy Map · SCAMPER · What If Scenarios · Lotus Blossom · Backcasting<br>
+    Two sessions · 5 techniques complete · 6 key insights · 28+ ideas captured<br><br>
+    Stack: React Native · n8n · PostgreSQL · Google Drive · Gemini 2.5 Flash Lite<br>
+    Inputs: Telegram · Gmail · App · Widget<br><br>
+    "She processes your receipts. She never judges your spending. She just types."
+  </div>
+</div>
+
+<script>
+  // Typewriter effect on cover title — re-types "Conchita" on load
+  (function() {
+    const subtitle = document.querySelector('.cover-subtitle');
+    if (!subtitle) return;
+    const base = 'Your AI Accountant';
+    const cursor = subtitle.querySelector('.typewriter-cursor');
+    subtitle.innerHTML = '';
+    subtitle.appendChild(cursor);
+
+    let i = 0;
+    function type() {
+      if (i < base.length) {
+        cursor.insertAdjacentText('beforebegin', base[i]);
+        i++;
+        setTimeout(type, 55 + Math.random() * 40);
+      }
+    }
+    // small delay before starting
+    setTimeout(type, 800);
+  })();
+
+  // Subtle parallax on cover background lines
+  (function() {
+    const cover = document.getElementById('cover');
+    if (!cover) return;
+    let ticking = false;
+    window.addEventListener('scroll', function() {
+      if (!ticking) {
+        requestAnimationFrame(function() {
+          const y = window.scrollY;
+          const h = cover.offsetHeight;
+          if (y < h) {
+            cover.style.backgroundPositionY = (y * 0.25) + 'px';
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+  })();
+
+  // Highlight active nav link on scroll
+  (function() {
+    const sections = ['cover','empathy','scamper','whatif','lotus','backcasting','synthesis'];
+    const links = document.querySelectorAll('nav a');
+    const map = {};
+    links.forEach(function(a) {
+      const href = a.getAttribute('href');
+      if (href) map[href.replace('#','')] = a;
+    });
+
+    function onScroll() {
+      let current = 'cover';
+      sections.forEach(function(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (window.scrollY >= el.offsetTop - 80) current = id;
+      });
+      Object.keys(map).forEach(function(k) {
+        map[k].style.color = k === current ? 'var(--paper)' : '';
+        map[k].style.background = k === current ? 'rgba(200,191,168,0.12)' : '';
+      });
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+
+</body>
+</html>
