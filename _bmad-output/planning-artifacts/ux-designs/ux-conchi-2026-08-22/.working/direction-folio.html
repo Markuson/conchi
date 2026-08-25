@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conchi — Direction B: Folio (Typewriter Amber)</title>
+<style>
+/*
+ * DIRECTION B — "FOLIO" (Typewriter Amber)
+ *
+ * DARK MODE PALETTE — closest to OpenCode warmth
+ *   --bg:           #18140f   deep warm dark (reddish-brown hint)
+ *   --bg-card:      #201a13   slightly lifted card surface
+ *   --bg-card-alt:  #261e15   confirmation card surface
+ *   --text:         #fdfaf4   warm off-white (near OpenCode #fdfcfc)
+ *   --text-muted:   #b09870   muted warm tan
+ *   --rule:         rgba(253,250,244,0.07)  hairline rule
+ *   --accent:       #c8922a   typewriter-amber
+ *   --accent-glow:  rgba(200,146,42,0.35)
+ *   --border:       rgba(253,250,244,0.11)
+ *   --nav-bg:       #18140f
+ *   --nav-shadow:   rgba(0,0,0,0.45)
+ *
+ * LIGHT MODE PALETTE
+ *   --bg:           #faf6ee   cream/linen base
+ *   --bg-card:      #fdf9f3   lighter cream
+ *   --bg-card-alt:  #fffcf5   confirmation card, near white warm
+ *   --text:         #1a1510   near-black ink
+ *   --text-muted:   #7a6a50   muted brown
+ *   --rule:         rgba(26,21,16,0.09)  hairline rule
+ *   --accent:       #b8860b   darker amber for light mode (better contrast)
+ *   --accent-glow:  rgba(184,134,11,0.30)
+ *   --border:       rgba(26,21,16,0.12)
+ *   --nav-bg:       #f2ede2
+ *   --nav-shadow:   rgba(0,0,0,0.12)
+ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #201a12;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  padding: 40px 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+}
+
+h1.page-title {
+  color: #fdfaf4;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+  opacity: 0.55;
+  text-align: center;
+}
+
+.direction-label {
+  color: #c8922a;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: -32px;
+}
+
+.pair {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mode-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.mode-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  opacity: 0.40;
+  color: #fdfaf4;
+}
+
+/* ─── Phone frame ────────────────────────────────────────────────────────── */
+.phone {
+  width: 390px;
+  height: 844px;
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 1.5px rgba(255,255,255,0.07),
+    0 20px 80px rgba(0,0,0,0.70),
+    0 4px 16px rgba(0,0,0,0.45);
+}
+
+.phone-sm {
+  width: 390px;
+  height: 480px;
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 1.5px rgba(255,255,255,0.07),
+    0 16px 60px rgba(0,0,0,0.55),
+    0 4px 12px rgba(0,0,0,0.30);
+}
+
+.screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DARK MODE — Deep warm, closest to OpenCode
+   ══════════════════════════════════════════════════════════ */
+.screen.dark {
+  background: #18140f;
+  color: #fdfaf4;
+}
+
+.screen.dark .status-bar { background: #18140f; }
+
+.screen.dark .app-header {
+  background: #18140f;
+  border-bottom: 1px solid rgba(253,250,244,0.07);
+}
+
+.screen.dark .header-total-amount { color: #fdfaf4; }
+.screen.dark .header-total-label  { color: #b09870; }
+
+.screen.dark .month-header {
+  background: #18140f;
+  color: #b09870;
+  border-bottom: 1px solid rgba(253,250,244,0.07);
+}
+.screen.dark .month-total { color: #c8922a; }
+
+.screen.dark .expense-list { background: #18140f; }
+
+.screen.dark .expense-row {
+  background: #18140f;
+  border-bottom: 1px solid rgba(253,250,244,0.07);
+}
+
+.screen.dark .expense-amount  { color: #fdfaf4; }
+.screen.dark .expense-category { color: #c4b898; }
+.screen.dark .expense-sub     { color: #7a6a50; }
+.screen.dark .expense-date    { color: #7a6a50; }
+
+.screen.dark .confirmation-backdrop { background: rgba(0,0,0,0.58); }
+
+.screen.dark .confirmation-card {
+  background: #261e15;
+  border-top: 1px solid rgba(253,250,244,0.10);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.58), 0 -1px 0 rgba(253,250,244,0.05);
+}
+
+.screen.dark .conf-handle       { background: rgba(253,250,244,0.14); }
+.screen.dark .conf-header-label { color: #b09870; }
+.screen.dark .conf-amount       { color: #fdfaf4; }
+.screen.dark .conf-drum-label   { color: #b09870; }
+.screen.dark .conf-drum-value   { color: #fdfaf4; }
+.screen.dark .conf-drum-track {
+  border-top: 1px solid rgba(253,250,244,0.08);
+  border-bottom: 1px solid rgba(253,250,244,0.08);
+}
+.screen.dark .conf-field-label  { color: #b09870; }
+.screen.dark .conf-field-value  { color: #fdfaf4; }
+.screen.dark .conf-voice        { color: #7a6a50; }
+
+.screen.dark .btn-discard {
+  background: transparent;
+  border: 1px solid rgba(253,250,244,0.16);
+  color: #b09870;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.screen.dark .btn-accept {
+  background: #c8922a;
+  border: 1px solid #d9a040;
+  color: #18140f;
+  box-shadow: 0 2px 8px rgba(200,146,42,0.45), 0 1px 2px rgba(0,0,0,0.30);
+  font-weight: 800;
+}
+
+.screen.dark .bottom-nav {
+  background: #18140f;
+  border-top: 1px solid rgba(253,250,244,0.07);
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.45);
+}
+
+.screen.dark .nav-icon { color: #7a6a50; }
+
+.screen.dark .fab {
+  background: #c8922a;
+  box-shadow: 0 4px 16px rgba(200,146,42,0.50), 0 2px 6px rgba(0,0,0,0.35);
+  border: 1px solid #d9a040;
+  color: #18140f;
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIGHT MODE — Cream/linen, warm ink
+   ══════════════════════════════════════════════════════════ */
+.screen.light {
+  background: #faf6ee;
+  color: #1a1510;
+}
+
+.screen.light .status-bar { background: #faf6ee; }
+
+.screen.light .app-header {
+  background: #faf6ee;
+  border-bottom: 1px solid rgba(26,21,16,0.09);
+}
+
+.screen.light .header-total-amount { color: #1a1510; }
+.screen.light .header-total-label  { color: #7a6a50; }
+
+.screen.light .month-header {
+  background: #faf6ee;
+  color: #7a6a50;
+  border-bottom: 1px solid rgba(26,21,16,0.09);
+}
+.screen.light .month-total { color: #b8860b; }
+
+.screen.light .expense-list { background: #faf6ee; }
+
+.screen.light .expense-row {
+  background: #faf6ee;
+  border-bottom: 1px solid rgba(26,21,16,0.09);
+}
+
+.screen.light .expense-amount   { color: #1a1510; }
+.screen.light .expense-category { color: #3a2e1e; }
+.screen.light .expense-sub      { color: #9a8a68; }
+.screen.light .expense-date     { color: #9a8a68; }
+
+.screen.light .confirmation-backdrop { background: rgba(26,21,16,0.28); }
+
+.screen.light .confirmation-card {
+  background: #fffcf5;
+  border-top: 1px solid rgba(26,21,16,0.10);
+  box-shadow: 0 -4px 24px rgba(26,21,16,0.20), 0 -1px 0 rgba(26,21,16,0.05);
+}
+
+.screen.light .conf-handle       { background: rgba(26,21,16,0.13); }
+.screen.light .conf-header-label { color: #7a6a50; }
+.screen.light .conf-amount       { color: #1a1510; }
+.screen.light .conf-drum-label   { color: #7a6a50; }
+.screen.light .conf-drum-value   { color: #1a1510; }
+.screen.light .conf-drum-track {
+  border-top: 1px solid rgba(26,21,16,0.09);
+  border-bottom: 1px solid rgba(26,21,16,0.09);
+}
+.screen.light .conf-field-label  { color: #7a6a50; }
+.screen.light .conf-field-value  { color: #1a1510; }
+.screen.light .conf-voice        { color: #b09870; }
+
+.screen.light .btn-discard {
+  background: transparent;
+  border: 1px solid rgba(26,21,16,0.18);
+  color: #7a6a50;
+  box-shadow: 0 2px 6px rgba(26,21,16,0.07);
+}
+
+.screen.light .btn-accept {
+  background: #b8860b;
+  border: 1px solid #a07808;
+  color: #fdfaf4;
+  box-shadow: 0 2px 8px rgba(184,134,11,0.35), 0 1px 2px rgba(26,21,16,0.18);
+  font-weight: 800;
+}
+
+.screen.light .bottom-nav {
+  background: #f2ede2;
+  border-top: 1px solid rgba(26,21,16,0.09);
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.12);
+}
+
+.screen.light .nav-icon { color: #9a8a68; }
+
+.screen.light .fab {
+  background: #b8860b;
+  box-shadow: 0 4px 16px rgba(184,134,11,0.38), 0 2px 6px rgba(26,21,16,0.20);
+  border: 1px solid #a07808;
+  color: #fdfaf4;
+}
+
+/* ─── Shared structural components ───────────────────────────────────────── */
+
+.status-bar {
+  height: 54px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 24px 8px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.status-time {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.status-icons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 11px;
+  opacity: 0.72;
+}
+
+.app-header {
+  padding: 16px 24px 14px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.app-name {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  opacity: 0.38;
+  margin-bottom: 6px;
+}
+
+.header-total-amount {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.header-total-label {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+}
+
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 24px;
+  flex-shrink: 0;
+}
+
+.month-name {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.month-total {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.expense-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.expense-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 24px;
+  gap: 12px;
+  transition: background 0.1s;
+}
+
+.expense-left  { flex: 1; min-width: 0; }
+
+.expense-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.expense-amount {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.expense-category {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.expense-sub {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+.expense-date {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+}
+
+/* ─── Confirmation card ──────────────────────────────────────────────────── */
+.confirmation-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+.confirmation-card {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 20px 20px 0 0;
+  padding: 0 0 20px;
+  z-index: 11;
+}
+
+.conf-handle-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 6px;
+}
+
+.conf-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.conf-header {
+  padding: 0 24px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.conf-header-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.conf-amount {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.conf-drum-row {
+  display: flex;
+  margin: 4px 0;
+}
+
+.conf-drum-col {
+  flex: 1;
+  padding: 0 24px;
+}
+
+.conf-drum-col:first-child {
+  border-right: 1px solid rgba(160,120,60,0.15);
+}
+
+.conf-drum-label {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.conf-drum-track {
+  padding: 7px 0;
+}
+
+.conf-drum-above,
+.conf-drum-below {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px;
+  opacity: 0.28;
+  letter-spacing: 0.06em;
+  text-align: center;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.conf-drum-value {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+
+.conf-fields {
+  padding: 10px 24px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.conf-field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.conf-field-label {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.conf-field-value {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.conf-voice {
+  padding: 8px 24px 6px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  font-style: italic;
+}
+
+.conf-buttons {
+  display: flex;
+  gap: 10px;
+  padding: 10px 24px 0;
+}
+
+.btn {
+  flex: 1;
+  height: 44px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ─── Bottom nav ─────────────────────────────────────────────────────────── */
+.bottom-nav {
+  height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 32px 16px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+
+.nav-icon {
+  font-size: 20px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 300;
+  margin-top: -8px;
+}
+
+/* ─── State badge ────────────────────────────────────────────────────────── */
+.state-badge {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 3px;
+  z-index: 50;
+}
+
+.screen.dark .state-badge  { background: rgba(200,146,42,0.18); color: #c8922a; }
+.screen.light .state-badge { background: rgba(184,134,11,0.12); color: #b8860b; }
+
+/* ─── Loading spinner ────────────────────────────────────────────────────── */
+.loading-ring {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #c8922a;
+  border-right-color: rgba(200,146,42,0.18);
+  animation: spin 1.2s linear infinite;
+}
+
+.screen.light .loading-ring {
+  border-top-color: #b8860b;
+  border-right-color: rgba(184,134,11,0.18);
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-copy {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Amber accent line under amount in header — a small ledger-book flourish */
+.accent-underline {
+  display: block;
+  width: 32px;
+  height: 2px;
+  border-radius: 1px;
+  margin-top: 6px;
+}
+
+.screen.dark .accent-underline { background: #c8922a; opacity: 0.55; }
+.screen.light .accent-underline { background: #b8860b; opacity: 0.45; }
+</style>
+</head>
+<body>
+
+<h1 class="page-title">Conchi · Direction B</h1>
+<div class="direction-label">Folio — Typewriter Amber</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 1: Home + Confirmation Card
+     ═══════════════════════════════════════════════════════════ -->
+
+<div style="color:#fdfaf4; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; opacity:0.32; text-align:center; font-weight:600;">Estado — Lista con confirmación activa</div>
+
+<div class="pair">
+
+  <!-- DARK -->
+  <div class="mode-col">
+    <div class="mode-label">Dark</div>
+    <div class="phone">
+      <div class="screen dark">
+        <div class="state-badge">Confirmación</div>
+
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons"><span>▲▲▲</span><span>WiFi</span><span>■■</span></div>
+        </div>
+
+        <div class="app-header">
+          <div class="app-name">Conchi</div>
+          <div class="header-total-amount">€224.60</div>
+          <span class="accent-underline"></span>
+          <div class="header-total-label" style="margin-top:8px;">este mes</div>
+        </div>
+
+        <div class="month-header">
+          <span class="month-name">Agosto 2026</span>
+          <span class="month-total">€224.60</span>
+        </div>
+
+        <div class="expense-list">
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Alimentación</div>
+              <div class="expense-sub">Supermercado</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€47.80</div>
+              <div class="expense-date">22 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Transporte</div>
+              <div class="expense-sub">Metro</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€12.50</div>
+              <div class="expense-date">22 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Hogar</div>
+              <div class="expense-sub">Electricidad</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€120.00</div>
+              <div class="expense-date">21 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Ocio</div>
+              <div class="expense-sub">Restaurante</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€8.90</div>
+              <div class="expense-date">20 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Alimentación</div>
+              <div class="expense-sub">Supermercado</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€35.40</div>
+              <div class="expense-date">19 ago</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-icon">⚙</div>
+          <div class="fab">+</div>
+          <div class="nav-icon">◎</div>
+        </div>
+
+        <!-- Confirmation overlay -->
+        <div class="confirmation-backdrop"></div>
+        <div class="confirmation-card">
+          <div class="conf-handle-wrap">
+            <div class="conf-handle"></div>
+          </div>
+
+          <div class="conf-header">
+            <div>
+              <div class="conf-header-label">Nuevo gasto</div>
+              <div class="conf-amount">€35.40</div>
+            </div>
+          </div>
+
+          <div class="conf-drum-row">
+            <div class="conf-drum-col">
+              <div class="conf-drum-label">Categoría</div>
+              <div class="conf-drum-track">
+                <div class="conf-drum-above">Transporte</div>
+                <div class="conf-drum-value">Alimentación</div>
+                <div class="conf-drum-below">Hogar</div>
+              </div>
+            </div>
+            <div class="conf-drum-col">
+              <div class="conf-drum-label">Subcategoría</div>
+              <div class="conf-drum-track">
+                <div class="conf-drum-above">Panadería</div>
+                <div class="conf-drum-value">Supermercado</div>
+                <div class="conf-drum-below">Mercado</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="conf-fields">
+            <div class="conf-field-row">
+              <span class="conf-field-label">Descripción</span>
+              <span class="conf-field-value">compra mercadona</span>
+            </div>
+            <div class="conf-field-row">
+              <span class="conf-field-label">Contexto</span>
+              <span class="conf-field-value" style="opacity:0.32;">—</span>
+            </div>
+          </div>
+
+          <div class="conf-voice">"Registrado. Como siempre."</div>
+
+          <div class="conf-buttons">
+            <button class="btn btn-discard">Descartar</button>
+            <button class="btn btn-accept">Aceptar</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHT -->
+  <div class="mode-col">
+    <div class="mode-label">Light</div>
+    <div class="phone">
+      <div class="screen light">
+        <div class="state-badge">Confirmación</div>
+
+        <div class="status-bar">
+          <span class="status-time" style="color:#1a1510;">9:41</span>
+          <div class="status-icons" style="color:#1a1510;"><span>▲▲▲</span><span>WiFi</span><span>■■</span></div>
+        </div>
+
+        <div class="app-header">
+          <div class="app-name" style="color:#1a1510;">Conchi</div>
+          <div class="header-total-amount">€224.60</div>
+          <span class="accent-underline"></span>
+          <div class="header-total-label" style="margin-top:8px;">este mes</div>
+        </div>
+
+        <div class="month-header">
+          <span class="month-name">Agosto 2026</span>
+          <span class="month-total">€224.60</span>
+        </div>
+
+        <div class="expense-list">
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Alimentación</div>
+              <div class="expense-sub">Supermercado</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€47.80</div>
+              <div class="expense-date">22 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Transporte</div>
+              <div class="expense-sub">Metro</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€12.50</div>
+              <div class="expense-date">22 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Hogar</div>
+              <div class="expense-sub">Electricidad</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€120.00</div>
+              <div class="expense-date">21 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Ocio</div>
+              <div class="expense-sub">Restaurante</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€8.90</div>
+              <div class="expense-date">20 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Alimentación</div>
+              <div class="expense-sub">Supermercado</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€35.40</div>
+              <div class="expense-date">19 ago</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-icon">⚙</div>
+          <div class="fab">+</div>
+          <div class="nav-icon">◎</div>
+        </div>
+
+        <div class="confirmation-backdrop"></div>
+        <div class="confirmation-card">
+          <div class="conf-handle-wrap">
+            <div class="conf-handle"></div>
+          </div>
+
+          <div class="conf-header">
+            <div>
+              <div class="conf-header-label">Nuevo gasto</div>
+              <div class="conf-amount">€35.40</div>
+            </div>
+          </div>
+
+          <div class="conf-drum-row">
+            <div class="conf-drum-col">
+              <div class="conf-drum-label">Categoría</div>
+              <div class="conf-drum-track">
+                <div class="conf-drum-above">Transporte</div>
+                <div class="conf-drum-value">Alimentación</div>
+                <div class="conf-drum-below">Hogar</div>
+              </div>
+            </div>
+            <div class="conf-drum-col">
+              <div class="conf-drum-label">Subcategoría</div>
+              <div class="conf-drum-track">
+                <div class="conf-drum-above">Panadería</div>
+                <div class="conf-drum-value">Supermercado</div>
+                <div class="conf-drum-below">Mercado</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="conf-fields">
+            <div class="conf-field-row">
+              <span class="conf-field-label">Descripción</span>
+              <span class="conf-field-value">compra mercadona</span>
+            </div>
+            <div class="conf-field-row">
+              <span class="conf-field-label">Contexto</span>
+              <span class="conf-field-value" style="opacity:0.28;">—</span>
+            </div>
+          </div>
+
+          <div class="conf-voice">"Registrado. Como siempre."</div>
+
+          <div class="conf-buttons">
+            <button class="btn btn-discard">Descartar</button>
+            <button class="btn btn-accept">Aceptar</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 2: Loading state
+     ═══════════════════════════════════════════════════════════ -->
+
+<div style="color:#fdfaf4; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; opacity:0.32; text-align:center; font-weight:600; margin-top:16px;">Estado — Cargando (Conchita procesando)</div>
+
+<div class="pair">
+
+  <!-- DARK loading -->
+  <div class="mode-col">
+    <div class="mode-label">Dark</div>
+    <div class="phone-sm">
+      <div class="screen dark" style="display:flex; flex-direction:column;">
+
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons"><span>▲▲▲</span><span>■■</span></div>
+        </div>
+
+        <div class="app-header">
+          <div class="app-name">Conchi</div>
+          <div style="font-family:'Courier New',Courier,monospace; font-size:32px; font-weight:700; color:#fdfaf4; opacity:0.22; letter-spacing:-0.02em;">€ – – . – –</div>
+          <div class="header-total-label" style="margin-top:6px;">este mes</div>
+        </div>
+
+        <!-- Loading center -->
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:24px; background:#18140f;">
+          <div style="width:48px; height:48px;">
+            <div class="loading-ring"></div>
+          </div>
+          <div class="loading-copy" style="color:#b09870;">
+            "Un momento.<br>Los números no mienten."
+          </div>
+          <div style="display:flex; gap:6px; margin-top:4px;">
+            <div style="width:4px;height:4px;border-radius:50%;background:#c8922a;"></div>
+            <div style="width:4px;height:4px;border-radius:50%;background:#c8922a;opacity:0.5;"></div>
+            <div style="width:4px;height:4px;border-radius:50%;background:#c8922a;opacity:0.22;"></div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-icon">⚙</div>
+          <div class="fab">+</div>
+          <div class="nav-icon">◎</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHT loading -->
+  <div class="mode-col">
+    <div class="mode-label">Light</div>
+    <div class="phone-sm">
+      <div class="screen light" style="display:flex; flex-direction:column;">
+
+        <div class="status-bar">
+          <span class="status-time" style="color:#1a1510;">9:41</span>
+          <div class="status-icons" style="color:#1a1510;"><span>▲▲▲</span><span>■■</span></div>
+        </div>
+
+        <div class="app-header">
+          <div class="app-name" style="color:#1a1510;">Conchi</div>
+          <div style="font-family:'Courier New',Courier,monospace; font-size:32px; font-weight:700; color:#1a1510; opacity:0.16; letter-spacing:-0.02em;">€ – – . – –</div>
+          <div class="header-total-label" style="margin-top:6px;">este mes</div>
+        </div>
+
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:24px; background:#faf6ee;">
+          <div style="width:48px; height:48px;">
+            <div class="loading-ring"></div>
+          </div>
+          <div class="loading-copy" style="color:#7a6a50;">
+            "Un momento.<br>Los números no mienten."
+          </div>
+          <div style="display:flex; gap:6px; margin-top:4px;">
+            <div style="width:4px;height:4px;border-radius:50%;background:#b8860b;"></div>
+            <div style="width:4px;height:4px;border-radius:50%;background:#b8860b;opacity:0.5;"></div>
+            <div style="width:4px;height:4px;border-radius:50%;background:#b8860b;opacity:0.22;"></div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-icon">⚙</div>
+          <div class="fab">+</div>
+          <div class="nav-icon">◎</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

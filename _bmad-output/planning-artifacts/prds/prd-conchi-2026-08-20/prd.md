@@ -2,7 +2,7 @@
 title: Conchi App PRD
 status: final
 created: 2026-08-20
-updated: 2026-08-21
+updated: 2026-08-22
 ---
 
 # PRD: Conchi App
@@ -102,7 +102,7 @@ Conchita's character — dry, sharp, competent in the way a 90s accountant earns
 
 - **Conchita** — The self-hosted AI accountant backend. Runs on n8n, uses Gemini 2.5 Flash Lite for extraction, stores data in PostgreSQL, handles Gmail invoice detection. Conchi (the app) is Conchita's mobile interface.
 - **Entry** — A single expense record, as stored in the `transaccions` table. Has amount, currency, category, subcategory, description, date, context (optional), and origin. The app's `origen` value is `'app'`.
-- **Round-trip** — The full request-response cycle: app sends input → n8n processes → Conchita responds with a structured Entry. No streaming. The app always waits for the complete response.
+- **Round-trip** — The full cycle: app sends input → n8n processes → Conchita responds with a complete structured Entry. No LLM token streaming — the response always arrives as one complete payload, not incrementally. The transport mechanism (how the app sends and how Conchita's response arrives) is an architecture decision; see OQ-12.
 - **Confirmation Card** — The in-app overlay that appears after a successful Round-trip, displaying the confirmed Entry fields for review and quick-edit before dismissal.
 - **Drum Roller** — An iOS time-picker–style scroll selector for closed, finite lists (category, subcategory, currency). Used in the Confirmation Card and Full Edit Screen for consistent interaction.
 - **Category** — A top-level expense classification, as defined in the `categories` table. Examples: "Alimentación", "Transporte", "Trabajo". Source of truth is the DB, not the app.
@@ -114,7 +114,7 @@ Conchita's character — dry, sharp, competent in the way a 90s accountant earns
 - **Unknown Sender** — A Gmail sender not yet in `remitents_factura`. Triggers an always-on push notification requiring Marc's attention.
 - **Home Screen Window** — The configurable time range shown on the Home screen list. Options: last calendar week (Mon–Sun), last calendar month, last 7 days, last 30 days, last N expenses (user-defined count).
 - **Full Edit Screen** — The secondary screen with all Entry fields editable. Accessed from the Confirmation Card or via swipe-to-reveal Edit action.
-- **Analytics Query Agent** — A new n8n workflow that receives filter parameters from the app, generates SQL, queries the DB, and returns structured data for display.
+- **Analytics Endpoint** — The backend mechanism that receives filter parameters from the app and returns structured expense data for the Analytics screen. Implementation strategy (how filters become DB queries and how the response is shaped) is an Architect decision — see OQ-13. Does not exist today; a new backend deliverable for V1.
 
 ---
 
@@ -129,6 +129,10 @@ Conchita's character — dry, sharp, competent in the way a 90s accountant earns
 #### FR-1: Widget text entry and submission
 Marc can type a natural language expense description into the Widget and submit it without opening the app. The Widget sends the text to the Conchita n8n endpoint. While processing, the Widget shows a loading indicator with Conchita voice copy if the widget platform supports dynamic text during processing [ASSUMPTION: widget platform constraints (WidgetKit / App Widget) may limit live text updates during loading; Architect to confirm feasibility]. On success, the Widget shows a mini Confirmation (amount and category). On failure, the Widget shows an error state with Conchita voice copy, the original input preserved, and a retry button.
 
+**Platform constraint — text-only:** Widget entry is text-only. Media capture (camera, gallery, PDF upload) is not feasible on the widget surface — WidgetKit and Android App Widget do not allow presenting camera or file-picker flows from the widget extension context. This is a confirmed platform constraint, not a design choice. As a convenience, the Widget may include a secondary action that deep-links directly to the app's in-app camera screen (UX decision).
+
+**Implementation sequencing:** The Widget is a late V1 user story. All in-app FRs (text entry, confirmation card, home list, analytics, settings) must be fully functional before widget implementation begins.
+
 **Consequences (testable):**
 - Widget submits text to the correct n8n endpoint on tap of submit.
 - Widget displays a loading indicator during the Round-trip.
@@ -137,27 +141,28 @@ Marc can type a natural language expense description into the Widget and submit 
 - Widget does not clear input on failure.
 
 #### FR-2: In-app text entry via FAB
-Marc can tap the center FAB on the Home screen to open a text input. Submitting the text triggers the Conchita Round-trip. During the Round-trip, a loading indicator is displayed with Conchita voice copy that cycles through multiple phrases (not a static single line). The app icon reflects the processing state with a subtle animation while the Round-trip is in progress. On completion, the Confirmation Card appears.
+Marc can tap the center FAB on the Home screen to open a text input. Submitting the text triggers the Conchita Round-trip. The Round-trip has two distinguishable phases: **Send phase** (HTTP request in flight, app → n8n endpoint) and **Process phase** (n8n workflow executing post-acknowledgement, until the response arrives). The visual and copy treatment for each phase is deferred to the UX Designer — see OQ-11. Marc's working assumption: a loading indicator for the Send phase; Conchita voice sentences cycling + animated app icon for the Process phase (the message has been accepted; Conchita is now working). On completion, the Confirmation Card appears.
+
+[NOTE FOR PM] Two-phase loading treatment is an open UX design question (OQ-11). Consequences below are phase-agnostic and should be refined once OQ-11 is resolved.
 
 **Consequences (testable):**
 - FAB tap opens text input.
-- Submission triggers the Round-trip request.
-- Loading state displays Conchita voice copy that cycles through phrases during the Round-trip (minimum 2 distinct phrases).
-- App icon shows a processing animation while the Round-trip is in progress.
+- Submission triggers the Round-trip request and shows a loading state.
+- Loading state displays Conchita voice copy that cycles through phrases (minimum 2 distinct phrases).
+- App icon shows a processing animation during the Round-trip.
 - Confirmation Card appears on successful Round-trip completion.
 - Error state is shown with Conchita voice copy, input preserved, and retry option on failure.
 
 #### FR-3: In-app media entry via FAB radial fan
-Marc can press-and-hold the center FAB to reveal a radial fan with three options: write (text, same as FR-2), record (deferred to V1.1), photo/camera. Selecting photo opens the native camera or gallery picker. The selected image or PDF is forwarded to the Conchita n8n endpoint using the same file-sending path as Telegram. On completion, the Confirmation Card appears.
+Marc can press-and-hold the center FAB to reveal a radial fan with three options: write (text, same as FR-2), photo/camera, and PDF upload. Selecting photo opens the native camera or gallery picker. Selecting PDF opens the native file picker. The selected file is forwarded to the Conchita n8n endpoint using the same file-sending path as Telegram. On completion, the Confirmation Card appears. Voice entry is not present in V1, including as a placeholder — it will be added as a fourth radial fan option in V1.1.
 
 **Consequences (testable):**
-- Long-press on FAB reveals radial fan with correct options.
+- Long-press on FAB reveals radial fan with exactly three options: write, photo/camera, PDF upload. No voice option is present or visible.
 - Photo option opens native camera or gallery picker.
+- PDF option opens native file picker.
 - Selected file is sent to the Conchita endpoint.
 - Confirmation Card appears on success.
 - Error state is shown with retry option on failure.
-
-**Out of Scope:** Record (voice) option is visible in the radial fan as a placeholder in V1 but is non-functional (tapping it shows a "coming soon" state). Voice entry is V1.1.
 
 #### FR-4: Offline entry queuing
 When Marc submits an Entry (FR-1, FR-2, or FR-3) with no network connectivity, the Entry is stored locally in a queue. When connectivity is restored, queued entries are sent to the Conchita endpoint in submission order. Marc receives the normal Confirmation Card or push notification for each queued entry as they are processed. V1 is designed for a queue depth of up to ~5 entries; no bulk offline sync is required.
@@ -234,9 +239,10 @@ The Home screen displays Entries within the selected Home Screen Window (configu
 - "Last N expenses" window shows exactly N entries (or fewer if fewer exist), regardless of date span.
 
 #### FR-10: List item anatomy
-Each list item displays: amount (dominant visual weight), category (secondary), subcategory (tertiary), and a short date if space allows. A context badge is shown if the Entry has a Context assigned. The exact layout and visual hierarchy are UX decisions; this FR defines the data requirements only.
+Each list item is a **single-line card** — entries never expand to multiple lines in their resting state. The data shown on that line: amount (dominant visual weight), category (secondary), subcategory (tertiary), and a short date if it fits without crowding. A context badge is shown if the Entry has a Context assigned. The UX Designer defines the exact layout, visual hierarchy, and whether a tap-to-expand or tap-to-modal detail view is warranted here (consistent with FR-15); this FR defines the data requirements and the single-line constraint.
 
 **Consequences (testable):**
+- Every list item renders as a single-line card in its resting state.
 - Amount, category, subcategory are always visible on each list item.
 - Context badge is present on entries with a Context and absent on entries without.
 - No sensitive or non-UI data (e.g. `origen`) is shown on the list item.
@@ -258,19 +264,20 @@ In both cases, the list source of truth is always Conchita's confirmed response;
 - Entries already visible before backgrounding do not re-animate.
 
 #### FR-12: Swipe-to-reveal actions on list items
-Swiping left on any list item reveals Edit and Delete action buttons. For invoice Entries (those with an associated PDF), swiping right (or an additional swipe direction — UX decision) reveals a "View PDF" action. Edit navigates to the Full Edit Screen (FR-7). Delete triggers the confirmation dialog (FR-8).
+Swiping left or right on any list item reveals the same set of action buttons: **Show** (only visible when the Entry has an associated file — PDF or image), **Edit**, and **Delete**. Both swipe directions expose identical actions; the UX Designer defines the visual layout of the reveal panel. Edit navigates to the Full Edit Screen (FR-7). Delete always triggers the confirmation dialog (FR-8). Show opens the associated file in the in-app viewer (FR-24).
 
 **Consequences (testable):**
-- Left swipe reveals Edit and Delete on all list items.
-- Edit navigates to Full Edit Screen for the correct Entry.
-- Delete triggers confirmation dialog.
-- Invoice entries have a PDF access action; non-invoice entries do not.
+- Both left and right swipe reveal the same action panel.
+- Edit action is present on all entries; navigates to Full Edit Screen.
+- Delete action is present on all entries; always triggers the confirmation dialog before deleting.
+- Show action is present only on entries with an associated file (PDF or image); it is not visible on entries without one.
+- Show action opens the file in the in-app viewer.
 
 ---
 
 ### 4.4 Analytics
 
-**Description:** The Analytics screen is the reward layer — the couch-browsing experience that makes the logging habit feel worthwhile. At the top is a unified filter bar controlling everything on the screen (graph and list). The main area is a swipeable graph (donut, pie, bar; UX may propose additional types). Below the graph is the filtered expense list. Marc can manually deselect individual entries from the list to exclude them from the graph calculation — this is a local-only session tweak, not persisted. All data is fetched by sending filter parameters to the Analytics Query Agent (n8n); the app does not perform aggregation client-side.
+**Description:** The Analytics screen is the reward layer — the couch-browsing experience that makes the logging habit feel worthwhile. At the top is a unified filter bar controlling everything on the screen (graph and list). The main area is a swipeable graph (donut, pie, bar; UX may propose additional types). Below the graph is the filtered expense list. Marc can manually deselect individual entries from the list to exclude them from the graph calculation — this is a local-only session tweak, not persisted. All data is fetched by sending filter parameters to the Analytics Endpoint; the app does not perform aggregation client-side. The implementation strategy for the Analytics Endpoint is an Architect decision (see OQ-13).
 
 **Functional Requirements:**
 
@@ -294,25 +301,37 @@ The main graph area displays expense data for the active filters. Three graph ty
 - Graph updates when filters change.
 
 #### FR-15: Filterable expense list
-Below the graph, a scrollable list of individual Entries matching the active filters is shown. Each item shows: amount, category, subcategory, description, date. Marc can manually deselect individual entries using a checkbox or similar control; deselected entries are excluded from the graph calculation for the current session only. The deselection state resets when the screen is left or the app is backgrounded.
+Below the graph, a scrollable list of individual Entries matching the active filters is shown. Each entry is always a **single-line card** — entries never expand to multiple lines in their resting state. The data fields visible on the single line are a UX decision (amount and category/subcategory are the likely anchors; date and context badge are secondary). Description is desirable to surface but must not break the single-line constraint; the UX Designer must define a mechanism for Marc to access it without the list feeling cluttered (e.g. tap to expand an accordion below the row, or tap to open a detail modal — UX to decide). Marc can manually deselect individual entries using a checkbox or similar control; deselected entries are excluded from the graph calculation for the current session only. The deselection state resets when the screen is left or the app is backgrounded.
 
 **Consequences (testable):**
+- Every entry renders as a single-line card in its resting state; no entry occupies more than one line without user interaction.
+- The UX spec defines which fields are visible on the single line.
+- Tapping an entry exposes description and any additional fields via the mechanism defined in the UX spec (accordion or modal).
 - List shows only entries matching all active filters.
 - Deselecting an entry removes it from graph calculations immediately.
 - Re-selecting an entry re-includes it in graph calculations immediately.
 - Deselection state does not persist across screen navigation or app backgrounding.
 
 #### FR-16: Analytics data fetching
-When Marc opens the Analytics screen or changes a filter, the app constructs a filter parameter payload (time span, category, subcategory, context) and sends it to the Analytics Query Agent (n8n endpoint). The agent returns structured, pre-aggregated data for the graph and the raw entry list. The app renders from the agent's response; it does not perform SQL, aggregation, or calculation client-side.
+When Marc opens the Analytics screen or changes a filter, the app sends a structured filter parameter payload (time span, category, subcategory, context) to the Analytics Endpoint and receives back pre-aggregated graph data and a raw entry list. The app renders from the response without performing SQL, aggregation, or calculation client-side.
 
-**[NOTE FOR PM]** The Analytics Query Agent response schema (aggregation shape, field names, data types) is an Architect deliverable — it does not exist today and must be designed before the Analytics screen can be implemented or tested. The Architect must define the API contract (request params + response envelope) as part of the architecture phase.
+**Hard constraint:** The app never connects to the PostgreSQL database directly. All data access routes through n8n — single backend principle.
+
+**Implementation strategy — Architect decision (OQ-13).** The mechanism by which filter params become DB queries and a response is an open question. Marc's instincts for the Architect:
+- **Preferred instinct: structured params → deterministic SQL in n8n.** The analytics filters are finite and well-defined (time range, category, subcategory, context). An n8n workflow node can map these programmatically to parameterized SQL without any AI. This is deterministic, predictable, and keeps all DB knowledge server-side.
+- **Option: local DB replica on device.** Full data lives on the phone; queries run client-side. Offline-capable but introduces sync complexity and uncertain performance at scale. Worth evaluating but Marc is not confident in it.
+- **Option: app constructs SQL, n8n executes.** Simpler n8n side, but couples the app to the DB schema and adds SQL query-building complexity to the client. Marc is unsure about this complexity.
+- **Not preferred: AI agent generating SQL.** Marc explicitly does not want an AI interpreting queries to generate SQL — reliability and safety concerns. Deterministic query construction is required.
+
+**[NOTE FOR PM]** The Analytics Endpoint (implementation strategy + API contract) is an Architect deliverable and does not exist today. The Architect must define: (a) the implementation strategy (see OQ-13), (b) the request filter param shape, (c) the response envelope for graph data and entry list. The Analytics screen cannot be implemented or tested until this contract is defined.
 
 **Consequences (testable):**
-- App sends filter parameters to the Analytics Query Agent on screen open and on filter change.
-- Graph data is derived from the agent's aggregated response per the defined API contract, not client-side calculation.
-- Entry list is derived from the agent's raw entry list response per the defined API contract.
+- App sends filter parameters to the Analytics Endpoint on screen open and on every filter change.
+- The app does not connect to the DB directly under any circumstances.
+- Graph data is derived from the endpoint's aggregated response per the defined API contract, not client-side calculation.
+- Entry list is derived from the endpoint's raw entry list response per the defined API contract.
 - A loading state is shown while the request is in flight.
-- An error state is shown if the request fails, with a retry option.
+- An error state with a retry option is shown if the request fails.
 
 ---
 
@@ -333,21 +352,22 @@ When a Context is Active, a persistent indicator is visible on the Home screen (
 - Switching to a new Context deactivates the previous one.
 
 #### FR-18: Per-entry Context opt-in
-When a Context is Active, the Confirmation Card's Context Drum Roller defaults to the Active Context. Marc can change it to another Context, clear it (no context), or leave it as the Active Context. The Active Context is an offer, not a forced assignment.
+When a Context is Active, the Confirmation Card's Context Drum Roller defaults to the Active Context. Marc can change it to another existing Context, clear it (no context), or leave it as the Active Context. The Active Context is an offer, not a forced assignment. The Confirmation Card's Context Drum Roller shows existing Contexts only — creating a new Context from the Confirmation Card is not supported.
 
 **Consequences (testable):**
 - Confirmation Card Context Drum Roller defaults to the Active Context when one is active.
 - Marc can change or clear the context on any individual Entry.
 - No context is forced; the Drum Roller is always editable.
+- No option to create a new Context is present on the Confirmation Card.
 
-#### FR-19: Inline Context creation during logging
-When Marc types a new context name during natural language entry (e.g. "120€ hotel Mallorca viaje nuevo"), Conchita detects the context signal and either creates a new Context or suggests it. [ASSUMPTION: Conchita's LLM prompt will be enriched to detect context signals in natural language and proactively suggest new contexts; this is a backend change.] The Confirmation Card shows the suggested new Context in the Drum Roller for Marc to confirm or discard.
+#### FR-19: Context creation surfaces
+Context creation is fully user-driven and never AI-initiated. Settings (FR-20) is always a creation surface. Additional creation surfaces — most likely the Full Edit Screen (FR-7) and potentially the Active Context picker on the Home screen (FR-17) — are deferred to the UX Designer; see OQ-14. The Confirmation Card (FR-18) is explicitly excluded as a creation surface. Wherever creation is offered, behaviour is consistent: the new Context is immediately saved to the DB and available in all pickers across the app.
 
 **Consequences (testable):**
-- If Conchita detects a new context signal, the Confirmation Card pre-populates the Context Drum Roller with the suggested new name.
-- Marc can confirm (creates and assigns the Context), change the name, or clear it.
-- A confirmed new Context is created in the DB and available in all pickers immediately.
-- If Conchita detects no context signal, the Context Drum Roller defaults to the Active Context (if one exists) or empty — identical behaviour to any other entry. No special state or prompt is shown.
+- Context can always be created from Settings (FR-20).
+- Any additional creation surface defined in the UX spec saves the new Context immediately to the DB.
+- A Context created from any surface is immediately available in all pickers across the app.
+- No Context creation is possible from the Confirmation Card.
 
 #### FR-20: Context management in Settings
 Marc can create, archive, unarchive, and delete Contexts from a Context management area within Settings (modal or secondary screen — UX decision). Deleting a Context that has Entries associated with it requires confirmation and removes the context reference from those Entries. Archived Contexts are hidden from pickers but their historical entries retain the context reference for analytics.
@@ -391,13 +411,14 @@ Tapping any invoice push notification navigates to an Invoice Review Card for th
 - All Drum Roller editing is functional on the Review Card.
 - Review Card does not expose a delete action.
 
-#### FR-24: PDF preview access
-On invoice entries — in the Review Card, the Home list, and the Analytics list — Marc can access the associated PDF. The trigger is a swipe action (swipe direction and exact UX pattern is a UX decision). The PDF opens in a native viewer within the app. The PDF is fetched from Google Drive via its stored link.
+#### FR-24: File preview access (PDF and images)
+On entries with an associated file — in the Review Card, the Home list, and the Analytics list — Marc can open the file in an in-app viewer. In the Home and Analytics lists, the trigger is the **Show** action in the swipe-to-reveal panel (FR-12, both directions). In the Review Card, the trigger is a UX decision (button, swipe, or tap — to be defined by UX Designer). The file opens in a native in-app viewer. Gmail invoice PDFs are fetched from their Google Drive URL (existing pipeline unchanged). App-uploaded files (photo receipts, PDFs via FAB) are fetched from the storage backend chosen by the Architect (see OQ-15; MinIO or Cloudflare R2 recommended).
 
 **Consequences (testable):**
-- Invoice entries expose a PDF access action; non-invoice entries do not.
-- Triggering the action opens the PDF in a native in-app viewer.
-- PDF is correctly fetched from its Google Drive URL.
+- Entries with an associated file expose a Show action; entries without one do not.
+- Triggering Show opens the file in a native in-app viewer.
+- PDFs are correctly fetched from their Google Drive URL.
+- The Show action is accessible from the Home list, Analytics list, and Review Card.
 
 #### FR-25: Inline Unknown Sender registration
 From the Invoice Review Card for an Unknown Sender invoice, Marc can add the sender to the Known Senders list with a single quick action (button or inline input — UX decision). After adding, future invoices from that sender are treated as Known Sender and handled automatically.
@@ -464,7 +485,7 @@ Marc can switch between dark and light mode from Settings. The theme applies imm
 ## 5. Non-Goals (Explicit)
 
 - **No AI-generated insights or anomaly detection.** The app surfaces data; it does not interpret it. "You're spending too much on groceries" is not a V1 feature.
-- **No voice entry (V1).** Planned for V1.1. The FAB radial fan includes a placeholder that shows a "coming soon" state.
+- **No voice entry (V1).** Planned for V1.1. The FAB radial fan has no voice placeholder in V1; voice will appear as a fourth radial fan option when introduced in V1.1.
 - **No multi-user or partner access (V1).** Planned for V1.1 (partner only). Architecture must not block this but must not build it.
 - **No reminder or nudge notifications.** No logging-streak nudges, no "you haven't logged today" alerts.
 - **No structured input form.** Entry is always natural language, photo, or PDF. There is no manual form for new entries (edit is different — that's the Full Edit Screen for existing entries).
@@ -481,9 +502,9 @@ Marc can switch between dark and light mode from Settings. The theme applies imm
 
 ### 6.1 In Scope
 
-- Widget (iOS WidgetKit + Android App Widget) with text entry, mini confirmation, and error state
-- In-app FAB: text entry, photo/PDF entry (radial fan), voice placeholder (non-functional)
-- Conchita Round-trip (request-response, no streaming)
+- Widget (iOS WidgetKit + Android App Widget): text-only entry, mini confirmation, error state — media capture not feasible on widget platform (confirmed platform constraint); implemented as late V1 user story after app is fully functional
+- In-app FAB: text entry (center tap), photo/camera and PDF upload (long-press radial fan — three options; no voice placeholder in V1)
+- Conchita Round-trip — no LLM token streaming; response is a complete payload. Transport protocol (webhook + SSE preferred — see OQ-12) is an Architect decision; n8n flow modifications required.
 - Offline entry queuing (Telegram-style, ~5 entry depth)
 - Confirmation Card with Drum Roller quick-edit
 - Push notification confirmation with deep-link to Confirmation Card
@@ -491,15 +512,14 @@ Marc can switch between dark and light mode from Settings. The theme applies imm
 - Entry deletion with confirmation dialog
 - Home screen: expense list, Home Screen Window, monthly grouping + subtotals, grand total, post-log cascade animation, swipe-to-reveal (Edit, Delete, PDF for invoices)
 - Analytics screen: unified filter bar, quick pills, swipeable graph (donut/pie/bar), filterable entry list, local-only entry deselect
-- Analytics data via Analytics Query Agent (new n8n workflow)
+- Analytics Endpoint (new backend deliverable — implementation strategy TBD by Architect, see OQ-13; hard constraint: no direct DB access from app)
 - Context Tagging: Active Context indicator, per-entry opt-in, inline creation during logging, Settings management
 - Gmail Invoice Flow: Unknown Sender notifications (always-on), Known Sender notifications (configurable), Invoice Review Card, PDF access, inline sender registration, Senders management in Settings
 - Settings: n8n connection config, notification toggles, Home Screen Window, theme (dark/light), Senders management, Context management
 - Push notification delivery infrastructure (new)
-- Conchita LLM prompt enrichment for context signal detection (new backend change)
 - TypeScript strict mode, Husky pre-commit hooks (lint + type check)
 - Unit, component, and E2E test suite (meaningful critical-path coverage)
-- GitHub Actions CI/CD: PR gate (lint + types + tests), merge-to-main build + local artifact storage
+- GitHub Actions CI/CD: PR gate (lint + types + tests), merge-to-main Android APK → Firebase App Distribution (invite-only; public repo, private distribution; no iOS build in pipeline)
 - Repo documentation: n8n workflow export + self-hosting setup guide
 
 ### 6.2 Out of Scope for MVP
@@ -510,7 +530,7 @@ Marc can switch between dark and light mode from Settings. The theme applies imm
 - Reminder / nudge notifications
 - Budget goals, bank sync, import, export
 - Retroactive bulk Context assignment
-- App Store / Play Store submission (personal use; build artifact distributed via GitHub Actions)
+- App Store / Play Store submission (personal use; distributed privately via Firebase App Distribution)
 - Soft-delete / trash recovery
 
 ---
@@ -538,14 +558,19 @@ Marc can switch between dark and light mode from Settings. The theme applies imm
 
 1. **Quick filter pills in Analytics** — "Last month" and "Last week" pills next to the filter button: exact placement, tap behavior, and whether they are mutually exclusive or can combine with other active filters. Deferred to UX Designer.
 2. **Typewriter font scope** — Does the typewriter font apply everywhere in the app, or only to Conchita's own voice surfaces (loading copy, empty states, confirmation language)? Deferred to UX Designer.
-3. **Swipe direction for PDF access** — Right swipe, additional left-swipe depth, or long-press? Deferred to UX Designer, considering platform conventions for both iOS and Android.
+3. ~~**Swipe direction for file access**~~ — **Resolved.** Both left and right swipe reveal the same action panel: Show (conditional), Edit, Delete. Direction is symmetric; UX Designer defines the visual layout of the reveal. See FR-12.
 4. **Analytics graph additional types** — UX Designer may propose one additional graph type beyond donut/pie/bar if it provides distinct descriptive value. Deferred to UX Designer.
 5. **Confirmation Card density threshold** — Amount, category, subcategory, description, context are required. Currency and date are added "if it fits without crowding." UX Designer defines the threshold and decides which fields make the cut on smaller screen sizes.
 6. **Context picker placement** — Fast access from Home screen: sheet, modal, popover, or inline expand? Deferred to UX Designer.
 7. ~~**"All notifications off" and Unknown Sender**~~ — **Resolved.** Unknown Sender notifications are always-on by design and cannot be disabled by any Settings toggle. FR-28 and FR-21 are consistent. No open question.
-8. **n8n connection fields** — The exact fields required for the self-hosting connection configuration (base URL, API key, webhook secret, etc.) are an architecture decision. Architect to define and document.
+8. ~~**n8n connection fields**~~ — **Superseded by OQ-12.** Connection field definition is now part of the transport protocol decision. Architect to define fields once OQ-12 is resolved.
 9. **Retroactive bulk Context assignment** — Not in V1. Revisit for V1.1 if partner use case reveals it as a pain point.
 10. **App license** — Marc wants to allow forks for learning but prevent commercial use of the source code. License selection (e.g. CC BY-NC, BSL, or custom) is a pre-publish task outside the app build scope. Tracked in the addendum.
+11. **Two-phase Round-trip loading states** — The Conchita Round-trip has a Send phase (HTTP request in flight → n8n acknowledges with a 200) and a Process phase (n8n workflow executing post-acknowledgement, until the response arrives). Marc's working assumption: loading indicator for the Send phase; Conchita voice sentences + animated app icon for the Process phase (communicating "your message landed, Conchita is on it"). If the webhook + SSE transport (OQ-12) is adopted, the phase boundary is technically detectable (POST 200 = Send complete; SSE event = Process complete). UX Designer to define: (a) whether the phase boundary is surfaced visually, (b) the specific treatment for each phase. Architect to confirm technical detectability once OQ-12 is resolved. Affects FR-2, FR-3, and FR-1 (widget, within platform constraints). Deferred to UX Designer + Architect.
+12. **App-to-Conchita transport protocol** — Marc's preferred pattern: app POSTs to an n8n webhook (receives HTTP 200 immediately); n8n pushes the result back via Server-Sent Events (SSE) once Conchita finishes processing. Mirrors Telegram's interaction feel and provides a natural OQ-11 phase boundary (POST 200 = sent; SSE event = Conchita done). Requires modifications to the existing n8n flow. Architect to: (a) validate SSE feasibility from self-hosted n8n, (b) confirm or propose an alternative transport if SSE is not suitable, (c) define the n8n flow changes required, (d) define connection fields for FR-27 (supersedes OQ-8 scope). Deferred to Architect.
+13. **Analytics Endpoint implementation strategy** — The app must never access the DB directly; all data flows through n8n (hard constraint). The mechanism by which analytics filter params become DB queries and a structured response is an Architect decision. Options to evaluate: (a) structured params → deterministic SQL built programmatically in an n8n workflow node — Marc's preferred instinct; filters are finite and well-defined, SQL generation is predictable, no AI involved; (b) local DB replica on device — offline-capable but sync complexity and performance at scale are uncertain; (c) app constructs SQL and sends to n8n for execution — simpler n8n side but couples app to DB schema and adds SQL query-building complexity to the client. **Explicitly not preferred:** AI-interpreted query generation — Marc requires deterministic, predictable query construction for reliability. Architect to recommend the cleanest and most efficient approach and define the API contract (request filter params + response envelope for graph data + entry list). Deferred to Architect.
+14. **Context creation surfaces beyond Settings** — Where can Marc create a new Context outside of the Settings screen? Confirmed excluded: the Confirmation Card. Settings (FR-20) is always available. Candidates for UX to evaluate: (a) Full Edit Screen (FR-7) — Marc's preferred candidate; (b) Active Context picker on Home screen (FR-17) — already noted as having a "create" action. UX Designer to decide which surfaces support creation and how creation is triggered (e.g. "New context…" option at the bottom of a Drum Roller, inline text input, or a dedicated sheet). Deferred to UX Designer.
+15. **File storage for app-uploaded files** — Photo receipts and PDFs uploaded via the FAB (FR-3) need a storage backend. Google Drive (used for Gmail invoice PDFs) is not a clean target for mobile uploads — uploads would need to proxy through n8n regardless, and Drive adds OAuth complexity. Recommended options (from research in addendum): MinIO (self-hosted, S3-compatible, strong portfolio signal, privacy-first) or Cloudflare R2 (zero-ops cloud, S3-compatible, no egress fees, 10 GB free). Both integrate with n8n's S3 node. At Marc's usage volume the cost difference is irrelevant. Suggested upload path: app → n8n (via OQ-12 transport) → storage; n8n returns URL; URL stored in DB. App reads files directly from the storage URL. Architect to recommend and define the integration. Deferred to Architect.
 
 ---
 
@@ -556,8 +581,7 @@ Marc can switch between dark and light mode from Settings. The theme applies imm
 - **§4.1 / FR-4** — Offline queue depth is ~5 entries maximum. Marc rarely logs more than a couple of entries offline in sequence.
 - **§4.2 / FR-5** — The list source of truth is always Conchita's confirmed response. The app never optimistically renders Marc's raw typed input in the Home list.
 - **§4.4 / FR-14** — UX designer may propose one additional graph type beyond donut/pie/bar if it provides distinct descriptive value. The final graph type list is a UX decision.
-- **§4.4 / FR-16** — The Analytics Query Agent (new n8n workflow) will be built as part of this project. It does not exist today.
-- **§4.5 / FR-19** — Conchita's LLM prompt will be enriched to detect context signals in natural language. This is a required backend change, not optional.
+- **§4.4 / FR-16** — The Analytics Endpoint does not exist today and is a new backend deliverable for V1. Implementation strategy is an Architect decision (OQ-13); the hard constraint is no direct DB access from the app.
 - **§4.6 / FR-21** — Unknown Sender notifications cannot be disabled by any user setting. Confirmed by Marc — resolved.
 - **§4.7 / FR-27** — Self-hosting is a first-class use case. The app should be usable by a technically capable second user who creates their own n8n + Conchita instance and enters credentials in Settings.
 - **§General** — Category and subcategory are both defined in the DB (`categories` table). Both are surfaced in all Drum Rollers; subcategory filters by selected category.
@@ -624,7 +648,9 @@ Marc can switch between dark and light mode from Settings. The theme applies imm
 
 **CI/CD (GitHub Actions).**
 - PR gate: lint + type check + full test suite must pass before merge is allowed.
-- Merge-to-main: build artifact generated and stored as a GitHub Actions artifact for local download. No TestFlight or store submission.
+- Merge-to-main: **Android APK** built and distributed via **Firebase App Distribution** (invite-only; Marc's email is the sole invited tester). No iOS build in the pipeline. No store submission.
+
+**Public repo + private distribution model.** The source code repository is public (portfolio visibility). Build artifacts are never attached to GitHub Releases — that would make the APK openly downloadable by anyone in a public repo. Firebase App Distribution is invite-only: only Marc's registered email can install the app. Signing keys, Firebase credentials, and any other secrets are stored in GitHub Secrets (never committed to the repo) and used only during the Actions workflow.
 
 **Repo documentation (portfolio requirement).**
 - n8n workflow export (JSON) committed to the repo.

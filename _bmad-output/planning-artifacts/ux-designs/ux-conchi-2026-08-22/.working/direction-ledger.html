@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction 1 — Ledger</title>
+<style>
+  /*
+   * DIRECTION 1 — LEDGER
+   * Palette (light / ink-on-paper):
+   *   Background:      #F5F0E8   warm off-white, aged paper
+   *   Surface:         #EDE8DC   slightly darker paper
+   *   Ink primary:     #1A1410   near-black, dense ink
+   *   Ink secondary:   #4A3F35   medium-dark brown ink
+   *   Ink muted:       #7A6E64   faded ink
+   *   Accent red:      #8B1A1A   deep ledger-red / archival ink
+   *   Rule lines:      #C8BFB0   hairline ledger rules
+   *   FAB:             #1A1410   ink black
+   *   Card overlay bg: #1A1410   near-black with opacity
+   *
+   * Typography: "Courier New", Courier, monospace — everywhere
+   */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #2C2720;
+    font-family: "Courier New", Courier, monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    padding: 60px 40px;
+    min-height: 100vh;
+  }
+
+  .label-direction {
+    color: #7A6E64;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  /* Phone frame */
+  .phone {
+    width: 390px;
+    min-height: 844px;
+    background: #F5F0E8;
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid #C8BFB0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Status bar */
+  .status-bar {
+    background: #F5F0E8;
+    padding: 14px 24px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #C8BFB0;
+  }
+  .status-bar .time {
+    font-size: 13px;
+    font-weight: bold;
+    color: #1A1410;
+    letter-spacing: 0.05em;
+  }
+  .status-bar .icons {
+    font-size: 11px;
+    color: #4A3F35;
+    letter-spacing: 0.08em;
+  }
+
+  /* Header */
+  .header {
+    background: #F5F0E8;
+    padding: 20px 24px 16px;
+    border-bottom: 2px solid #1A1410;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .app-name {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #7A6E64;
+  }
+  .conchita-tag {
+    font-size: 10px;
+    color: #8B1A1A;
+    letter-spacing: 0.1em;
+    border: 1px solid #8B1A1A;
+    padding: 2px 6px;
+  }
+  .period-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7A6E64;
+    margin-bottom: 4px;
+  }
+  .period-value {
+    font-size: 11px;
+    color: #4A3F35;
+    letter-spacing: 0.05em;
+  }
+  .total-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7A6E64;
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+  .total-amount {
+    font-size: 28px;
+    font-weight: bold;
+    color: #1A1410;
+    letter-spacing: -0.02em;
+  }
+  .total-amount .currency {
+    font-size: 16px;
+    font-weight: normal;
+    color: #4A3F35;
+  }
+
+  /* Column headers */
+  .column-headers {
+    background: #EDE8DC;
+    padding: 6px 24px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #C8BFB0;
+  }
+  .col-h {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #7A6E64;
+  }
+
+  /* Expense list */
+  .expense-list {
+    flex: 1;
+    background: #F5F0E8;
+    overflow-y: auto;
+  }
+
+  .expense-row {
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 52px;
+    border-bottom: 1px solid #C8BFB0;
+    gap: 12px;
+  }
+  .expense-row:nth-child(even) {
+    background: #EDE8DC;
+  }
+
+  .row-date {
+    font-size: 10px;
+    color: #7A6E64;
+    letter-spacing: 0.05em;
+    width: 38px;
+    flex-shrink: 0;
+  }
+  .row-divider {
+    width: 1px;
+    height: 28px;
+    background: #C8BFB0;
+    flex-shrink: 0;
+  }
+  .row-category {
+    flex: 1;
+    min-width: 0;
+  }
+  .row-cat-main {
+    font-size: 11px;
+    color: #1A1410;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .row-cat-sub {
+    font-size: 9px;
+    color: #7A6E64;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .row-amount {
+    font-size: 13px;
+    font-weight: bold;
+    color: #1A1410;
+    letter-spacing: 0.02em;
+    text-align: right;
+    flex-shrink: 0;
+    width: 64px;
+  }
+  .row-amount.accent {
+    color: #8B1A1A;
+  }
+
+  /* Subtotal row */
+  .subtotal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 24px;
+    background: #1A1410;
+  }
+  .subtotal-label {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #7A6E64;
+  }
+  .subtotal-value {
+    font-size: 13px;
+    font-weight: bold;
+    color: #F5F0E8;
+    letter-spacing: 0.03em;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    background: #F5F0E8;
+    border-top: 2px solid #1A1410;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .nav-icon {
+    font-size: 16px;
+    color: #7A6E64;
+  }
+  .nav-label {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #7A6E64;
+  }
+
+  .fab {
+    width: 52px;
+    height: 52px;
+    background: #1A1410;
+    border: 2px solid #1A1410;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fab-plus {
+    font-size: 22px;
+    color: #F5F0E8;
+    line-height: 1;
+  }
+
+  /* Confirmation card overlay */
+  .phone-primary {
+    position: relative;
+  }
+
+  .card-overlay {
+    position: absolute;
+    bottom: 80px;
+    left: 0;
+    right: 0;
+    background: #F5F0E8;
+    border-top: 2px solid #1A1410;
+    border-left: 2px solid #1A1410;
+    border-right: 2px solid #1A1410;
+    padding: 20px 24px 24px;
+    z-index: 10;
+  }
+  .overlay-scrim {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 80px;
+    background: rgba(26,20,16,0.45);
+    z-index: 9;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #C8BFB0;
+  }
+  .card-title {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #7A6E64;
+  }
+  .card-amount {
+    font-size: 20px;
+    font-weight: bold;
+    color: #8B1A1A;
+    letter-spacing: 0.02em;
+  }
+
+  .card-field {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #C8BFB0;
+    gap: 12px;
+  }
+  .field-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #7A6E64;
+    width: 88px;
+    flex-shrink: 0;
+  }
+  .field-value {
+    font-size: 12px;
+    color: #1A1410;
+    flex: 1;
+  }
+  .drum-indicator {
+    font-size: 9px;
+    color: #8B1A1A;
+    letter-spacing: 0.08em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    line-height: 1;
+  }
+  .drum-arrow {
+    font-size: 8px;
+    color: #C8BFB0;
+  }
+  .drum-val {
+    font-size: 12px;
+    color: #1A1410;
+    padding: 1px 0;
+  }
+
+  .conchita-quip {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #C8BFB0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .quip-mark {
+    font-size: 10px;
+    color: #8B1A1A;
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
+  .quip-text {
+    font-size: 11px;
+    color: #4A3F35;
+    font-style: italic;
+    letter-spacing: 0.02em;
+  }
+
+  .confirm-btn {
+    margin-top: 16px;
+    width: 100%;
+    height: 40px;
+    background: #1A1410;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .confirm-btn-text {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #F5F0E8;
+  }
+
+  /* Secondary state — empty */
+  .phone-secondary {
+    background: #F5F0E8;
+  }
+
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 32px;
+    gap: 24px;
+  }
+
+  .empty-ledger-lines {
+    width: 100%;
+  }
+  .ledger-blank-row {
+    height: 52px;
+    border-bottom: 1px solid #C8BFB0;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+  }
+  .ledger-blank-row:nth-child(even) {
+    background: #EDE8DC;
+  }
+  .blank-date {
+    width: 38px;
+    height: 1px;
+    background: #C8BFB0;
+  }
+  .blank-body {
+    flex: 1;
+    margin: 0 16px;
+    height: 1px;
+    background: #C8BFB0;
+  }
+  .blank-amt {
+    width: 48px;
+    height: 1px;
+    background: #C8BFB0;
+  }
+
+  .empty-message {
+    text-align: center;
+    padding: 0 8px;
+  }
+  .empty-conchita {
+    font-size: 10px;
+    color: #8B1A1A;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .empty-copy {
+    font-size: 14px;
+    color: #1A1410;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+  }
+  .empty-sub {
+    font-size: 10px;
+    color: #7A6E64;
+    letter-spacing: 0.08em;
+    margin-top: 6px;
+  }
+
+  .section-title {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #7A6E64;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="label-direction">Direction 1 — Ledger · Primary: Home + Confirmation Card</div>
+
+<!-- PRIMARY SCREEN -->
+<div class="phone phone-primary" style="position:relative;">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="time">09:41</span>
+    <span class="icons">▌▌▌  ▐▐  100%</span>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-top">
+      <span class="app-name">Conchi</span>
+      <span class="conchita-tag">CONCHITA</span>
+    </div>
+    <div class="period-label">Período</div>
+    <div class="period-value">Agosto 2026</div>
+    <div class="total-label">Total registrado</div>
+    <div class="total-amount"><span class="currency">€</span>224.60</div>
+  </div>
+
+  <!-- Column headers -->
+  <div class="column-headers">
+    <span class="col-h">Fecha</span>
+    <span class="col-h">Categoría</span>
+    <span class="col-h">Importe</span>
+  </div>
+
+  <!-- Expense list -->
+  <div class="expense-list">
+    <div class="expense-row">
+      <span class="row-date">22 ago</span>
+      <div class="row-divider"></div>
+      <div class="row-category">
+        <div class="row-cat-main">Alimentación</div>
+        <div class="row-cat-sub">Supermercado</div>
+      </div>
+      <span class="row-amount">€47.80</span>
+    </div>
+    <div class="expense-row">
+      <span class="row-date">22 ago</span>
+      <div class="row-divider"></div>
+      <div class="row-category">
+        <div class="row-cat-main">Transporte</div>
+        <div class="row-cat-sub">Metro</div>
+      </div>
+      <span class="row-amount">€12.50</span>
+    </div>
+    <div class="expense-row">
+      <span class="row-date">21 ago</span>
+      <div class="row-divider"></div>
+      <div class="row-category">
+        <div class="row-cat-main">Hogar</div>
+        <div class="row-cat-sub">Electricidad</div>
+      </div>
+      <span class="row-amount accent">€120.00</span>
+    </div>
+    <div class="expense-row">
+      <span class="row-date">20 ago</span>
+      <div class="row-divider"></div>
+      <div class="row-category">
+        <div class="row-cat-main">Ocio</div>
+        <div class="row-cat-sub">Restaurante</div>
+      </div>
+      <span class="row-amount">€8.90</span>
+    </div>
+    <div class="expense-row">
+      <span class="row-date">19 ago</span>
+      <div class="row-divider"></div>
+      <div class="row-category">
+        <div class="row-cat-main">Alimentación</div>
+        <div class="row-cat-sub">Supermercado</div>
+      </div>
+      <span class="row-amount">€35.40</span>
+    </div>
+    <!-- Filler rows for realism -->
+    <div class="expense-row" style="opacity:0.35;">
+      <span class="row-date">17 ago</span>
+      <div class="row-divider"></div>
+      <div class="row-category">
+        <div class="row-cat-main">Transporte</div>
+        <div class="row-cat-sub">Metro</div>
+      </div>
+      <span class="row-amount">€12.50</span>
+    </div>
+    <div class="expense-row" style="opacity:0.2;">
+      <span class="row-date">15 ago</span>
+      <div class="row-divider"></div>
+      <div class="row-category">
+        <div class="row-cat-main">Hogar</div>
+        <div class="row-cat-sub">Internet</div>
+      </div>
+      <span class="row-amount">€29.00</span>
+    </div>
+  </div>
+
+  <!-- Subtotal bar -->
+  <div class="subtotal-row">
+    <span class="subtotal-label">Agosto 2026</span>
+    <span class="subtotal-value">€224.60</span>
+  </div>
+
+  <!-- Scrim -->
+  <div class="overlay-scrim"></div>
+
+  <!-- Confirmation card -->
+  <div class="card-overlay">
+    <div class="card-header">
+      <span class="card-title">Confirmar registro</span>
+      <span class="card-amount">€35.40</span>
+    </div>
+
+    <div class="card-field">
+      <span class="field-label">Categoría</span>
+      <div class="drum-indicator">
+        <span class="drum-arrow">▲</span>
+        <span class="drum-val">Alimentación</span>
+        <span class="drum-arrow">▼</span>
+      </div>
+    </div>
+
+    <div class="card-field">
+      <span class="field-label">Subcategoría</span>
+      <div class="drum-indicator">
+        <span class="drum-arrow">▲</span>
+        <span class="drum-val">Supermercado</span>
+        <span class="drum-arrow">▼</span>
+      </div>
+    </div>
+
+    <div class="card-field">
+      <span class="field-label">Descripción</span>
+      <span class="field-value">compra mercadona</span>
+    </div>
+
+    <div class="card-field" style="border-bottom:none;">
+      <span class="field-label">Contexto</span>
+      <span class="field-value" style="color:#7A6E64;">—</span>
+    </div>
+
+    <div class="conchita-quip">
+      <span class="quip-mark">C//</span>
+      <span class="quip-text">"Registrado. Como siempre."</span>
+    </div>
+
+    <div class="confirm-btn">
+      <span class="confirm-btn-text">Confirmar</span>
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <div class="nav-item">
+      <span class="nav-icon">⚙</span>
+      <span class="nav-label">Ajustes</span>
+    </div>
+    <div class="fab">
+      <span class="fab-plus">+</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">▦</span>
+      <span class="nav-label">Análisis</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- LABEL -->
+<div class="section-title">Secondary state — Empty</div>
+
+<!-- SECONDARY SCREEN: Empty state -->
+<div class="phone phone-secondary">
+
+  <div class="status-bar">
+    <span class="time">09:41</span>
+    <span class="icons">▌▌▌  ▐▐  100%</span>
+  </div>
+
+  <div class="header">
+    <div class="header-top">
+      <span class="app-name">Conchi</span>
+      <span class="conchita-tag">CONCHITA</span>
+    </div>
+    <div class="period-label">Período</div>
+    <div class="period-value">Agosto 2026</div>
+    <div class="total-label">Total registrado</div>
+    <div class="total-amount"><span class="currency">€</span>0.00</div>
+  </div>
+
+  <div class="column-headers">
+    <span class="col-h">Fecha</span>
+    <span class="col-h">Categoría</span>
+    <span class="col-h">Importe</span>
+  </div>
+
+  <!-- Blank ledger rows -->
+  <div class="empty-ledger-lines">
+    <div class="ledger-blank-row"><span class="blank-date"></span><span class="blank-body"></span><span class="blank-amt"></span></div>
+    <div class="ledger-blank-row"><span class="blank-date"></span><span class="blank-body"></span><span class="blank-amt"></span></div>
+    <div class="ledger-blank-row"><span class="blank-date"></span><span class="blank-body"></span><span class="blank-amt"></span></div>
+    <div class="ledger-blank-row"><span class="blank-date"></span><span class="blank-body"></span><span class="blank-amt"></span></div>
+  </div>
+
+  <div class="empty-state">
+    <div class="empty-message">
+      <div class="empty-conchita">Conchita</div>
+      <div class="empty-copy">"Nada registrado aún.<br>Empieza por algo."</div>
+      <div class="empty-sub">Pulsa + para añadir el primero</div>
+    </div>
+  </div>
+
+  <div class="subtotal-row">
+    <span class="subtotal-label">Agosto 2026</span>
+    <span class="subtotal-value">€0.00</span>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item">
+      <span class="nav-icon">⚙</span>
+      <span class="nav-label">Ajustes</span>
+    </div>
+    <div class="fab">
+      <span class="fab-plus">+</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">▦</span>
+      <span class="nav-label">Análisis</span>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

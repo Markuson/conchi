@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conchi — Direction B: Folio R3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/*
+ * DIRECTION B — "FOLIO" (Typewriter Amber) — Round 3
+ *
+ * THREE-FONT SYSTEM:
+ *   Special Elite     → hero display data (big balance total, month totals)
+ *   Courier Prime     → all data in lists (amounts, categories, dates, drum, voice quote)
+ *   System UI         → all chrome (app name, nav labels, buttons, field labels, section headers)
+ *
+ * DARK MODE PALETTE
+ *   --bg:           #18140f
+ *   --bg-card:      #201a13
+ *   --bg-card-alt:  #261e15
+ *   --text:         #fdfaf4
+ *   --text-muted:   #b09870
+ *   --accent:       #c8922a
+ *   --border:       rgba(253,250,244,0.07)
+ *
+ * LIGHT MODE PALETTE
+ *   --bg:           #faf6ee
+ *   --bg-card:      #fdf9f3
+ *   --text:         #1a1510
+ *   --text-muted:   #7a6a50
+ *   --accent:       #b8860b
+ *   --border:       rgba(26,21,16,0.09)
+ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #201a12;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+  padding: 40px 24px 64px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+}
+
+h1.page-title {
+  color: #c8922a;
+  font-size: 11px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  font-weight: 700;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+.page-subtitle {
+  color: #fdfaf4;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 400;
+  opacity: 0.30;
+  text-align: center;
+  margin-top: -36px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+.section-label {
+  color: #fdfaf4;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.32;
+  text-align: center;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+.pair {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mode-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.mode-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  opacity: 0.40;
+  color: #fdfaf4;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+/* ─── Phone frames ───────────────────────────────────────────────────────── */
+.phone {
+  width: 390px;
+  height: 844px;
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 1.5px rgba(255,255,255,0.07),
+    0 20px 80px rgba(0,0,0,0.70);
+}
+
+.phone-sm {
+  width: 390px;
+  height: 480px;
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 1.5px rgba(255,255,255,0.07),
+    0 16px 60px rgba(0,0,0,0.55);
+}
+
+.screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DARK MODE
+   ══════════════════════════════════════════════════════════ */
+.screen.dark {
+  background: #18140f;
+  color: #fdfaf4;
+}
+
+.screen.dark .status-bar        { background: #18140f; }
+.screen.dark .app-header        { background: #18140f; border-bottom: 1px solid rgba(253,250,244,0.07); }
+.screen.dark .header-total-amount { color: #fdfaf4; }
+.screen.dark .header-total-label  { color: #b09870; }
+
+.screen.dark .month-header {
+  background: #18140f;
+  color: #b09870;
+  border-bottom: 1px solid rgba(253,250,244,0.07);
+}
+.screen.dark .month-total        { color: #c8922a; }
+.screen.dark .expense-list       { background: #18140f; }
+.screen.dark .expense-row        { background: #18140f; border-bottom: 1px solid rgba(253,250,244,0.07); }
+.screen.dark .expense-amount     { color: #fdfaf4; }
+.screen.dark .expense-category   { color: #c4b898; }
+.screen.dark .expense-sub        { color: #7a6a50; }
+.screen.dark .expense-date       { color: #7a6a50; }
+
+.screen.dark .confirmation-backdrop { background: rgba(0,0,0,0.58); }
+.screen.dark .confirmation-card {
+  background: #261e15;
+  border-top: 1px solid rgba(253,250,244,0.10);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.28);
+}
+.screen.dark .conf-handle         { background: rgba(253,250,244,0.14); }
+.screen.dark .conf-header-label   { color: #b09870; }
+.screen.dark .conf-amount         { color: #fdfaf4; }
+.screen.dark .conf-drum-label     { color: #b09870; }
+.screen.dark .conf-drum-value     { color: #fdfaf4; }
+.screen.dark .conf-drum-track {
+  border-top: 1px solid rgba(253,250,244,0.08);
+  border-bottom: 1px solid rgba(253,250,244,0.08);
+}
+.screen.dark .conf-field-label    { color: #b09870; }
+.screen.dark .conf-field-value    { color: #fdfaf4; }
+.screen.dark .conf-voice          { color: #7a6a50; }
+
+.screen.dark .btn-discard {
+  background: transparent;
+  border: 1px solid rgba(253,250,244,0.16);
+  color: #b09870;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+.screen.dark .btn-accept {
+  background: #c8922a;
+  border: 1px solid #d9a040;
+  color: #18140f;
+  box-shadow: 0 2px 8px rgba(200,146,42,0.45), 0 1px 2px rgba(0,0,0,0.30);
+}
+.screen.dark .bottom-nav {
+  background: #18140f;
+  border-top: 1px solid rgba(253,250,244,0.07);
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.45);
+}
+.screen.dark .nav-icon            { color: #7a6a50; }
+.screen.dark .fab {
+  background: #c8922a;
+  box-shadow: 0 4px 16px rgba(200,146,42,0.50), 0 2px 6px rgba(0,0,0,0.35);
+  border: 1px solid #d9a040;
+  color: #18140f;
+}
+.screen.dark .accent-underline    { background: #c8922a; opacity: 0.55; }
+.screen.dark .state-badge         { background: rgba(200,146,42,0.18); color: #c8922a; }
+
+/* ══════════════════════════════════════════════════════════
+   LIGHT MODE
+   ══════════════════════════════════════════════════════════ */
+.screen.light {
+  background: #faf6ee;
+  color: #1a1510;
+}
+
+.screen.light .status-bar        { background: #faf6ee; }
+.screen.light .app-header        { background: #faf6ee; border-bottom: 1px solid rgba(26,21,16,0.09); }
+.screen.light .header-total-amount { color: #1a1510; }
+.screen.light .header-total-label  { color: #7a6a50; }
+
+.screen.light .month-header {
+  background: #faf6ee;
+  color: #7a6a50;
+  border-bottom: 1px solid rgba(26,21,16,0.09);
+}
+.screen.light .month-total        { color: #b8860b; }
+.screen.light .expense-list       { background: #faf6ee; }
+.screen.light .expense-row        { background: #faf6ee; border-bottom: 1px solid rgba(26,21,16,0.09); }
+.screen.light .expense-amount     { color: #1a1510; }
+.screen.light .expense-category   { color: #3a2e1e; }
+.screen.light .expense-sub        { color: #9a8a68; }
+.screen.light .expense-date       { color: #9a8a68; }
+
+.screen.light .confirmation-backdrop { background: rgba(26,21,16,0.28); }
+.screen.light .confirmation-card {
+  background: #fffcf5;
+  border-top: 1px solid rgba(26,21,16,0.10);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.28);
+}
+.screen.light .conf-handle         { background: rgba(26,21,16,0.13); }
+.screen.light .conf-header-label   { color: #7a6a50; }
+.screen.light .conf-amount         { color: #1a1510; }
+.screen.light .conf-drum-label     { color: #7a6a50; }
+.screen.light .conf-drum-value     { color: #1a1510; }
+.screen.light .conf-drum-track {
+  border-top: 1px solid rgba(26,21,16,0.09);
+  border-bottom: 1px solid rgba(26,21,16,0.09);
+}
+.screen.light .conf-field-label    { color: #7a6a50; }
+.screen.light .conf-field-value    { color: #1a1510; }
+.screen.light .conf-voice          { color: #b09870; }
+
+.screen.light .btn-discard {
+  background: transparent;
+  border: 1px solid rgba(26,21,16,0.18);
+  color: #7a6a50;
+  box-shadow: 0 2px 6px rgba(26,21,16,0.07);
+}
+.screen.light .btn-accept {
+  background: #b8860b;
+  border: 1px solid #a07808;
+  color: #fdfaf4;
+  box-shadow: 0 2px 8px rgba(184,134,11,0.35), 0 1px 2px rgba(26,21,16,0.18);
+}
+.screen.light .bottom-nav {
+  background: #f2ede2;
+  border-top: 1px solid rgba(26,21,16,0.09);
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.12);
+}
+.screen.light .nav-icon            { color: #9a8a68; }
+.screen.light .fab {
+  background: #b8860b;
+  box-shadow: 0 4px 16px rgba(184,134,11,0.38), 0 2px 6px rgba(26,21,16,0.20);
+  border: 1px solid #a07808;
+  color: #fdfaf4;
+}
+.screen.light .accent-underline    { background: #b8860b; opacity: 0.45; }
+.screen.light .state-badge         { background: rgba(184,134,11,0.12); color: #b8860b; }
+
+/* ─── Status bar ─────────────────────────────────────────────────────────── */
+.status-bar {
+  height: 54px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 24px 8px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+.status-time {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.status-icons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 11px;
+  opacity: 0.72;
+}
+
+/* ─── App header ─────────────────────────────────────────────────────────── */
+.app-header {
+  padding: 16px 24px 14px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* Conchi avatar in header — positioned absolute top-right */
+.header-avatar {
+  position: absolute;
+  top: 14px;
+  right: 20px;
+}
+
+.app-name {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  opacity: 0.38;
+  margin-bottom: 6px;
+  /* System UI — chrome */
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+/* Special Elite — soul font — hero data only */
+.header-total-amount {
+  font-family: 'Special Elite', cursive;
+  font-size: 34px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.header-total-label {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+  /* System UI — chrome */
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+.accent-underline {
+  display: block;
+  width: 32px;
+  height: 2px;
+  border-radius: 1px;
+  margin-top: 6px;
+}
+
+/* ─── Month header ───────────────────────────────────────────────────────── */
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 24px;
+  flex-shrink: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+.month-name {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  /* System UI — chrome (month label) */
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+/* Special Elite — hero data: month total */
+.month-total {
+  font-family: 'Special Elite', cursive;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+/* ─── Expense list ───────────────────────────────────────────────────────── */
+.expense-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.expense-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 24px;
+  gap: 12px;
+}
+
+.expense-left  { flex: 1; min-width: 0; }
+
+.expense-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+/* Courier Prime — data in lists */
+.expense-amount {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.expense-category {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.expense-sub {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+.expense-date {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+}
+
+/* ─── Confirmation card ──────────────────────────────────────────────────── */
+.confirmation-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+.confirmation-card {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 20px 20px 0 0;
+  padding: 0 0 20px;
+  z-index: 11;
+}
+
+.conf-handle-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 6px;
+}
+
+.conf-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.conf-header {
+  padding: 0 24px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* System UI — chrome: field labels */
+.conf-header-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+/* Courier Prime — data: the amount in card */
+.conf-amount {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.conf-drum-row {
+  display: flex;
+  margin: 4px 0;
+}
+
+.conf-drum-col {
+  flex: 1;
+  padding: 0 24px;
+}
+
+.conf-drum-col:first-child {
+  border-right: 1px solid rgba(160,120,60,0.15);
+}
+
+/* System UI — chrome: drum labels */
+.conf-drum-label {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+.conf-drum-track {
+  padding: 7px 0;
+}
+
+/* Courier Prime — data: drum values */
+.conf-drum-above,
+.conf-drum-below {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 10px;
+  opacity: 0.28;
+  letter-spacing: 0.06em;
+  text-align: center;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.conf-drum-value {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+
+.conf-fields {
+  padding: 10px 24px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.conf-field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+/* System UI — chrome: field labels */
+.conf-field-label {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+/* Courier Prime — data: field values */
+.conf-field-value {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+/* Courier Prime — data: voice quote */
+.conf-voice {
+  padding: 8px 24px 6px;
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  font-style: italic;
+}
+
+.conf-buttons {
+  display: flex;
+  gap: 10px;
+  padding: 10px 24px 0;
+}
+
+.btn {
+  flex: 1;
+  height: 44px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* System UI — chrome: buttons */
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+/* ─── Bottom nav ─────────────────────────────────────────────────────────── */
+.bottom-nav {
+  height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 32px 16px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+
+.nav-icon {
+  font-size: 20px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 300;
+  margin-top: -8px;
+}
+
+/* ─── State badge ────────────────────────────────────────────────────────── */
+.state-badge {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 3px;
+  z-index: 50;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+/* ─── Loading states ─────────────────────────────────────────────────────── */
+.loading-copy {
+  /* System UI — chrome: loading copy */
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  line-height: 1.7;
+}
+
+/* ─── Avatar reference sheet ─────────────────────────────────────────────── */
+.avatar-sheet {
+  display: flex;
+  gap: 36px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.avatar-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: #261e15;
+  border: 1px solid rgba(253,250,244,0.07);
+  border-radius: 12px;
+  padding: 24px 28px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+.avatar-state-label {
+  font-size: 9px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #b09870;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+.avatar-desc {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 9px;
+  color: #7a6a50;
+  text-align: center;
+  max-width: 100px;
+  line-height: 1.5;
+}
+
+</style>
+</head>
+<body>
+
+<h1 class="page-title">Conchi · Direction B — Round 3</h1>
+<div class="page-subtitle">Special Elite / Courier Prime / System UI · Folio Amber</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 2: Avatar Reference Sheet (placed first for visibility)
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<div class="section-label" style="margin-top:8px;">Conchita — Pixel Art Avatar States</div>
+
+<div class="avatar-sheet">
+
+  <!-- IDLE STATE -->
+  <div class="avatar-card">
+    <div class="avatar-state-label">Idle</div>
+    <!--
+      Conchita — IDLE
+      12×16 pixel grid, 4px per pixel
+      Canvas: 48×64 displayed at 96×128
+    -->
+    <svg width="96" height="128" viewBox="0 0 48 64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+      <!-- Hair top bun -->
+      <rect x="16" y="0" width="16" height="4" fill="#261e15"/>
+      <rect x="12" y="4" width="24" height="4" fill="#261e15"/>
+      <rect x="16" y="8" width="16" height="4" fill="#261e15"/>
+      <!-- Face -->
+      <rect x="12" y="12" width="24" height="4" fill="#f5ead8"/>
+      <!-- Glasses row -->
+      <rect x="8"  y="16" width="8"  height="4" fill="#c8922a"/>
+      <rect x="16" y="16" width="4"  height="4" fill="#f5ead8"/>
+      <rect x="20" y="16" width="4"  height="4" fill="#c8922a"/>
+      <rect x="24" y="16" width="4"  height="4" fill="#c8922a"/>
+      <rect x="28" y="16" width="4"  height="4" fill="#f5ead8"/>
+      <rect x="32" y="16" width="8"  height="4" fill="#c8922a"/>
+      <!-- Face mid -->
+      <rect x="12" y="20" width="24" height="4" fill="#f5ead8"/>
+      <!-- Mouth — small neutral smile -->
+      <rect x="20" y="24" width="8"  height="4" fill="#f5ead8"/>
+      <rect x="20" y="24" width="4"  height="4" fill="#a07850"/>
+      <rect x="24" y="24" width="4"  height="4" fill="#a07850"/>
+      <!-- Chin -->
+      <rect x="16" y="28" width="16" height="4" fill="#f5ead8"/>
+      <!-- Neck -->
+      <rect x="20" y="32" width="8"  height="4" fill="#f5ead8"/>
+      <!-- Bow / cravat -->
+      <rect x="12" y="36" width="24" height="4" fill="#c8922a"/>
+      <rect x="20" y="32" width="8"  height="4" fill="#c8922a"/>
+      <!-- Shoulders / jacket -->
+      <rect x="4"  y="40" width="40" height="4" fill="#261e15"/>
+      <rect x="0"  y="44" width="48" height="4" fill="#261e15"/>
+      <rect x="0"  y="48" width="48" height="4" fill="#261e15"/>
+      <!-- Jacket lapels — small skin hint -->
+      <rect x="16" y="44" width="4"  height="4" fill="#f5ead8"/>
+      <rect x="28" y="44" width="4"  height="4" fill="#f5ead8"/>
+      <!-- Body base -->
+      <rect x="4"  y="52" width="40" height="4" fill="#261e15"/>
+      <rect x="8"  y="56" width="32" height="4" fill="#261e15"/>
+      <rect x="12" y="60" width="24" height="4" fill="#261e15"/>
+    </svg>
+    <div class="avatar-desc">Waiting for input</div>
+  </div>
+
+  <!-- PROCESSING STATE -->
+  <div class="avatar-card">
+    <div class="avatar-state-label">Processing</div>
+    <!--
+      Conchita — PROCESSING
+      Same base; arms extended, neutral focused expression, slight lean
+    -->
+    <svg width="96" height="128" viewBox="0 0 48 64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+      <!-- Hair top bun (slightly offset right for lean) -->
+      <rect x="16" y="0" width="16" height="4" fill="#261e15"/>
+      <rect x="12" y="4" width="24" height="4" fill="#261e15"/>
+      <rect x="16" y="8" width="16" height="4" fill="#261e15"/>
+      <!-- Face -->
+      <rect x="12" y="12" width="24" height="4" fill="#f5ead8"/>
+      <!-- Glasses — focused, no smile below -->
+      <rect x="8"  y="16" width="8"  height="4" fill="#c8922a"/>
+      <rect x="16" y="16" width="4"  height="4" fill="#f5ead8"/>
+      <rect x="20" y="16" width="4"  height="4" fill="#c8922a"/>
+      <rect x="24" y="16" width="4"  height="4" fill="#c8922a"/>
+      <rect x="28" y="16" width="4"  height="4" fill="#f5ead8"/>
+      <rect x="32" y="16" width="8"  height="4" fill="#c8922a"/>
+      <!-- Face mid -->
+      <rect x="12" y="20" width="24" height="4" fill="#f5ead8"/>
+      <!-- Neutral/focused mouth — flat line -->
+      <rect x="20" y="24" width="8"  height="4" fill="#f5ead8"/>
+      <rect x="20" y="26" width="8"  height="2" fill="#a07850"/>
+      <!-- Chin -->
+      <rect x="16" y="28" width="16" height="4" fill="#f5ead8"/>
+      <!-- Neck -->
+      <rect x="20" y="32" width="8"  height="4" fill="#f5ead8"/>
+      <!-- Bow -->
+      <rect x="12" y="36" width="24" height="4" fill="#c8922a"/>
+      <rect x="20" y="32" width="8"  height="4" fill="#c8922a"/>
+      <!-- Arms extended (reaching forward to calculator) -->
+      <!-- Left arm -->
+      <rect x="0"  y="40" width="4"  height="4" fill="#261e15"/>
+      <!-- Right arm reaching for calc -->
+      <rect x="44" y="40" width="4"  height="4" fill="#261e15"/>
+      <!-- Shoulders / jacket -->
+      <rect x="4"  y="40" width="40" height="4" fill="#261e15"/>
+      <rect x="0"  y="44" width="48" height="4" fill="#261e15"/>
+      <rect x="0"  y="48" width="48" height="4" fill="#261e15"/>
+      <!-- Lapels -->
+      <rect x="16" y="44" width="4"  height="4" fill="#f5ead8"/>
+      <rect x="28" y="44" width="4"  height="4" fill="#f5ead8"/>
+      <!-- Calculator (small amber shape to right) -->
+      <rect x="40" y="44" width="8"  height="4" fill="#c8922a" opacity="0.85"/>
+      <rect x="40" y="48" width="8"  height="4" fill="#c8922a" opacity="0.65"/>
+      <!-- Body base -->
+      <rect x="4"  y="52" width="40" height="4" fill="#261e15"/>
+      <rect x="8"  y="56" width="32" height="4" fill="#261e15"/>
+      <rect x="12" y="60" width="24" height="4" fill="#261e15"/>
+    </svg>
+    <!-- Dots below to suggest working -->
+    <div style="display:flex;gap:5px;margin-top:-4px;">
+      <div style="width:5px;height:5px;border-radius:50%;background:#c8922a;"></div>
+      <div style="width:5px;height:5px;border-radius:50%;background:#c8922a;opacity:0.5;"></div>
+      <div style="width:5px;height:5px;border-radius:50%;background:#c8922a;opacity:0.22;"></div>
+    </div>
+    <div class="avatar-desc">Working the numbers</div>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div class="avatar-card">
+    <div class="avatar-state-label">Error</div>
+    <!--
+      Conchita — ERROR
+      Worried mouth (down), sweat drop to left, exclamation to right
+    -->
+    <svg width="96" height="128" viewBox="0 0 48 64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+      <!-- Hair top bun -->
+      <rect x="16" y="0" width="16" height="4" fill="#261e15"/>
+      <rect x="12" y="4" width="24" height="4" fill="#261e15"/>
+      <rect x="16" y="8" width="16" height="4" fill="#261e15"/>
+      <!-- Sweat drop to left of head — a warm teardrop hint -->
+      <rect x="8"  y="8"  width="4" height="4" fill="#c8b89a" opacity="0.70"/>
+      <rect x="8"  y="12" width="4" height="4" fill="#c8b89a" opacity="0.45"/>
+      <!-- Face -->
+      <rect x="12" y="12" width="24" height="4" fill="#f5ead8"/>
+      <!-- Glasses — wide worried -->
+      <rect x="8"  y="16" width="8"  height="4" fill="#c8922a"/>
+      <rect x="16" y="16" width="4"  height="4" fill="#f5ead8"/>
+      <rect x="20" y="16" width="4"  height="4" fill="#c8922a"/>
+      <rect x="24" y="16" width="4"  height="4" fill="#c8922a"/>
+      <rect x="28" y="16" width="4"  height="4" fill="#f5ead8"/>
+      <rect x="32" y="16" width="8"  height="4" fill="#c8922a"/>
+      <!-- Exclamation mark to the right -->
+      <rect x="40" y="12" width="4" height="8" fill="#c8922a"/>
+      <rect x="40" y="22" width="4" height="4" fill="#c8922a"/>
+      <!-- Face mid -->
+      <rect x="12" y="20" width="24" height="4" fill="#f5ead8"/>
+      <!-- Worried mouth — downward corners -->
+      <rect x="20" y="24" width="8"  height="4" fill="#f5ead8"/>
+      <rect x="20" y="24" width="4"  height="4" fill="#a07850"/>
+      <rect x="24" y="26" width="4"  height="2" fill="#a07850"/>
+      <!-- Chin -->
+      <rect x="16" y="28" width="16" height="4" fill="#f5ead8"/>
+      <!-- Neck -->
+      <rect x="20" y="32" width="8"  height="4" fill="#f5ead8"/>
+      <!-- Bow -->
+      <rect x="12" y="36" width="24" height="4" fill="#c8922a"/>
+      <rect x="20" y="32" width="8"  height="4" fill="#c8922a"/>
+      <!-- Shoulders / jacket -->
+      <rect x="4"  y="40" width="40" height="4" fill="#261e15"/>
+      <rect x="0"  y="44" width="48" height="4" fill="#261e15"/>
+      <rect x="0"  y="48" width="48" height="4" fill="#261e15"/>
+      <!-- Lapels -->
+      <rect x="16" y="44" width="4"  height="4" fill="#f5ead8"/>
+      <rect x="28" y="44" width="4"  height="4" fill="#f5ead8"/>
+      <!-- Body base -->
+      <rect x="4"  y="52" width="40" height="4" fill="#261e15"/>
+      <rect x="8"  y="56" width="32" height="4" fill="#261e15"/>
+      <rect x="12" y="60" width="24" height="4" fill="#261e15"/>
+    </svg>
+    <div class="avatar-desc">Something went wrong</div>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 1: Home screen + Confirmation Card overlay
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<div class="section-label" style="margin-top:16px;">Estado — Lista con confirmación activa</div>
+
+<div class="pair">
+
+  <!-- ───────────────────── DARK ───────────────────────────────────────── -->
+  <div class="mode-col">
+    <div class="mode-label">Dark</div>
+    <div class="phone">
+      <div class="screen dark">
+        <div class="state-badge">Confirmación</div>
+
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons"><span>▲▲▲</span><span>WiFi</span><span>■■</span></div>
+        </div>
+
+        <div class="app-header">
+          <!-- Idle Conchi avatar peeking from top-right -->
+          <div class="header-avatar">
+            <svg width="32" height="42" viewBox="0 0 48 64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+              <rect x="16" y="0" width="16" height="4" fill="#261e15"/>
+              <rect x="12" y="4" width="24" height="4" fill="#261e15"/>
+              <rect x="16" y="8" width="16" height="4" fill="#261e15"/>
+              <rect x="12" y="12" width="24" height="4" fill="#f5ead8"/>
+              <rect x="8"  y="16" width="8"  height="4" fill="#c8922a"/>
+              <rect x="16" y="16" width="4"  height="4" fill="#f5ead8"/>
+              <rect x="20" y="16" width="4"  height="4" fill="#c8922a"/>
+              <rect x="24" y="16" width="4"  height="4" fill="#c8922a"/>
+              <rect x="28" y="16" width="4"  height="4" fill="#f5ead8"/>
+              <rect x="32" y="16" width="8"  height="4" fill="#c8922a"/>
+              <rect x="12" y="20" width="24" height="4" fill="#f5ead8"/>
+              <rect x="20" y="24" width="8"  height="4" fill="#f5ead8"/>
+              <rect x="20" y="24" width="4"  height="4" fill="#a07850"/>
+              <rect x="24" y="24" width="4"  height="4" fill="#a07850"/>
+              <rect x="16" y="28" width="16" height="4" fill="#f5ead8"/>
+              <rect x="20" y="32" width="8"  height="4" fill="#f5ead8"/>
+              <rect x="12" y="36" width="24" height="4" fill="#c8922a"/>
+              <rect x="20" y="32" width="8"  height="4" fill="#c8922a"/>
+              <rect x="4"  y="40" width="40" height="4" fill="#261e15"/>
+              <rect x="0"  y="44" width="48" height="4" fill="#261e15"/>
+              <rect x="0"  y="48" width="48" height="4" fill="#261e15"/>
+              <rect x="16" y="44" width="4"  height="4" fill="#f5ead8"/>
+              <rect x="28" y="44" width="4"  height="4" fill="#f5ead8"/>
+              <rect x="4"  y="52" width="40" height="4" fill="#261e15"/>
+              <rect x="8"  y="56" width="32" height="4" fill="#261e15"/>
+              <rect x="12" y="60" width="24" height="4" fill="#261e15"/>
+            </svg>
+          </div>
+
+          <div class="app-name">Conchi</div>
+          <div class="header-total-amount">€224.60</div>
+          <span class="accent-underline"></span>
+          <div class="header-total-label" style="margin-top:8px;">este mes</div>
+        </div>
+
+        <div class="month-header">
+          <span class="month-name">Agosto 2026</span>
+          <span class="month-total">€224.60</span>
+        </div>
+
+        <div class="expense-list">
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Alimentación</div>
+              <div class="expense-sub">Supermercado</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€47.80</div>
+              <div class="expense-date">22 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Transporte</div>
+              <div class="expense-sub">Metro</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€12.50</div>
+              <div class="expense-date">22 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Hogar</div>
+              <div class="expense-sub">Electricidad</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€120.00</div>
+              <div class="expense-date">21 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Ocio</div>
+              <div class="expense-sub">Restaurante</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€8.90</div>
+              <div class="expense-date">20 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Alimentación</div>
+              <div class="expense-sub">Supermercado</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€35.40</div>
+              <div class="expense-date">19 ago</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-icon">⚙</div>
+          <div class="fab">+</div>
+          <div class="nav-icon">◎</div>
+        </div>
+
+        <!-- Confirmation overlay -->
+        <div class="confirmation-backdrop"></div>
+        <div class="confirmation-card">
+          <div class="conf-handle-wrap">
+            <div class="conf-handle"></div>
+          </div>
+
+          <div class="conf-header">
+            <div>
+              <div class="conf-header-label">Nuevo gasto</div>
+              <div class="conf-amount">€35.40</div>
+            </div>
+          </div>
+
+          <div class="conf-drum-row">
+            <div class="conf-drum-col">
+              <div class="conf-drum-label">Categoría</div>
+              <div class="conf-drum-track">
+                <div class="conf-drum-above">Transporte</div>
+                <div class="conf-drum-value">Alimentación</div>
+                <div class="conf-drum-below">Hogar</div>
+              </div>
+            </div>
+            <div class="conf-drum-col">
+              <div class="conf-drum-label">Subcategoría</div>
+              <div class="conf-drum-track">
+                <div class="conf-drum-above">Panadería</div>
+                <div class="conf-drum-value">Supermercado</div>
+                <div class="conf-drum-below">Mercado</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="conf-fields">
+            <div class="conf-field-row">
+              <span class="conf-field-label">Descripción</span>
+              <span class="conf-field-value">compra mercadona</span>
+            </div>
+            <div class="conf-field-row">
+              <span class="conf-field-label">Contexto</span>
+              <span class="conf-field-value" style="opacity:0.32;">—</span>
+            </div>
+          </div>
+
+          <div class="conf-voice">"Registrado. Como siempre."</div>
+
+          <div class="conf-buttons">
+            <button class="btn btn-discard">Descartar</button>
+            <button class="btn btn-accept">Aceptar</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────── LIGHT ──────────────────────────────────────── -->
+  <div class="mode-col">
+    <div class="mode-label">Light</div>
+    <div class="phone">
+      <div class="screen light">
+        <div class="state-badge">Confirmación</div>
+
+        <div class="status-bar">
+          <span class="status-time" style="color:#1a1510;">9:41</span>
+          <div class="status-icons" style="color:#1a1510;"><span>▲▲▲</span><span>WiFi</span><span>■■</span></div>
+        </div>
+
+        <div class="app-header">
+          <!-- Idle Conchi avatar (light version — same art, palette works on both) -->
+          <div class="header-avatar">
+            <svg width="32" height="42" viewBox="0 0 48 64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+              <rect x="16" y="0" width="16" height="4" fill="#261e15"/>
+              <rect x="12" y="4" width="24" height="4" fill="#261e15"/>
+              <rect x="16" y="8" width="16" height="4" fill="#261e15"/>
+              <rect x="12" y="12" width="24" height="4" fill="#f5ead8"/>
+              <rect x="8"  y="16" width="8"  height="4" fill="#b8860b"/>
+              <rect x="16" y="16" width="4"  height="4" fill="#f5ead8"/>
+              <rect x="20" y="16" width="4"  height="4" fill="#b8860b"/>
+              <rect x="24" y="16" width="4"  height="4" fill="#b8860b"/>
+              <rect x="28" y="16" width="4"  height="4" fill="#f5ead8"/>
+              <rect x="32" y="16" width="8"  height="4" fill="#b8860b"/>
+              <rect x="12" y="20" width="24" height="4" fill="#f5ead8"/>
+              <rect x="20" y="24" width="8"  height="4" fill="#f5ead8"/>
+              <rect x="20" y="24" width="4"  height="4" fill="#a07850"/>
+              <rect x="24" y="24" width="4"  height="4" fill="#a07850"/>
+              <rect x="16" y="28" width="16" height="4" fill="#f5ead8"/>
+              <rect x="20" y="32" width="8"  height="4" fill="#f5ead8"/>
+              <rect x="12" y="36" width="24" height="4" fill="#b8860b"/>
+              <rect x="20" y="32" width="8"  height="4" fill="#b8860b"/>
+              <rect x="4"  y="40" width="40" height="4" fill="#261e15"/>
+              <rect x="0"  y="44" width="48" height="4" fill="#261e15"/>
+              <rect x="0"  y="48" width="48" height="4" fill="#261e15"/>
+              <rect x="16" y="44" width="4"  height="4" fill="#f5ead8"/>
+              <rect x="28" y="44" width="4"  height="4" fill="#f5ead8"/>
+              <rect x="4"  y="52" width="40" height="4" fill="#261e15"/>
+              <rect x="8"  y="56" width="32" height="4" fill="#261e15"/>
+              <rect x="12" y="60" width="24" height="4" fill="#261e15"/>
+            </svg>
+          </div>
+
+          <div class="app-name" style="color:#1a1510;">Conchi</div>
+          <div class="header-total-amount">€224.60</div>
+          <span class="accent-underline"></span>
+          <div class="header-total-label" style="margin-top:8px;">este mes</div>
+        </div>
+
+        <div class="month-header">
+          <span class="month-name">Agosto 2026</span>
+          <span class="month-total">€224.60</span>
+        </div>
+
+        <div class="expense-list">
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Alimentación</div>
+              <div class="expense-sub">Supermercado</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€47.80</div>
+              <div class="expense-date">22 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Transporte</div>
+              <div class="expense-sub">Metro</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€12.50</div>
+              <div class="expense-date">22 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Hogar</div>
+              <div class="expense-sub">Electricidad</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€120.00</div>
+              <div class="expense-date">21 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Ocio</div>
+              <div class="expense-sub">Restaurante</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€8.90</div>
+              <div class="expense-date">20 ago</div>
+            </div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-left">
+              <div class="expense-category">Alimentación</div>
+              <div class="expense-sub">Supermercado</div>
+            </div>
+            <div class="expense-right">
+              <div class="expense-amount">€35.40</div>
+              <div class="expense-date">19 ago</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-icon">⚙</div>
+          <div class="fab">+</div>
+          <div class="nav-icon">◎</div>
+        </div>
+
+        <div class="confirmation-backdrop"></div>
+        <div class="confirmation-card">
+          <div class="conf-handle-wrap">
+            <div class="conf-handle"></div>
+          </div>
+
+          <div class="conf-header">
+            <div>
+              <div class="conf-header-label">Nuevo gasto</div>
+              <div class="conf-amount">€35.40</div>
+            </div>
+          </div>
+
+          <div class="conf-drum-row">
+            <div class="conf-drum-col">
+              <div class="conf-drum-label">Categoría</div>
+              <div class="conf-drum-track">
+                <div class="conf-drum-above">Transporte</div>
+                <div class="conf-drum-value">Alimentación</div>
+                <div class="conf-drum-below">Hogar</div>
+              </div>
+            </div>
+            <div class="conf-drum-col">
+              <div class="conf-drum-label">Subcategoría</div>
+              <div class="conf-drum-track">
+                <div class="conf-drum-above">Panadería</div>
+                <div class="conf-drum-value">Supermercado</div>
+                <div class="conf-drum-below">Mercado</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="conf-fields">
+            <div class="conf-field-row">
+              <span class="conf-field-label">Descripción</span>
+              <span class="conf-field-value">compra mercadona</span>
+            </div>
+            <div class="conf-field-row">
+              <span class="conf-field-label">Contexto</span>
+              <span class="conf-field-value" style="opacity:0.28;">—</span>
+            </div>
+          </div>
+
+          <div class="conf-voice">"Registrado. Como siempre."</div>
+
+          <div class="conf-buttons">
+            <button class="btn btn-discard">Descartar</button>
+            <button class="btn btn-accept">Aceptar</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 3: Loading states (Processing + Error)
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<div class="section-label" style="margin-top:16px;">Estado — Cargando (Conchita procesando)</div>
+
+<div class="pair">
+
+  <!-- DARK loading -->
+  <div class="mode-col">
+    <div class="mode-label">Dark</div>
+    <div class="phone-sm">
+      <div class="screen dark" style="display:flex; flex-direction:column;">
+
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons"><span>▲▲▲</span><span>■■</span></div>
+        </div>
+
+        <div class="app-header">
+          <div class="app-name">Conchi</div>
+          <div style="font-family:'Courier Prime',Courier,monospace; font-size:32px; font-weight:700; color:#fdfaf4; opacity:0.18; letter-spacing:-0.02em;">€ – – . – –</div>
+          <div class="header-total-label" style="margin-top:6px;">este mes</div>
+        </div>
+
+        <!-- Processing avatar + copy -->
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:24px; background:#18140f;">
+          <!-- Processing Conchi — larger size -->
+          <svg width="64" height="85" viewBox="0 0 48 64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+            <rect x="16" y="0" width="16" height="4" fill="#261e15"/>
+            <rect x="12" y="4" width="24" height="4" fill="#261e15"/>
+            <rect x="16" y="8" width="16" height="4" fill="#261e15"/>
+            <rect x="12" y="12" width="24" height="4" fill="#f5ead8"/>
+            <rect x="8"  y="16" width="8"  height="4" fill="#c8922a"/>
+            <rect x="16" y="16" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="20" y="16" width="4"  height="4" fill="#c8922a"/>
+            <rect x="24" y="16" width="4"  height="4" fill="#c8922a"/>
+            <rect x="28" y="16" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="32" y="16" width="8"  height="4" fill="#c8922a"/>
+            <rect x="12" y="20" width="24" height="4" fill="#f5ead8"/>
+            <rect x="20" y="24" width="8"  height="4" fill="#f5ead8"/>
+            <rect x="20" y="26" width="8"  height="2" fill="#a07850"/>
+            <rect x="16" y="28" width="16" height="4" fill="#f5ead8"/>
+            <rect x="20" y="32" width="8"  height="4" fill="#f5ead8"/>
+            <rect x="12" y="36" width="24" height="4" fill="#c8922a"/>
+            <rect x="20" y="32" width="8"  height="4" fill="#c8922a"/>
+            <rect x="0"  y="40" width="4"  height="4" fill="#261e15"/>
+            <rect x="44" y="40" width="4"  height="4" fill="#261e15"/>
+            <rect x="4"  y="40" width="40" height="4" fill="#261e15"/>
+            <rect x="0"  y="44" width="48" height="4" fill="#261e15"/>
+            <rect x="0"  y="48" width="48" height="4" fill="#261e15"/>
+            <rect x="16" y="44" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="28" y="44" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="40" y="44" width="8"  height="4" fill="#c8922a" opacity="0.85"/>
+            <rect x="40" y="48" width="8"  height="4" fill="#c8922a" opacity="0.65"/>
+            <rect x="4"  y="52" width="40" height="4" fill="#261e15"/>
+            <rect x="8"  y="56" width="32" height="4" fill="#261e15"/>
+            <rect x="12" y="60" width="24" height="4" fill="#261e15"/>
+          </svg>
+
+          <div class="loading-copy" style="color:#b09870;">
+            "Un momento.<br>Los números no mienten."
+          </div>
+          <div style="display:flex; gap:6px; margin-top:4px;">
+            <div style="width:5px;height:5px;border-radius:50%;background:#c8922a;"></div>
+            <div style="width:5px;height:5px;border-radius:50%;background:#c8922a;opacity:0.5;"></div>
+            <div style="width:5px;height:5px;border-radius:50%;background:#c8922a;opacity:0.22;"></div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-icon">⚙</div>
+          <div class="fab">+</div>
+          <div class="nav-icon">◎</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHT loading -->
+  <div class="mode-col">
+    <div class="mode-label">Light</div>
+    <div class="phone-sm">
+      <div class="screen light" style="display:flex; flex-direction:column;">
+
+        <div class="status-bar">
+          <span class="status-time" style="color:#1a1510;">9:41</span>
+          <div class="status-icons" style="color:#1a1510;"><span>▲▲▲</span><span>■■</span></div>
+        </div>
+
+        <div class="app-header">
+          <div class="app-name" style="color:#1a1510;">Conchi</div>
+          <div style="font-family:'Courier Prime',Courier,monospace; font-size:32px; font-weight:700; color:#1a1510; opacity:0.14; letter-spacing:-0.02em;">€ – – . – –</div>
+          <div class="header-total-label" style="margin-top:6px;">este mes</div>
+        </div>
+
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:24px; background:#faf6ee;">
+          <!-- Processing Conchi (light — amber shifted to darker tone for contrast) -->
+          <svg width="64" height="85" viewBox="0 0 48 64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+            <rect x="16" y="0" width="16" height="4" fill="#261e15"/>
+            <rect x="12" y="4" width="24" height="4" fill="#261e15"/>
+            <rect x="16" y="8" width="16" height="4" fill="#261e15"/>
+            <rect x="12" y="12" width="24" height="4" fill="#f5ead8"/>
+            <rect x="8"  y="16" width="8"  height="4" fill="#b8860b"/>
+            <rect x="16" y="16" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="20" y="16" width="4"  height="4" fill="#b8860b"/>
+            <rect x="24" y="16" width="4"  height="4" fill="#b8860b"/>
+            <rect x="28" y="16" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="32" y="16" width="8"  height="4" fill="#b8860b"/>
+            <rect x="12" y="20" width="24" height="4" fill="#f5ead8"/>
+            <rect x="20" y="24" width="8"  height="4" fill="#f5ead8"/>
+            <rect x="20" y="26" width="8"  height="2" fill="#a07850"/>
+            <rect x="16" y="28" width="16" height="4" fill="#f5ead8"/>
+            <rect x="20" y="32" width="8"  height="4" fill="#f5ead8"/>
+            <rect x="12" y="36" width="24" height="4" fill="#b8860b"/>
+            <rect x="20" y="32" width="8"  height="4" fill="#b8860b"/>
+            <rect x="0"  y="40" width="4"  height="4" fill="#261e15"/>
+            <rect x="44" y="40" width="4"  height="4" fill="#261e15"/>
+            <rect x="4"  y="40" width="40" height="4" fill="#261e15"/>
+            <rect x="0"  y="44" width="48" height="4" fill="#261e15"/>
+            <rect x="0"  y="48" width="48" height="4" fill="#261e15"/>
+            <rect x="16" y="44" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="28" y="44" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="40" y="44" width="8"  height="4" fill="#b8860b" opacity="0.85"/>
+            <rect x="40" y="48" width="8"  height="4" fill="#b8860b" opacity="0.65"/>
+            <rect x="4"  y="52" width="40" height="4" fill="#261e15"/>
+            <rect x="8"  y="56" width="32" height="4" fill="#261e15"/>
+            <rect x="12" y="60" width="24" height="4" fill="#261e15"/>
+          </svg>
+
+          <div class="loading-copy" style="color:#7a6a50;">
+            "Un momento.<br>Los números no mienten."
+          </div>
+          <div style="display:flex; gap:6px; margin-top:4px;">
+            <div style="width:5px;height:5px;border-radius:50%;background:#b8860b;"></div>
+            <div style="width:5px;height:5px;border-radius:50%;background:#b8860b;opacity:0.5;"></div>
+            <div style="width:5px;height:5px;border-radius:50%;background:#b8860b;opacity:0.22;"></div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-icon">⚙</div>
+          <div class="fab">+</div>
+          <div class="nav-icon">◎</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── Error state section ───────────────────────────────────────────────── -->
+<div class="section-label" style="margin-top:16px;">Estado — Error (Conchita preocupada)</div>
+
+<div class="pair">
+
+  <!-- DARK error -->
+  <div class="mode-col">
+    <div class="mode-label">Dark</div>
+    <div class="phone-sm">
+      <div class="screen dark" style="display:flex; flex-direction:column;">
+
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons"><span>▲▲▲</span><span>■■</span></div>
+        </div>
+
+        <div class="app-header">
+          <div class="app-name">Conchi</div>
+          <div style="font-family:'Courier Prime',Courier,monospace; font-size:32px; font-weight:700; color:#fdfaf4; opacity:0.18; letter-spacing:-0.02em;">€ – – . – –</div>
+          <div class="header-total-label" style="margin-top:6px;">este mes</div>
+        </div>
+
+        <!-- Error avatar + copy -->
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:24px; background:#18140f;">
+          <!-- Error Conchi -->
+          <svg width="64" height="85" viewBox="0 0 48 64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+            <rect x="16" y="0" width="16" height="4" fill="#261e15"/>
+            <rect x="12" y="4" width="24" height="4" fill="#261e15"/>
+            <rect x="16" y="8" width="16" height="4" fill="#261e15"/>
+            <rect x="8"  y="8"  width="4" height="4" fill="#c8b89a" opacity="0.70"/>
+            <rect x="8"  y="12" width="4" height="4" fill="#c8b89a" opacity="0.45"/>
+            <rect x="12" y="12" width="24" height="4" fill="#f5ead8"/>
+            <rect x="8"  y="16" width="8"  height="4" fill="#c8922a"/>
+            <rect x="16" y="16" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="20" y="16" width="4"  height="4" fill="#c8922a"/>
+            <rect x="24" y="16" width="4"  height="4" fill="#c8922a"/>
+            <rect x="28" y="16" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="32" y="16" width="8"  height="4" fill="#c8922a"/>
+            <rect x="40" y="12" width="4" height="8" fill="#c8922a"/>
+            <rect x="40" y="22" width="4" height="4" fill="#c8922a"/>
+            <rect x="12" y="20" width="24" height="4" fill="#f5ead8"/>
+            <rect x="20" y="24" width="8"  height="4" fill="#f5ead8"/>
+            <rect x="20" y="24" width="4"  height="4" fill="#a07850"/>
+            <rect x="24" y="26" width="4"  height="2" fill="#a07850"/>
+            <rect x="16" y="28" width="16" height="4" fill="#f5ead8"/>
+            <rect x="20" y="32" width="8"  height="4" fill="#f5ead8"/>
+            <rect x="12" y="36" width="24" height="4" fill="#c8922a"/>
+            <rect x="20" y="32" width="8"  height="4" fill="#c8922a"/>
+            <rect x="4"  y="40" width="40" height="4" fill="#261e15"/>
+            <rect x="0"  y="44" width="48" height="4" fill="#261e15"/>
+            <rect x="0"  y="48" width="48" height="4" fill="#261e15"/>
+            <rect x="16" y="44" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="28" y="44" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="4"  y="52" width="40" height="4" fill="#261e15"/>
+            <rect x="8"  y="56" width="32" height="4" fill="#261e15"/>
+            <rect x="12" y="60" width="24" height="4" fill="#261e15"/>
+          </svg>
+
+          <div class="loading-copy" style="color:#b09870;">
+            "Algo no encaja.<br>Inténtalo de nuevo."
+          </div>
+          <div style="margin-top:4px;">
+            <div style="padding:4px 12px; border-radius:4px; background:rgba(200,146,42,0.14); border:1px solid rgba(200,146,42,0.28);">
+              <span style="font-family:-apple-system,BlinkMacSystemFont,'Roboto',sans-serif; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700; color:#c8922a;">Reintentar</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-icon">⚙</div>
+          <div class="fab">+</div>
+          <div class="nav-icon">◎</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHT error -->
+  <div class="mode-col">
+    <div class="mode-label">Light</div>
+    <div class="phone-sm">
+      <div class="screen light" style="display:flex; flex-direction:column;">
+
+        <div class="status-bar">
+          <span class="status-time" style="color:#1a1510;">9:41</span>
+          <div class="status-icons" style="color:#1a1510;"><span>▲▲▲</span><span>■■</span></div>
+        </div>
+
+        <div class="app-header">
+          <div class="app-name" style="color:#1a1510;">Conchi</div>
+          <div style="font-family:'Courier Prime',Courier,monospace; font-size:32px; font-weight:700; color:#1a1510; opacity:0.14; letter-spacing:-0.02em;">€ – – . – –</div>
+          <div class="header-total-label" style="margin-top:6px;">este mes</div>
+        </div>
+
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:24px; background:#faf6ee;">
+          <!-- Error Conchi light -->
+          <svg width="64" height="85" viewBox="0 0 48 64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+            <rect x="16" y="0" width="16" height="4" fill="#261e15"/>
+            <rect x="12" y="4" width="24" height="4" fill="#261e15"/>
+            <rect x="16" y="8" width="16" height="4" fill="#261e15"/>
+            <rect x="8"  y="8"  width="4" height="4" fill="#c8b89a" opacity="0.70"/>
+            <rect x="8"  y="12" width="4" height="4" fill="#c8b89a" opacity="0.45"/>
+            <rect x="12" y="12" width="24" height="4" fill="#f5ead8"/>
+            <rect x="8"  y="16" width="8"  height="4" fill="#b8860b"/>
+            <rect x="16" y="16" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="20" y="16" width="4"  height="4" fill="#b8860b"/>
+            <rect x="24" y="16" width="4"  height="4" fill="#b8860b"/>
+            <rect x="28" y="16" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="32" y="16" width="8"  height="4" fill="#b8860b"/>
+            <rect x="40" y="12" width="4" height="8" fill="#b8860b"/>
+            <rect x="40" y="22" width="4" height="4" fill="#b8860b"/>
+            <rect x="12" y="20" width="24" height="4" fill="#f5ead8"/>
+            <rect x="20" y="24" width="8"  height="4" fill="#f5ead8"/>
+            <rect x="20" y="24" width="4"  height="4" fill="#a07850"/>
+            <rect x="24" y="26" width="4"  height="2" fill="#a07850"/>
+            <rect x="16" y="28" width="16" height="4" fill="#f5ead8"/>
+            <rect x="20" y="32" width="8"  height="4" fill="#f5ead8"/>
+            <rect x="12" y="36" width="24" height="4" fill="#b8860b"/>
+            <rect x="20" y="32" width="8"  height="4" fill="#b8860b"/>
+            <rect x="4"  y="40" width="40" height="4" fill="#261e15"/>
+            <rect x="0"  y="44" width="48" height="4" fill="#261e15"/>
+            <rect x="0"  y="48" width="48" height="4" fill="#261e15"/>
+            <rect x="16" y="44" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="28" y="44" width="4"  height="4" fill="#f5ead8"/>
+            <rect x="4"  y="52" width="40" height="4" fill="#261e15"/>
+            <rect x="8"  y="56" width="32" height="4" fill="#261e15"/>
+            <rect x="12" y="60" width="24" height="4" fill="#261e15"/>
+          </svg>
+
+          <div class="loading-copy" style="color:#7a6a50;">
+            "Algo no encaja.<br>Inténtalo de nuevo."
+          </div>
+          <div style="margin-top:4px;">
+            <div style="padding:4px 12px; border-radius:4px; background:rgba(184,134,11,0.10); border:1px solid rgba(184,134,11,0.30);">
+              <span style="font-family:-apple-system,BlinkMacSystemFont,'Roboto',sans-serif; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700; color:#b8860b;">Reintentar</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-icon">⚙</div>
+          <div class="fab">+</div>
+          <div class="nav-icon">◎</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

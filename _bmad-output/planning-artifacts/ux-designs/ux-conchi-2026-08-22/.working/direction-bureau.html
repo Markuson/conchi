@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction 3 — Bureau</title>
+<style>
+  /*
+   * DIRECTION 3 — BUREAU
+   * Light and dark variants shown side by side.
+   * Modern minimalist, institutional backbone.
+   * Sharp edges (no rounded corners).
+   * Monospace for data (numbers, categories); system sans-serif for UI chrome.
+   *
+   * LIGHT PALETTE:
+   *   Background:      #F2F1EF   warm off-white
+   *   Surface:         #ECEAE6   card surface
+   *   Surface 2:       #E4E2DC   nav / header alt
+   *   Border:          #D4D0C8   default rule
+   *   Border strong:   #A8A49C   strong separator
+   *   Text primary:    #1C1B18   near-black
+   *   Text secondary:  #6B6760   medium grey
+   *   Text muted:      #A8A49C   light grey
+   *   Accent slate:    #4A5568   institutional slate-blue (muted)
+   *   Accent light:    #E8ECF2   accent bg tint
+   *   High amount:     #5A3A2A   warm dark for emphasis
+   *
+   * DARK PALETTE:
+   *   Background:      #1A1918   near-black warm
+   *   Surface:         #222120   elevated surface
+   *   Surface 2:       #2A2927   nav / header alt
+   *   Border:          #343230   default rule
+   *   Border strong:   #4A4846   strong separator
+   *   Text primary:    #E8E6E2   warm white
+   *   Text secondary:  #908C88   medium warm grey
+   *   Text muted:      #5A5754   light grey
+   *   Accent slate:    #7A92B0   lighter slate (legible on dark)
+   *   High amount:     #C8A882   warm amber for emphasis
+   *
+   * Data typography:  "Courier New", Courier, monospace
+   * UI typography:    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif
+   */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1A1918;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    padding: 60px 40px;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .label-direction {
+    color: #5A5754;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-align: center;
+    font-family: "Courier New", Courier, monospace;
+  }
+
+  /* Two phones side by side */
+  .phones-row {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+  }
+
+  .phone-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .phone-mode-label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .phone-mode-label.light { color: #908C88; }
+  .phone-mode-label.dark  { color: #5A5754; }
+
+  /* Phone frame */
+  .phone {
+    width: 390px;
+    min-height: 844px;
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone.light {
+    background: #F2F1EF;
+    border-color: #D4D0C8;
+  }
+  .phone.dark {
+    background: #1A1918;
+    border-color: #343230;
+  }
+
+  /* ========================
+     LIGHT VARIANT STYLES
+     ======================== */
+
+  .phone.light .status-bar {
+    background: #F2F1EF;
+    padding: 14px 24px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #D4D0C8;
+  }
+  .phone.light .sb-time {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1C1B18;
+  }
+  .phone.light .sb-icons {
+    font-size: 11px;
+    color: #6B6760;
+    font-family: "Courier New", Courier, monospace;
+  }
+
+  .phone.light .header {
+    background: #F2F1EF;
+    padding: 20px 24px 18px;
+    border-bottom: 1px solid #A8A49C;
+  }
+  .phone.light .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .phone.light .app-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1C1B18;
+    letter-spacing: -0.01em;
+  }
+  .phone.light .conchita-tag {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #A8A49C;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .phone.light .period {
+    font-size: 12px;
+    color: #6B6760;
+    margin-bottom: 8px;
+  }
+  .phone.light .total-amount {
+    font-size: 32px;
+    font-weight: 300;
+    color: #1C1B18;
+    letter-spacing: -0.03em;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .phone.light .total-amount .currency {
+    font-size: 18px;
+    color: #6B6760;
+  }
+
+  .phone.light .section-label {
+    background: #ECEAE6;
+    padding: 6px 24px;
+    border-bottom: 1px solid #D4D0C8;
+    display: flex;
+    justify-content: space-between;
+  }
+  .phone.light .sec-lbl-text {
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #A8A49C;
+    font-family: "Courier New", Courier, monospace;
+  }
+
+  .phone.light .expense-list {
+    flex: 1;
+    background: #F2F1EF;
+    overflow-y: auto;
+  }
+  .phone.light .expense-row {
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 56px;
+    border-bottom: 1px solid #D4D0C8;
+    gap: 16px;
+  }
+  .phone.light .row-date {
+    font-size: 10px;
+    color: #A8A49C;
+    font-family: "Courier New", Courier, monospace;
+    width: 42px;
+    flex-shrink: 0;
+  }
+  .phone.light .row-category {
+    flex: 1;
+    min-width: 0;
+  }
+  .phone.light .row-cat-main {
+    font-size: 13px;
+    color: #1C1B18;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .phone.light .row-cat-sub {
+    font-size: 10px;
+    color: #A8A49C;
+    font-family: "Courier New", Courier, monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .phone.light .row-amount {
+    font-size: 14px;
+    color: #1C1B18;
+    font-family: "Courier New", Courier, monospace;
+    text-align: right;
+    flex-shrink: 0;
+    width: 68px;
+    font-weight: 400;
+  }
+  .phone.light .row-amount.high {
+    color: #5A3A2A;
+  }
+
+  .phone.light .subtotal-bar {
+    background: #E4E2DC;
+    padding: 10px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #A8A49C;
+  }
+  .phone.light .subtotal-label {
+    font-size: 10px;
+    color: #6B6760;
+    font-family: "Courier New", Courier, monospace;
+    letter-spacing: 0.04em;
+  }
+  .phone.light .subtotal-value {
+    font-size: 14px;
+    color: #1C1B18;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 400;
+  }
+
+  .phone.light .bottom-nav {
+    background: #F2F1EF;
+    border-top: 1px solid #D4D0C8;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    flex-shrink: 0;
+  }
+  .phone.light .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .phone.light .nav-icon {
+    font-size: 15px;
+    color: #A8A49C;
+  }
+  .phone.light .nav-label {
+    font-size: 9px;
+    color: #A8A49C;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .phone.light .fab {
+    width: 52px;
+    height: 52px;
+    background: #4A5568;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .phone.light .fab-plus {
+    font-size: 22px;
+    color: #F2F1EF;
+    line-height: 1;
+  }
+
+  /* Light card overlay */
+  .phone.light .overlay-scrim {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    bottom: 80px;
+    background: rgba(28,27,24,0.35);
+    z-index: 9;
+  }
+  .phone.light .card-overlay {
+    position: absolute;
+    bottom: 80px;
+    left: 0; right: 0;
+    background: #F2F1EF;
+    border-top: 1px solid #A8A49C;
+    padding: 20px 24px 24px;
+    z-index: 10;
+  }
+  .phone.light .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #D4D0C8;
+  }
+  .phone.light .card-label {
+    font-size: 10px;
+    color: #A8A49C;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-family: "Courier New", Courier, monospace;
+    margin-bottom: 2px;
+  }
+  .phone.light .card-title {
+    font-size: 13px;
+    color: #1C1B18;
+    font-weight: 600;
+  }
+  .phone.light .card-amount {
+    font-size: 24px;
+    color: #1C1B18;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 400;
+  }
+  .phone.light .card-field {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #D4D0C8;
+    gap: 16px;
+  }
+  .phone.light .field-label {
+    font-size: 10px;
+    color: #A8A49C;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    width: 90px;
+    flex-shrink: 0;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .phone.light .field-value {
+    font-size: 13px;
+    color: #1C1B18;
+    flex: 1;
+  }
+  .phone.light .drum-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+  }
+  .phone.light .drum-arrow {
+    font-size: 8px;
+    color: #D4D0C8;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .phone.light .drum-val {
+    font-size: 13px;
+    color: #4A5568;
+    font-family: "Courier New", Courier, monospace;
+    padding: 2px 0;
+  }
+  .phone.light .quip-row {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #D4D0C8;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .phone.light .quip-attr {
+    font-size: 9px;
+    color: #4A5568;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-family: "Courier New", Courier, monospace;
+    flex-shrink: 0;
+  }
+  .phone.light .quip-text {
+    font-size: 12px;
+    color: #6B6760;
+    font-style: italic;
+  }
+  .phone.light .confirm-btn {
+    margin-top: 14px;
+    width: 100%;
+    height: 42px;
+    background: #1C1B18;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .phone.light .confirm-btn-text {
+    font-size: 10px;
+    color: #F2F1EF;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-family: "Courier New", Courier, monospace;
+  }
+
+  /* ========================
+     DARK VARIANT STYLES
+     ======================== */
+
+  .phone.dark .status-bar {
+    background: #1A1918;
+    padding: 14px 24px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #343230;
+  }
+  .phone.dark .sb-time {
+    font-size: 13px;
+    font-weight: 600;
+    color: #E8E6E2;
+  }
+  .phone.dark .sb-icons {
+    font-size: 11px;
+    color: #908C88;
+    font-family: "Courier New", Courier, monospace;
+  }
+
+  .phone.dark .header {
+    background: #1A1918;
+    padding: 20px 24px 18px;
+    border-bottom: 1px solid #4A4846;
+  }
+  .phone.dark .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .phone.dark .app-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #E8E6E2;
+    letter-spacing: -0.01em;
+  }
+  .phone.dark .conchita-tag {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #5A5754;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .phone.dark .period {
+    font-size: 12px;
+    color: #908C88;
+    margin-bottom: 8px;
+  }
+  .phone.dark .total-amount {
+    font-size: 32px;
+    font-weight: 300;
+    color: #E8E6E2;
+    letter-spacing: -0.03em;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .phone.dark .total-amount .currency {
+    font-size: 18px;
+    color: #908C88;
+  }
+
+  .phone.dark .section-label {
+    background: #222120;
+    padding: 6px 24px;
+    border-bottom: 1px solid #343230;
+    display: flex;
+    justify-content: space-between;
+  }
+  .phone.dark .sec-lbl-text {
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #5A5754;
+    font-family: "Courier New", Courier, monospace;
+  }
+
+  .phone.dark .expense-list {
+    flex: 1;
+    background: #1A1918;
+    overflow-y: auto;
+  }
+  .phone.dark .expense-row {
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 56px;
+    border-bottom: 1px solid #2A2927;
+    gap: 16px;
+  }
+  .phone.dark .row-date {
+    font-size: 10px;
+    color: #5A5754;
+    font-family: "Courier New", Courier, monospace;
+    width: 42px;
+    flex-shrink: 0;
+  }
+  .phone.dark .row-category {
+    flex: 1;
+    min-width: 0;
+  }
+  .phone.dark .row-cat-main {
+    font-size: 13px;
+    color: #E8E6E2;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .phone.dark .row-cat-sub {
+    font-size: 10px;
+    color: #5A5754;
+    font-family: "Courier New", Courier, monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .phone.dark .row-amount {
+    font-size: 14px;
+    color: #E8E6E2;
+    font-family: "Courier New", Courier, monospace;
+    text-align: right;
+    flex-shrink: 0;
+    width: 68px;
+  }
+  .phone.dark .row-amount.high {
+    color: #C8A882;
+  }
+
+  .phone.dark .subtotal-bar {
+    background: #222120;
+    padding: 10px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #4A4846;
+  }
+  .phone.dark .subtotal-label {
+    font-size: 10px;
+    color: #908C88;
+    font-family: "Courier New", Courier, monospace;
+    letter-spacing: 0.04em;
+  }
+  .phone.dark .subtotal-value {
+    font-size: 14px;
+    color: #E8E6E2;
+    font-family: "Courier New", Courier, monospace;
+  }
+
+  .phone.dark .bottom-nav {
+    background: #1A1918;
+    border-top: 1px solid #343230;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    flex-shrink: 0;
+  }
+  .phone.dark .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .phone.dark .nav-icon {
+    font-size: 15px;
+    color: #5A5754;
+  }
+  .phone.dark .nav-label {
+    font-size: 9px;
+    color: #5A5754;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .phone.dark .fab {
+    width: 52px;
+    height: 52px;
+    background: #7A92B0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .phone.dark .fab-plus {
+    font-size: 22px;
+    color: #1A1918;
+    line-height: 1;
+    font-weight: bold;
+  }
+
+  /* Dark card overlay */
+  .phone.dark .overlay-scrim {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    bottom: 80px;
+    background: rgba(0,0,0,0.6);
+    z-index: 9;
+  }
+  .phone.dark .card-overlay {
+    position: absolute;
+    bottom: 80px;
+    left: 0; right: 0;
+    background: #222120;
+    border-top: 1px solid #4A4846;
+    padding: 20px 24px 24px;
+    z-index: 10;
+  }
+  .phone.dark .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #343230;
+  }
+  .phone.dark .card-label {
+    font-size: 10px;
+    color: #5A5754;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-family: "Courier New", Courier, monospace;
+    margin-bottom: 2px;
+  }
+  .phone.dark .card-title {
+    font-size: 13px;
+    color: #E8E6E2;
+    font-weight: 600;
+  }
+  .phone.dark .card-amount {
+    font-size: 24px;
+    color: #E8E6E2;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .phone.dark .card-field {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #343230;
+    gap: 16px;
+  }
+  .phone.dark .field-label {
+    font-size: 10px;
+    color: #5A5754;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    width: 90px;
+    flex-shrink: 0;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .phone.dark .field-value {
+    font-size: 13px;
+    color: #E8E6E2;
+    flex: 1;
+  }
+  .phone.dark .drum-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+  }
+  .phone.dark .drum-arrow {
+    font-size: 8px;
+    color: #4A4846;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .phone.dark .drum-val {
+    font-size: 13px;
+    color: #7A92B0;
+    font-family: "Courier New", Courier, monospace;
+    padding: 2px 0;
+  }
+  .phone.dark .quip-row {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #343230;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .phone.dark .quip-attr {
+    font-size: 9px;
+    color: #7A92B0;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-family: "Courier New", Courier, monospace;
+    flex-shrink: 0;
+  }
+  .phone.dark .quip-text {
+    font-size: 12px;
+    color: #908C88;
+    font-style: italic;
+  }
+  .phone.dark .confirm-btn {
+    margin-top: 14px;
+    width: 100%;
+    height: 42px;
+    background: #E8E6E2;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .phone.dark .confirm-btn-text {
+    font-size: 10px;
+    color: #1A1918;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-family: "Courier New", Courier, monospace;
+  }
+
+  /* Secondary screens */
+  .secondary-row {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+  }
+
+  /* Empty state */
+  .empty-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px;
+    gap: 20px;
+  }
+
+  /* Light empty */
+  .phone.light .empty-row-blank {
+    height: 56px;
+    border-bottom: 1px solid #D4D0C8;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+  }
+  .phone.light .blank-date-bar {
+    width: 36px;
+    height: 1px;
+    background: #D4D0C8;
+  }
+  .phone.light .blank-cat-bar {
+    flex: 1;
+    height: 1px;
+    background: #D4D0C8;
+  }
+  .phone.light .blank-amt-bar {
+    width: 48px;
+    height: 1px;
+    background: #D4D0C8;
+  }
+  .phone.light .empty-message {
+    text-align: center;
+    padding: 0 16px;
+  }
+  .phone.light .empty-conchita-lbl {
+    font-size: 9px;
+    color: #4A5568;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-family: "Courier New", Courier, monospace;
+    margin-bottom: 10px;
+  }
+  .phone.light .empty-copy {
+    font-size: 15px;
+    color: #1C1B18;
+    font-weight: 400;
+    line-height: 1.5;
+    font-style: italic;
+  }
+  .phone.light .empty-sub {
+    font-size: 11px;
+    color: #A8A49C;
+    margin-top: 8px;
+    font-family: "Courier New", Courier, monospace;
+    letter-spacing: 0.04em;
+  }
+
+  /* Dark empty */
+  .phone.dark .empty-row-blank {
+    height: 56px;
+    border-bottom: 1px solid #2A2927;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+  }
+  .phone.dark .blank-date-bar {
+    width: 36px;
+    height: 1px;
+    background: #2A2927;
+  }
+  .phone.dark .blank-cat-bar {
+    flex: 1;
+    height: 1px;
+    background: #2A2927;
+  }
+  .phone.dark .blank-amt-bar {
+    width: 48px;
+    height: 1px;
+    background: #2A2927;
+  }
+  .phone.dark .empty-message {
+    text-align: center;
+    padding: 0 16px;
+  }
+  .phone.dark .empty-conchita-lbl {
+    font-size: 9px;
+    color: #7A92B0;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-family: "Courier New", Courier, monospace;
+    margin-bottom: 10px;
+  }
+  .phone.dark .empty-copy {
+    font-size: 15px;
+    color: #E8E6E2;
+    font-weight: 300;
+    line-height: 1.5;
+    font-style: italic;
+  }
+  .phone.dark .empty-sub {
+    font-size: 11px;
+    color: #5A5754;
+    margin-top: 8px;
+    font-family: "Courier New", Courier, monospace;
+    letter-spacing: 0.04em;
+  }
+
+  .section-title {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #5A5754;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="label-direction">Direction 3 — Bureau · Light + Dark · Primary: Home + Confirmation Card</div>
+
+<!-- PRIMARY — SIDE BY SIDE -->
+<div class="phones-row">
+
+  <!-- LIGHT PRIMARY -->
+  <div class="phone-col">
+    <span class="phone-mode-label light">Light</span>
+    <div class="phone light" style="position:relative;">
+
+      <div class="status-bar">
+        <span class="sb-time">09:41</span>
+        <span class="sb-icons">▌▌▌  ▐▐  100%</span>
+      </div>
+
+      <div class="header">
+        <div class="header-top">
+          <span class="app-name">Conchi</span>
+          <span class="conchita-tag">Conchita</span>
+        </div>
+        <div class="period">Agosto 2026</div>
+        <div class="total-amount"><span class="currency">€</span>224.60</div>
+      </div>
+
+      <div class="section-label">
+        <span class="sec-lbl-text">Fecha</span>
+        <span class="sec-lbl-text">Categoría</span>
+        <span class="sec-lbl-text">Importe</span>
+      </div>
+
+      <div class="expense-list">
+        <div class="expense-row">
+          <span class="row-date">22 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Alimentación</div>
+            <div class="row-cat-sub">Supermercado</div>
+          </div>
+          <span class="row-amount">€47.80</span>
+        </div>
+        <div class="expense-row">
+          <span class="row-date">22 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Transporte</div>
+            <div class="row-cat-sub">Metro</div>
+          </div>
+          <span class="row-amount">€12.50</span>
+        </div>
+        <div class="expense-row">
+          <span class="row-date">21 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Hogar</div>
+            <div class="row-cat-sub">Electricidad</div>
+          </div>
+          <span class="row-amount high">€120.00</span>
+        </div>
+        <div class="expense-row">
+          <span class="row-date">20 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Ocio</div>
+            <div class="row-cat-sub">Restaurante</div>
+          </div>
+          <span class="row-amount">€8.90</span>
+        </div>
+        <div class="expense-row">
+          <span class="row-date">19 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Alimentación</div>
+            <div class="row-cat-sub">Supermercado</div>
+          </div>
+          <span class="row-amount">€35.40</span>
+        </div>
+        <div class="expense-row" style="opacity:0.35;">
+          <span class="row-date">17 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Transporte</div>
+            <div class="row-cat-sub">Metro</div>
+          </div>
+          <span class="row-amount">€12.50</span>
+        </div>
+        <div class="expense-row" style="opacity:0.15;">
+          <span class="row-date">15 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Hogar</div>
+            <div class="row-cat-sub">Internet</div>
+          </div>
+          <span class="row-amount">€29.00</span>
+        </div>
+      </div>
+
+      <div class="subtotal-bar">
+        <span class="subtotal-label">Agosto 2026</span>
+        <span class="subtotal-value">€224.60</span>
+      </div>
+
+      <!-- Scrim -->
+      <div class="overlay-scrim"></div>
+
+      <!-- Confirmation card -->
+      <div class="card-overlay">
+        <div class="card-header">
+          <div>
+            <div class="card-label">Confirmar registro</div>
+            <div class="card-title">Nuevo gasto</div>
+          </div>
+          <span class="card-amount">€35.40</span>
+        </div>
+
+        <div class="card-field">
+          <span class="field-label">Categoría</span>
+          <div class="drum-wrap">
+            <span class="drum-arrow">▲</span>
+            <span class="drum-val">Alimentación</span>
+            <span class="drum-arrow">▼</span>
+          </div>
+        </div>
+
+        <div class="card-field">
+          <span class="field-label">Subcategoría</span>
+          <div class="drum-wrap">
+            <span class="drum-arrow">▲</span>
+            <span class="drum-val">Supermercado</span>
+            <span class="drum-arrow">▼</span>
+          </div>
+        </div>
+
+        <div class="card-field">
+          <span class="field-label">Descripción</span>
+          <span class="field-value">compra mercadona</span>
+        </div>
+
+        <div class="card-field" style="border-bottom:none;">
+          <span class="field-label">Contexto</span>
+          <span class="field-value" style="color:#A8A49C;">—</span>
+        </div>
+
+        <div class="quip-row">
+          <span class="quip-attr">Conchita</span>
+          <span class="quip-text">"Registrado. Como siempre."</span>
+        </div>
+
+        <div class="confirm-btn">
+          <span class="confirm-btn-text">Confirmar</span>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <span class="nav-icon">⚙</span>
+          <span class="nav-label">Ajustes</span>
+        </div>
+        <div class="fab">
+          <span class="fab-plus">+</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon">▦</span>
+          <span class="nav-label">Análisis</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DARK PRIMARY -->
+  <div class="phone-col">
+    <span class="phone-mode-label dark">Dark</span>
+    <div class="phone dark" style="position:relative;">
+
+      <div class="status-bar">
+        <span class="sb-time">09:41</span>
+        <span class="sb-icons">▌▌▌  ▐▐  100%</span>
+      </div>
+
+      <div class="header">
+        <div class="header-top">
+          <span class="app-name">Conchi</span>
+          <span class="conchita-tag">Conchita</span>
+        </div>
+        <div class="period">Agosto 2026</div>
+        <div class="total-amount"><span class="currency">€</span>224.60</div>
+      </div>
+
+      <div class="section-label">
+        <span class="sec-lbl-text">Fecha</span>
+        <span class="sec-lbl-text">Categoría</span>
+        <span class="sec-lbl-text">Importe</span>
+      </div>
+
+      <div class="expense-list">
+        <div class="expense-row">
+          <span class="row-date">22 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Alimentación</div>
+            <div class="row-cat-sub">Supermercado</div>
+          </div>
+          <span class="row-amount">€47.80</span>
+        </div>
+        <div class="expense-row">
+          <span class="row-date">22 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Transporte</div>
+            <div class="row-cat-sub">Metro</div>
+          </div>
+          <span class="row-amount">€12.50</span>
+        </div>
+        <div class="expense-row">
+          <span class="row-date">21 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Hogar</div>
+            <div class="row-cat-sub">Electricidad</div>
+          </div>
+          <span class="row-amount high">€120.00</span>
+        </div>
+        <div class="expense-row">
+          <span class="row-date">20 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Ocio</div>
+            <div class="row-cat-sub">Restaurante</div>
+          </div>
+          <span class="row-amount">€8.90</span>
+        </div>
+        <div class="expense-row">
+          <span class="row-date">19 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Alimentación</div>
+            <div class="row-cat-sub">Supermercado</div>
+          </div>
+          <span class="row-amount">€35.40</span>
+        </div>
+        <div class="expense-row" style="opacity:0.35;">
+          <span class="row-date">17 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Transporte</div>
+            <div class="row-cat-sub">Metro</div>
+          </div>
+          <span class="row-amount">€12.50</span>
+        </div>
+        <div class="expense-row" style="opacity:0.15;">
+          <span class="row-date">15 ago</span>
+          <div class="row-category">
+            <div class="row-cat-main">Hogar</div>
+            <div class="row-cat-sub">Internet</div>
+          </div>
+          <span class="row-amount">€29.00</span>
+        </div>
+      </div>
+
+      <div class="subtotal-bar">
+        <span class="subtotal-label">Agosto 2026</span>
+        <span class="subtotal-value">€224.60</span>
+      </div>
+
+      <!-- Scrim -->
+      <div class="overlay-scrim"></div>
+
+      <!-- Confirmation card -->
+      <div class="card-overlay">
+        <div class="card-header">
+          <div>
+            <div class="card-label">Confirmar registro</div>
+            <div class="card-title">Nuevo gasto</div>
+          </div>
+          <span class="card-amount">€35.40</span>
+        </div>
+
+        <div class="card-field">
+          <span class="field-label">Categoría</span>
+          <div class="drum-wrap">
+            <span class="drum-arrow">▲</span>
+            <span class="drum-val">Alimentación</span>
+            <span class="drum-arrow">▼</span>
+          </div>
+        </div>
+
+        <div class="card-field">
+          <span class="field-label">Subcategoría</span>
+          <div class="drum-wrap">
+            <span class="drum-arrow">▲</span>
+            <span class="drum-val">Supermercado</span>
+            <span class="drum-arrow">▼</span>
+          </div>
+        </div>
+
+        <div class="card-field">
+          <span class="field-label">Descripción</span>
+          <span class="field-value">compra mercadona</span>
+        </div>
+
+        <div class="card-field" style="border-bottom:none;">
+          <span class="field-label">Contexto</span>
+          <span class="field-value" style="color:#5A5754;">—</span>
+        </div>
+
+        <div class="quip-row">
+          <span class="quip-attr">Conchita</span>
+          <span class="quip-text">"Registrado. Como siempre."</span>
+        </div>
+
+        <div class="confirm-btn">
+          <span class="confirm-btn-text">Confirmar</span>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <span class="nav-icon">⚙</span>
+          <span class="nav-label">Ajustes</span>
+        </div>
+        <div class="fab">
+          <span class="fab-plus">+</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon">▦</span>
+          <span class="nav-label">Análisis</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="section-title">Secondary state — Empty (Light + Dark)</div>
+
+<!-- SECONDARY — SIDE BY SIDE EMPTY STATE -->
+<div class="secondary-row">
+
+  <!-- LIGHT EMPTY -->
+  <div class="phone-col">
+    <span class="phone-mode-label light">Light</span>
+    <div class="phone light">
+
+      <div class="status-bar">
+        <span class="sb-time">09:41</span>
+        <span class="sb-icons">▌▌▌  ▐▐  100%</span>
+      </div>
+
+      <div class="header">
+        <div class="header-top">
+          <span class="app-name">Conchi</span>
+          <span class="conchita-tag">Conchita</span>
+        </div>
+        <div class="period">Agosto 2026</div>
+        <div class="total-amount"><span class="currency">€</span>0.00</div>
+      </div>
+
+      <div class="section-label">
+        <span class="sec-lbl-text">Fecha</span>
+        <span class="sec-lbl-text">Categoría</span>
+        <span class="sec-lbl-text">Importe</span>
+      </div>
+
+      <!-- Blank lines -->
+      <div class="empty-row-blank">
+        <span class="blank-date-bar"></span><span class="blank-cat-bar"></span><span class="blank-amt-bar"></span>
+      </div>
+      <div class="empty-row-blank">
+        <span class="blank-date-bar"></span><span class="blank-cat-bar"></span><span class="blank-amt-bar"></span>
+      </div>
+      <div class="empty-row-blank">
+        <span class="blank-date-bar"></span><span class="blank-cat-bar"></span><span class="blank-amt-bar"></span>
+      </div>
+      <div class="empty-row-blank">
+        <span class="blank-date-bar"></span><span class="blank-cat-bar"></span><span class="blank-amt-bar"></span>
+      </div>
+
+      <div class="empty-section">
+        <div class="empty-message">
+          <div class="empty-conchita-lbl">Conchita</div>
+          <div class="empty-copy">"Nada registrado aún.<br>Empieza por algo."</div>
+          <div class="empty-sub">Pulsa + para el primer registro</div>
+        </div>
+      </div>
+
+      <div class="subtotal-bar">
+        <span class="subtotal-label">Agosto 2026</span>
+        <span class="subtotal-value">€0.00</span>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <span class="nav-icon">⚙</span>
+          <span class="nav-label">Ajustes</span>
+        </div>
+        <div class="fab">
+          <span class="fab-plus">+</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon">▦</span>
+          <span class="nav-label">Análisis</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DARK EMPTY -->
+  <div class="phone-col">
+    <span class="phone-mode-label dark">Dark</span>
+    <div class="phone dark">
+
+      <div class="status-bar">
+        <span class="sb-time">09:41</span>
+        <span class="sb-icons">▌▌▌  ▐▐  100%</span>
+      </div>
+
+      <div class="header">
+        <div class="header-top">
+          <span class="app-name">Conchi</span>
+          <span class="conchita-tag">Conchita</span>
+        </div>
+        <div class="period">Agosto 2026</div>
+        <div class="total-amount"><span class="currency">€</span>0.00</div>
+      </div>
+
+      <div class="section-label">
+        <span class="sec-lbl-text">Fecha</span>
+        <span class="sec-lbl-text">Categoría</span>
+        <span class="sec-lbl-text">Importe</span>
+      </div>
+
+      <!-- Blank lines -->
+      <div class="empty-row-blank">
+        <span class="blank-date-bar"></span><span class="blank-cat-bar"></span><span class="blank-amt-bar"></span>
+      </div>
+      <div class="empty-row-blank">
+        <span class="blank-date-bar"></span><span class="blank-cat-bar"></span><span class="blank-amt-bar"></span>
+      </div>
+      <div class="empty-row-blank">
+        <span class="blank-date-bar"></span><span class="blank-cat-bar"></span><span class="blank-amt-bar"></span>
+      </div>
+      <div class="empty-row-blank">
+        <span class="blank-date-bar"></span><span class="blank-cat-bar"></span><span class="blank-amt-bar"></span>
+      </div>
+
+      <div class="empty-section">
+        <div class="empty-message">
+          <div class="empty-conchita-lbl">Conchita</div>
+          <div class="empty-copy">"Nada registrado aún.<br>Empieza por algo."</div>
+          <div class="empty-sub">Pulsa + para el primer registro</div>
+        </div>
+      </div>
+
+      <div class="subtotal-bar">
+        <span class="subtotal-label">Agosto 2026</span>
+        <span class="subtotal-value">€0.00</span>
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <span class="nav-icon">⚙</span>
+          <span class="nav-label">Ajustes</span>
+        </div>
+        <div class="fab">
+          <span class="fab-plus">+</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon">▦</span>
+          <span class="nav-label">Análisis</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
