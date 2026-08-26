@@ -28,6 +28,7 @@ android/build/
 android/app/build/
 .idea
 .gradle
+gradle-daemon-jvm.properties
 local.properties
 *.iml
 *.hprof
