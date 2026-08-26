@@ -51,7 +51,7 @@ Produce a production-ready app skeleton deployed to Firebase App Distribution â€
 
 | Package | Version |
 |---|---|
-| React Native | 0.76+ (bare, no Expo managed workflow) |
+| React Native | 0.87.x (bare, New Architecture + Bridgeless, no Expo managed workflow) |
 | TypeScript | 5.x strict |
 | pnpm | 9.x |
 | React Navigation | 7.x |

@@ -177,7 +177,7 @@ graph TD
 
 | Name | Version |
 |---|---|
-| React Native | 0.76+ |
+| React Native | 0.87.x |
 | React | 18.x |
 | TypeScript | 5.x |
 | pnpm | 9.x |

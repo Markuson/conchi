@@ -1,0 +1,15 @@
+packages:
+  - '.'
+  - 'docs'
+nodeLinker: hoisted
+# Native/postinstall build scripts required by the toolchain (Detox's native
+# test runner, esbuild's/@swc's native binaries, dtrace-provider's native addon,
+# core-js's polyfill setup) — pre-approved so pnpm's script-approval guard
+# doesn't block `pnpm install` on every fresh checkout.
+allowBuilds:
+  '@swc/core': true
+  core-js: true
+  core-js-pure: true
+  detox: true
+  dtrace-provider: true
+  esbuild: true
