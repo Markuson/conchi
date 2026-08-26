@@ -51,8 +51,8 @@ All files are new — no existing app source to reuse.
 - `tsconfig.json` — strict TypeScript config
 - `.eslintrc.js` — three-plugin ESLint config + `no-restricted-imports` boundary rule
 - `.husky/pre-commit` — runs `pnpm lint && pnpm typecheck`
-- `src/navigation/routes.ts` — typed `ROUTES` const (`as const`) with keys: `Home`, `Analytics`, `Main`, `Settings`; exports `TabParamList` (`{Home: undefined; Analytics: undefined}`) and `StackParamList` (`{Main: undefined; Settings: undefined}`) as separate types
-- `src/navigation/index.tsx` — `createBottomTabNavigator<TabParamList>` (Home + Analytics); `createNativeStackNavigator<StackParamList>` wrapping tabs under `ROUTES.Main`; Settings as `ROUTES.Settings` stack screen
+- `src/navigation/routes.ts` — typed `ROUTES` const (`as const`) with keys: `Home`, `Analytics`, `AppTabs`, `Settings`; exports `TabParamList` (`{Home: undefined; Analytics: undefined}`) and `StackParamList` (`{AppTabs: undefined; Settings: undefined}`) as separate types
+- `src/navigation/index.tsx` — `createBottomTabNavigator<TabParamList>` (Home + Analytics); `createNativeStackNavigator<StackParamList>` wrapping tabs under `ROUTES.AppTabs`; Settings as `ROUTES.Settings` stack screen
 - `src/lib/types/entry.ts` — `Entry` shape: `{ id, userId, amount, currency, category, subcategory, description, date, context?, fileUrl?, origin: 'app' }`
 - `src/lib/types/analytics.ts` — exact shapes: `AnalyticsFilterParams: { from: string; to: string; category?: string; subcategory?: string; context?: string }` · `AnalyticsTotals: Array<{ label: string; value: number }>` (array type alias, not interface) · `AnalyticsResponse: { totals: AnalyticsTotals; entries: Entry[] }`
 - `src/lib/types/index.ts` — barrel re-export of all types
@@ -84,7 +84,7 @@ All files are new — no existing app source to reuse.
 - [x] `src/lib/types/index.ts` — barrel re-export
 - [x] `src/lib/storage/mmkv.ts`, `secureStore.ts` — typed wrappers; no business logic
 - [x] `src/navigation/routes.ts` — `ROUTES` with `Home`, `Analytics`, `Main`, `Settings`; export `TabParamList` and `StackParamList` as separate types
-- [x] `src/navigation/index.tsx` — `createBottomTabNavigator<TabParamList>` (Home+Analytics); `createNativeStackNavigator<StackParamList>` with `ROUTES.Main`→MainTabs and `ROUTES.Settings`→SettingsScreen
+- [x] `src/navigation/index.tsx` — `createBottomTabNavigator<TabParamList>` (Home+Analytics); `createNativeStackNavigator<StackParamList>` with `ROUTES.AppTabs`→MainTabs and `ROUTES.Settings`→SettingsScreen
 - [x] `src/store/referenceData.ts` — stubbed Zustand slice (empty arrays)
 - [x] `src/features/settings/settingsStore.ts` — placeholder slice (`webhookUrl: ''`, `theme: 'system'`)
 - [x] `src/store/index.ts` — aggregate re-exports only
@@ -212,6 +212,16 @@ step in all three workflows (`pr-gate.yml`, `deploy-app.yml`, `deploy-docs.yml`)
 `packageManager: pnpm@11.9.0` in `package.json` is now the sole source of truth for
 the pnpm version, in CI and locally alike.
 
+### Loop 2, post-review rename (2026-08-26)
+
+`ROUTES.Main` renamed to `ROUTES.AppTabs` — user feedback that `Main` read as
+ambiguous next to `Home` (which screen is actually "main"?), when what it names is
+specifically the Stack's wrapper around the tab bar, not a screen with its own
+content. Renamed in `routes.ts`, `index.tsx`, and `routes.test.ts`; Code Map,
+Design Notes, and Suggested Review Order below updated to match. Loop 1's own
+change-log entry above is left as `ROUTES.Main` — it's a historical record of what
+was decided at that point in time, not a description of current state.
+
 ## Design Notes
 
 **ROUTES constant + navigation pattern:**
@@ -220,11 +230,11 @@ the pnpm version, in CI and locally alike.
 export const ROUTES = {
   Home: 'Home',
   Analytics: 'Analytics',
-  Main: 'Main',      // stack-level wrapper for tab navigator
+  AppTabs: 'AppTabs',      // stack-level wrapper for tab navigator
   Settings: 'Settings',
 } as const;
 export type TabParamList = { [ROUTES.Home]: undefined; [ROUTES.Analytics]: undefined };
-export type StackParamList = { [ROUTES.Main]: undefined; [ROUTES.Settings]: undefined };
+export type StackParamList = { [ROUTES.AppTabs]: undefined; [ROUTES.Settings]: undefined };
 
 // index.tsx
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -233,13 +243,13 @@ function MainTabs() { /* Tab.Screen Home + Analytics */ }
 export function RootNavigator() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name={ROUTES.Main} component={MainTabs} options={{headerShown:false}} />
+      <Stack.Screen name={ROUTES.AppTabs} component={MainTabs} options={{headerShown:false}} />
       <Stack.Screen name={ROUTES.Settings} component={SettingsScreen} />
     </Stack.Navigator>
   );
 }
 ```
-`ROUTES.Main` ≠ `ROUTES.Home` — no naming collision between stack and tab layers.
+`ROUTES.AppTabs` ≠ `ROUTES.Home` — no naming collision between stack and tab layers. (Named `AppTabs` rather than `Main` for clarity — it's the Stack's name for "the whole tab-bar experience," not a screen with its own content.)
 
 **Detox animation disable — single source:**
 `src/lib/constants.ts` exports `IS_DETOX`. Reanimated config file reads this flag and sets `disableAnimations`. No per-component conditionals.
@@ -265,16 +275,16 @@ The ESLint `no-restricted-imports` rule on `src/components/**` prevents importin
 
 **Typed navigation (the design decision Loop 1 caught and fixed)**
 
-- Entry point — `ROUTES.Main` is a distinct Stack-level name from `ROUTES.Home` the Tab screen, resolving Loop 1's naming collision.
+- Entry point — `ROUTES.AppTabs` is a distinct Stack-level name from `ROUTES.Home` the Tab screen, resolving Loop 1's naming collision.
   [`routes.ts:9`](../../src/navigation/routes.ts#L9)
 
 - Separate `TabParamList`/`StackParamList` types, not one shared param list, so each navigator's screen names are independently checked.
   [`routes.ts:16`](../../src/navigation/routes.ts#L16)
 
-- Stack wraps the tab navigator under `ROUTES.Main`; Settings sits alongside as a sibling stack screen.
+- Stack wraps the tab navigator under `ROUTES.AppTabs`; Settings sits alongside as a sibling stack screen.
   [`index.tsx:25`](../../src/navigation/index.tsx#L25)
 
-- Regression test pins the fix: asserts `ROUTES.Main !== ROUTES.Home`.
+- Regression test pins the fix: asserts `ROUTES.AppTabs !== ROUTES.Home`.
   [`routes.test.ts:3`](../../__tests__/routes.test.ts#L3)
 
 **Type contracts (Loop 1's other design-level fix)**

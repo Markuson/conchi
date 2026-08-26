@@ -22,7 +22,7 @@ function MainTabs(): React.JSX.Element {
 export function RootNavigator(): React.JSX.Element {
   return (
     <Stack.Navigator>
-      <Stack.Screen name={ROUTES.Main} component={MainTabs} options={{ headerShown: false }} />
+      <Stack.Screen name={ROUTES.AppTabs} component={MainTabs} options={{ headerShown: false }} />
       <Stack.Screen name={ROUTES.Settings} component={SettingsScreen} />
     </Stack.Navigator>
   );
