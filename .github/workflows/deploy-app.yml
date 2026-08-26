@@ -1,0 +1,76 @@
+name: Deploy App
+
+on:
+  push:
+    branches: [main, master]
+
+concurrency:
+  group: deploy-app-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-distribute:
+    name: Build Android APK and distribute via Firebase App Distribution
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '11'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Decode signing keystore
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+
+      - name: Decode google-services.json
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > android/app/google-services.json
+
+      - name: Build release APK
+        env:
+          MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: Distribute to Firebase App Distribution
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-service-account.json
+          pnpm dlx firebase-tools@latest appdistribution:distribute \
+            android/app/build/outputs/apk/release/app-release.apk \
+            --app "1:755020602836:android:38ab7a1ceaeb39789fca41" \
+            --groups "testers" \
+            --release-notes "Automated build from ${{ github.sha }}" \
+            --credential-file /tmp/firebase-service-account.json
+
+      # APK is never attached to a GitHub Release — invite-only Firebase App
+      # Distribution (group: testers, Marc's email: el.marcuson@gmail.com) is the
+      # sole distribution channel.
+      - name: Clean up secrets from disk
+        if: always()
+        run: rm -f android/app/release.keystore android/app/google-services.json /tmp/firebase-service-account.json

@@ -1,0 +1,33 @@
+{
+  "extends": "@react-native/typescript-config",
+  "compilerOptions": {
+    "types": ["jest", "node"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "useUnknownInCatchVariables": true,
+    "noUncheckedIndexedAccess": false
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx",
+    "e2e/**/*.ts",
+    "e2e/**/*.js",
+    ".storybook/**/*.ts",
+    ".storybook/**/*.cjs",
+    "*.ts",
+    "*.tsx",
+    "*.js",
+    "*.cjs"
+  ],
+  "exclude": ["node_modules", "**/Pods", "android", "ios", "docs", "storybook-static"]
+}
