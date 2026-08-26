@@ -192,6 +192,26 @@ Re-verified after all patches: `pnpm typecheck` (0 errors), `pnpm lint` (0 error
 - `docs/brief.md` deletion and its content not being carried into `docs/docs/intro.md` (this deletion predates Story 1.1's own changes — inherited pre-existing state, not this story's decision to second-guess).
 - `nodeLinker: hoisted` trade-off not documented in the frozen "Always" boundaries (already documented in this file's own Spec Change Log, which is the correct non-frozen location for it).
 
+### Loop 2, CI-caught fix (2026-08-26)
+
+The PR's real `pr-gate.yml` run on GitHub Actions (not reproducible in the sandbox
+used for every prior verification pass) failed immediately at pnpm setup:
+
+```
+Error: Multiple versions of pnpm specified:
+  - version 11 in the GitHub Action config with the key "version"
+  - version pnpm@11.9.0 in the package.json with the key "packageManager"
+Remove one of these versions to avoid version mismatch errors like ERR_PNPM_BAD_PM_VERSION
+```
+
+`pnpm/action-setup@v4` reads `packageManager` from `package.json` via Corepack
+automatically; pinning `version: '11'` in the workflow step's `with:` block as well
+creates two independent version declarations the action refuses to reconcile.
+**Classification: patch.** **Fixed:** removed `version: '11'` from the `Setup pnpm`
+step in all three workflows (`pr-gate.yml`, `deploy-app.yml`, `deploy-docs.yml`) —
+`packageManager: pnpm@11.9.0` in `package.json` is now the sole source of truth for
+the pnpm version, in CI and locally alike.
+
 ## Design Notes
 
 **ROUTES constant + navigation pattern:**
