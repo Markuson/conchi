@@ -3,7 +3,7 @@
 
 ## Conchi
 
-Bare React Native mobile app — mobile interface to Conchita, a self-hosted AI accounting agent (n8n + PostgreSQL + MinIO). TypeScript 5.x strict, pnpm 9.x, Zustand 5, MMKV, Reanimated, expo-notifications (FCM). Planning artifacts in `_bmad-output/planning-artifacts/`; read the architecture spine before touching any source.
+Bare React Native mobile app — mobile interface to Conchita, a self-hosted AI accounting agent (n8n + PostgreSQL + Google Drive). TypeScript 5.x strict, pnpm 9.x, Zustand 5, MMKV, Reanimated, expo-notifications (FCM). Planning artifacts in `_bmad-output/planning-artifacts/`; read the architecture spine before touching any source.
 
 ## Policy
 

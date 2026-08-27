@@ -38,10 +38,6 @@
     Recommended fix: run `npx expo prebuild --platform android` (Expo's own official tool for exactly this class of problem — it regenerates `android/` with the correct native wiring for whatever Expo modules are installed, driven by `app.json`) on a machine with the Android SDK installed, review the diff against the current hand-scaffolded `android/` (custom `applicationId`, package name, signing config in `android/app/build.gradle` must survive the regen), then commit and push to verify against real CI. Exact Expo Gradle plugin IDs/syntax weren't hand-patched here because they've changed across Expo SDK versions and this project is on Expo 57 — a version past the point where guessing from memory is reliable; `expo prebuild` is the version-correct, testable way to get it right.
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-2-self-hosting-infrastructure.md`
-  summary: docs/docs/intro.md's one-line backend summary still says "n8n + PostgreSQL + Google Drive" and should be updated to "n8n + PostgreSQL + MinIO" with a pointer to the new self-hosting/README.md guide
-  evidence: carved off story 1.2's own spec to stay within the token budget — it's a one-line, low-risk doc correction, tightly coupled to but not required for the MinIO compose/env/guide deliverable itself
-
-- source_spec: `_bmad-output/implementation-artifacts/spec-1-2-self-hosting-infrastructure.md`
   summary: root README.md has no mention of or link to self-hosting/README.md, so a reader of the main project README has no way to discover the self-hosting folder exists
   evidence: found during story 1.2's code review (blind-hunter layer); same discoverability class as the intro.md pointer above — bundling both into one small follow-up doc pass makes more sense than a one-line patch mid-review
 
@@ -52,3 +48,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-2-self-hosting-infrastructure.md`
   summary: self-hosting/README.md has no guidance on monitoring minio-data disk usage or a retention/cleanup policy for old uploads, on a host that also runs Postgres and n8n
   evidence: found during story 1.2's code review (blind-hunter layer); operational concern that matters once real upload volume exists, not blocking this story's infrastructure-standup goal
+
+- source_spec: `_bmad-output/planning-artifacts/sprint-change-proposal-2026-08-27.md`
+  summary: app-uploaded file storage reverted from MinIO to Google Drive (reusing the existing n8n Drive node); the `self-hosting/` MinIO compose/docs from Story 1.2 were removed 2026-08-28 as unused, rather than kept dormant
+  evidence: the OAuth-complexity rationale for avoiding Drive didn't hold once uploads were confirmed to always proxy through n8n with an already-authenticated Drive credential; MinIO's public-read requirement needs a Tailscale/Cloudflare tunnel not yet built. Portfolio-signal value of self-hosting was the only remaining reason for MinIO — Marc chose ops simplicity instead, then decided the dormant infra folder wasn't worth keeping around either. Migrating to a self-hosted store is a possible future improvement, to be rebuilt from scratch if revisited.

@@ -24,7 +24,7 @@ Stand up a production-ready, portfolio-grade React Native app skeleton — CI/CD
 - TypeScript strict mode, no `any`, enforced by a Husky pre-commit hook (lint + type check both block the commit). `pnpm` is the sole package manager everywhere (scripts, CI, docs) — no npm/yarn.
 - Three CI workflows are required: PR gate (lint + type check + tests, blocks merge), app deploy (Android APK → Firebase App Distribution, invite-only to Marc's email, never attached to a GitHub Release since the repo is public), and docs deploy (Docusaurus + Storybook → GitHub Pages).
 - All secrets (signing keystore, Firebase service account, FCM key) live only in GitHub Secrets; no real VPS URLs, tokens, or credentials in any committed file — docs use placeholder values throughout.
-- Self-hosted infra (n8n, PostgreSQL, MinIO via Docker Compose) must be reachable from the dev device, with MinIO public-read confirmed (upload + unauthenticated fetch both succeed), before this epic's tracer bullet and before Epic 2's media entry work.
+- Self-hosted infra (n8n, PostgreSQL via Docker Compose) must be reachable from the dev device before this epic's tracer bullet. Story 1.2 also stood up MinIO and validated it, but it was rejected and removed 2026-08-28 — app-uploaded files use the existing n8n Drive connection instead, so Epic 2's media entry work has no MinIO dependency (see AD-6, revised).
 - The `Entry` type must require `userId: string` at every callsite from day one (multi-user-readiness, no V1.1 rework), and the Analytics API contract types must be committed in `lib/types` even though no Analytics screen exists yet — both are pure type-level deliverables with no backend work.
 
 ## Technical Decisions
@@ -36,7 +36,7 @@ Stand up a production-ready, portfolio-grade React Native app skeleton — CI/CD
 - Routing goes through React Navigation exclusively, with a typed `ROUTES` constant established in the skeleton — no string-literal route names anywhere, ever.
 - Detox (E2E) and the ESLint base ruleset (`@typescript-eslint/recommended-type-checked` + `eslint-plugin-react-native` + `eslint-plugin-react-hooks`) are configured at the skeleton stage, before any feature story, so nothing is retrofitted later.
 - Storybook stories are co-located with components (`ComponentName.stories.tsx`); Storybook web build and Docusaurus both deploy to GitHub Pages on merge.
-- Deployment topology: single VPS running n8n + PostgreSQL + MinIO under Docker Compose; no separate dev/staging — the dev device talks to the live instance.
+- Deployment topology: single VPS running n8n + PostgreSQL under Docker Compose; no separate dev/staging — the dev device talks to the live instance. (MinIO was deployed under Story 1.2 and later removed — see AD-6.)
 - Key stack versions: React Native 0.87.x, TypeScript 5.x, pnpm 9.x, React Navigation 7.x, Zustand 5.x, react-native-mmkv 3.x, Detox 20.x, Husky 9.x.
 - Tracer bullet (Story 1.6) is throwaway: plain POST with `Authorization: Bearer <secret>` and raw text body, raw response rendered unstyled — no retry logic, no parsing beyond display. It must leave zero surviving code once Epic 2 ships the production entry flow.
 

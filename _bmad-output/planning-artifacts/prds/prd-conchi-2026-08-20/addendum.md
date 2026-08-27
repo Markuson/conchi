@@ -40,6 +40,8 @@ Researched August 2026. Widget media entry is **not feasible** on either platfor
 
 ## File Storage for App-Uploaded Files (for Architect)
 
+**Superseded 2026-08-27** — see `sprint-change-proposal-2026-08-27.md`. MinIO was built (Story 1.2) but the app reverted to Google Drive for app uploads; the analysis below is kept as a historical record of the original research, not the current decision.
+
 *Research conducted August 2026. Scope: photo receipts and PDFs uploaded via the FAB (FR-3). Gmail invoice PDFs already stored on Google Drive via existing pipeline — that path is unchanged.*
 
 **Why Google Drive is not the right target for app uploads:** Drive is correct for the Gmail PDF pipeline (n8n has a native Drive node, already wired). For app-uploaded files, the mobile client cannot use a service account directly — uploads would need to proxy through n8n anyway, and Drive adds OAuth complexity without meaningful benefit. "Stores files in Google Drive" also reads as a hobby-project pattern on a portfolio piece.
