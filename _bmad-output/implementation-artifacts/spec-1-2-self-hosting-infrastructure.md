@@ -9,6 +9,8 @@ context:
   - _bmad-output/implementation-artifacts/epic-1-context.md
 ---
 
+*Status: **REJECTED** (2026-08-28). The `self-hosting/` deliverable described below was built and verified exactly as specified, then Marc decided against using it — app-uploaded file storage reverted to Google Drive (see `sprint-change-proposal-2026-08-27.md` and AD-6) and the `self-hosting/` folder was removed from the repo entirely. Treat MinIO as never having been adopted by the app. File links below point to a folder that no longer exists; kept only as a historical record of what was built and verified.*
+
 <frozen-after-approval reason="human-owned intent — do not modify unless human renegotiates">
 
 ## Intent

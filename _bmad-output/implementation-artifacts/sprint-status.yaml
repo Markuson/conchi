@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-25-2026 00:00
-last_updated: 08-27-2026 00:00
+last_updated: 08-28-2026 00:00
 project: conchi
 project_key: NOKEY
 tracking_system: file-system
@@ -38,7 +38,7 @@ story_location:
 development_status:
   epic-1: in-progress
   1-1-project-skeleton-ci-cd: review
-  1-2-self-hosting-infrastructure: review
+  1-2-self-hosting-infrastructure: done  # built & verified, then rejected — MinIO not used; see AD-6 and epics.md
   1-3-design-system-foundation: backlog
   1-4-app-shell-navigation: backlog
   1-5-settings-screen-connexió-tema-sobre: backlog

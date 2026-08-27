@@ -38,7 +38,7 @@ graph TD
   lib --> n8n_ext["n8n (HTTP)"]
   lib --> fcm_ext["FCM (push)"]
   lib --> mmkv_ext["MMKV"]
-  lib --> minio_ext["MinIO (file read)"]
+  lib --> gdrive_ext["Google Drive (file read)"]
 ```
 
 ## Invariants & Rules
@@ -78,13 +78,15 @@ graph TD
 
 - **Binds:** all n8n HTTP calls (FR-27); public repo security
 - **Prevents:** unauthenticated access to n8n from anyone who reads the public repo; secrets committed to the repository; Marc's VPS URL exposed via documentation screenshots
-- **Rule:** every n8n request carries `Authorization: Bearer <secret>`. The webhook secret is stored in `expo-secure-store` (device secure enclave), never in MMKV and never committed. GitHub Actions Secrets hold all server-side credentials (Firebase service account, MinIO credentials, Android signing keystore, FCM server key). `.env` files are gitignored. The self-hosting guide documents where credentials go without exposing Marc's values. All documentation screenshots and examples use placeholder values (`https://your-n8n-instance.example.com`) — no real VPS URLs or tokens in any committed documentation asset.
+- **Rule:** every n8n request carries `Authorization: Bearer <secret>`. The webhook secret is stored in `expo-secure-store` (device secure enclave), never in MMKV and never committed. GitHub Actions Secrets hold all server-side credentials (Firebase service account, Android signing keystore, FCM server key). `.env` files are gitignored. The self-hosting guide documents where credentials go without exposing Marc's values. All documentation screenshots and examples use placeholder values (`https://your-n8n-instance.example.com`) — no real VPS URLs or tokens in any committed documentation asset.
 
-### AD-6 — MinIO for app-uploaded files; direct URL reads
+### AD-6 — Google Drive for app-uploaded files; direct URL reads
 
 - **Binds:** FR-3 (photo/PDF entry), FR-24 (file preview)
-- **Prevents:** Google Drive as upload target for mobile files (OAuth complexity, not suited for mobile upload); file reads routed through n8n on every view
-- **Rule:** upload path: app → n8n webhook → MinIO S3 node → file URL stored in `transaccions`. At view time the app fetches files directly from the MinIO URL — no n8n hop. Gmail invoice PDFs continue to use the existing Google Drive pipeline unchanged.
+- **Prevents:** a second storage backend and its own public-reachability problem (self-hosted MinIO needs a tunnel/VPN to be viewable off-network); file reads routed through n8n on every view
+- **Rule:** upload path: app → n8n webhook → n8n's existing Drive node (same credential as the Gmail-invoice pipeline) → file URL stored in `transaccions.drive_url`. At view time the app fetches files directly from the Drive URL — no n8n hop. Gmail invoice PDFs and app-uploaded files now share one pipeline.
+
+**Deferred:** MinIO self-hosting infrastructure was built (Story 1.2) and validated, then removed 2026-08-28 (unused — public-read access would have needed a tunnel/VPN not worth the ops cost). Migrating to a self-hosted store is a possible future improvement, to be rebuilt from scratch if revisited. See `deferred-work.md`.
 
 ### AD-7 — MMKV for all local persistence except secrets; defined offline queue contract
 
@@ -152,7 +154,7 @@ graph TD
 
 - **Binds:** self-hosting guide; all n8n/DB/storage references
 - **Prevents:** two assemblers inferring different infrastructure topologies from the spine
-- **Rule:** single VPS, Docker Compose: n8n + PostgreSQL + MinIO on the same host. No separate dev/staging environment — development devices (emulator and real device) connect to the live n8n instance. App versioning: semver in `package.json`, bumped manually before each Firebase App Distribution release, displayed in Settings → Sobre. Crash reporting and analytics are deferred (see Deferred section).
+- **Rule:** single VPS, Docker Compose: n8n + PostgreSQL on the same host. (MinIO was deployed under Story 1.2 and has since been removed — see AD-6.) No separate dev/staging environment — development devices (emulator and real device) connect to the live n8n instance. App versioning: semver in `package.json`, bumped manually before each Firebase App Distribution release, displayed in Settings → Sobre. Crash reporting and analytics are deferred (see Deferred section).
 
 ## Consistency Conventions
 
@@ -208,18 +210,15 @@ graph LR
   n8n["n8n\n(self-hosted VPS)"]
   PG["PostgreSQL\n(self-hosted VPS)"]
   FCM["Firebase Cloud\nMessaging"]
-  MinIO["MinIO\n(self-hosted VPS)"]
-  GDrive["Google Drive\n(invoice PDFs only)"]
+  GDrive["Google Drive\n(invoice PDFs + app uploads)"]
   Gmail["Gmail API"]
 
   App -->|"POST + Bearer secret"| n8n
   n8n -->|"FCM combined message\n(results + notifications)"| FCM
   FCM -->|"push to device"| App
   n8n --- PG
-  n8n -->|"S3 upload"| MinIO
-  App -->|"direct file read"| MinIO
+  n8n -->|"upload"| GDrive
   App -->|"direct file read"| GDrive
-  n8n --- GDrive
   n8n --- Gmail
 ```
 
@@ -277,7 +276,7 @@ graph LR
 | Context tagging (FR-17–FR-20) | `features/context-tags/` + `screens/ContextManagerScreen` | AD-7 |
 | Gmail invoice flow (FR-21–FR-26) | `features/invoice/` + `organisms/ConfirmationCard` | AD-3, AD-6 |
 | Settings + connection config (FR-27–FR-30) | `screens/SettingsScreen` + `features/settings/` | AD-5, AD-7 |
-| File preview (FR-24) | direct MinIO / Google Drive URL from `lib/storage/` | AD-6 |
+| File preview (FR-24) | direct Google Drive URL from `lib/storage/` | AD-6 |
 | Push infrastructure | `lib/fcm/` + `features/confirmation/` + `features/invoice/` | AD-3 |
 | Documentation | `/docs` (Docusaurus) + `.storybook/` | AD-14 |
 

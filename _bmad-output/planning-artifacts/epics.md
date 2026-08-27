@@ -64,7 +64,7 @@ FR-22: Known Sender push notification (configurable) — When Conchita processes
 
 FR-23: Invoice Review Card via deep link — Tapping any invoice push notification navigates to Invoice Review Card. Structurally identical to regular Confirmation Card (FR-5): amount, category Drum Roller, subcategory Drum Roller, description, context Drum Roller, date/currency. Additional PDF access action available. All Drum Roller editing functional. No delete action on Review Card (deletion via Full Edit Screen or swipe-to-reveal only).
 
-FR-24: File preview access (PDF and images) — Entries with associated file expose Veure/Show action (swipe-to-reveal panel in Home and Analytics lists; Obrir link in accordion expand; UX-defined trigger in Review Card). File opens in native in-app viewer. Gmail invoice PDFs fetched from Google Drive URL; app-uploaded files (photo receipts, PDFs via FAB) fetched directly from MinIO URL.
+FR-24: File preview access (PDF and images) — Entries with associated file expose Veure/Show action (swipe-to-reveal panel in Home and Analytics lists; Obrir link in accordion expand; UX-defined trigger in Review Card). File opens in native in-app viewer. Gmail invoice PDFs and app-uploaded files (photo receipts, PDFs via FAB) are both fetched directly from their Google Drive URL — same pipeline.
 
 FR-25: Inline Unknown Sender registration — Invoice Review Card for Unknown Sender invoice includes "Add sender" quick action. Triggering adds sender to `remitents_factura` in DB. Future invoices from that sender classified as Known Sender.
 
@@ -92,7 +92,7 @@ NFR-5: Testing — Unit tests: business logic, utility functions, data transform
 
 NFR-6: CI/CD — Three GitHub Actions workflows: pr-gate.yml (lint + type check + unit + component + Detox E2E on Android emulator, must pass before merge); deploy-app.yml (Android APK → Firebase App Distribution, invite-only, Marc's email only); deploy-docs.yml (Docusaurus + Storybook → GitHub Pages on merge to main). No iOS build in CI. No store submission.
 
-NFR-7: Security — Webhook secret stored in expo-secure-store (device secure enclave), never in MMKV, never committed. Every n8n request carries Authorization: Bearer <secret>. GitHub Actions Secrets hold all server-side credentials (Firebase service account, MinIO credentials, Android signing keystore, FCM server key). .env files gitignored. No real VPS URLs or tokens in any committed documentation asset; all docs use placeholder values.
+NFR-7: Security — Webhook secret stored in expo-secure-store (device secure enclave), never in MMKV, never committed. Every n8n request carries Authorization: Bearer <secret>. GitHub Actions Secrets hold all server-side credentials (Firebase service account, Android signing keystore, FCM server key). .env files gitignored. No real VPS URLs or tokens in any committed documentation asset; all docs use placeholder values.
 
 NFR-8: Public repo + private distribution — Source code repository public (portfolio visibility). APK builds never attached to GitHub Releases (would be openly downloadable). Firebase App Distribution invite-only; only Marc's registered email can install the app.
 
@@ -115,7 +115,7 @@ NFR-12: Language and copy — Default UI language: Català. English switchable f
 - **Widget shared container** (AD-12): iOS: App Group configured for main app target and WidgetKit extension. Android: widget reads from SharedPreferences written by main app. Both hold webhook URL and auth secret.
 - **Storybook co-located stories** (AD-14): .stories.tsx files co-located with components inside components/. Storybook web build deployed alongside Docusaurus to GitHub Pages.
 - **Reference data slice** (AD-16): categories, subcategories, and contexts live in store/referenceData.ts. features/settings is sole writer (fetches on first launch and on user-triggered refresh). All other features read from this slice.
-- **Single VPS Docker Compose** (AD-17): n8n + PostgreSQL + MinIO on same host. No dev/staging environment — development devices connect to live n8n instance. App version displayed in Settings → SOBRE → Versió (semver, bumped manually before Firebase release).
+- **Single VPS Docker Compose** (AD-17): n8n + PostgreSQL on same host (MinIO deployed from Story 1.2, later removed — see AD-6). No dev/staging environment — development devices connect to live n8n instance. App version displayed in Settings → SOBRE → Versió (semver, bumped manually before Firebase release).
 - **New backend deliverables required**: (1) device_tokens table in PostgreSQL for FCM token storage; (2) Analytics Endpoint n8n workflow (3-node: Webhook → Postgres → Respond); (3) FCM dispatch integration in existing n8n entry-processing flow; (4) FCM token registration endpoint in n8n; (5) new origen value 'app' in transaccions table.
 
 ### UX Design Requirements
@@ -166,7 +166,7 @@ UX-DR20: Implement post-log cascade animation (background case) using React Nati
 |---|---|---|
 | FR-1 | Epic 7 | Widget text entry, mini confirmation, error state |
 | FR-2 | Epic 2 | In-app text entry via FAB, two-phase loading |
-| FR-3 | Epic 2 | Media entry (photo/PDF) via FAB radial fan, MinIO upload |
+| FR-3 | Epic 2 | Media entry (photo/PDF) via FAB radial fan, Google Drive upload |
 | FR-4 | Epic 2 | Offline entry queue (MMKV, max 5, drain on reconnect) |
 | FR-5 | Epic 2 | Confirmation Card with Drum Rollers (Context field stubbed) |
 | FR-6 | Epic 2 | Push notification + deep-link to Confirmation Card |
@@ -204,7 +204,7 @@ Marc has a production-ready app skeleton deployed to Firebase App Distribution �
 
 > **Design note (pre-mortem change):** Only FR-27 and FR-30 live here. FR-28 (notification toggles) and FR-29 (Home Screen Window config) are deferred to the epics where those features are first built — they are meaningless without notifications or the Home Screen existing.
 >
-> **Infrastructure prerequisite (second-order change):** Epic 1 includes a self-hosting infrastructure story — ensuring n8n + PostgreSQL + MinIO are running under Docker Compose and accessible from the development device. MinIO is a new service (not in the existing backend); it must be running before Epic 2's media entry story can be validated. This is a non-app-code deliverable but a first-class story with a clear AC: "n8n, PostgreSQL, and MinIO are all reachable from the dev device; a test file can be uploaded to MinIO via the S3 API and the returned URL resolves without authentication."
+> **Infrastructure prerequisite (second-order change, revised 2026-08-27, superseded 2026-08-28):** Epic 1 originally included a self-hosting infrastructure story — ensuring n8n + PostgreSQL + MinIO are running under Docker Compose and accessible from the development device. Story 1.2 delivered and validated this, but MinIO was never wired into the app (see AD-6, revised) and its `self-hosting/` compose/docs were removed 2026-08-28 as unused. Epic 2's media entry story has no infra gate: it depends only on the existing n8n Drive connection, already proven by the invoice flow.
 >
 > **Tracer bullet story (steelman S1 change):** The final story of Epic 1 is an end-to-end tracer bullet — a minimal, unstyled proof that the causal chain works: FAB tap → plain text input → POST to n8n → raw Conchita response displayed in a placeholder view. No Drum Rollers, no Confirmation Card, no design tokens applied yet. The purpose is psychological: Marc sees the core loop working before spending time on the quality layer. Epic 2 replaces the placeholder with the production Confirmation Card and full FCM infrastructure.
 >
@@ -219,7 +219,7 @@ Marc can log expenses by text, photo, or PDF from within the app, receive Conchi
 
 > **Design notes (pre-mortem + assumption audit + second-order changes):**
 > - **FCM spike gate (A1 mitigation):** Story 1 of this epic is an FCM proof-of-concept spike. Its AC must include: "an FCM test message is successfully delivered to a real Android device from the self-hosted n8n instance." Production FCM infrastructure code only proceeds after this is confirmed. If FCM is not viable, transport strategy must be revisited before any other Epic 2 story begins.
-> - **MinIO upload + read validation gate (A6 + second-order mitigation):** The media entry story (FR-3) must validate the full upload path AND read access before building UI on top of it. AC must include: "a 5MB test image is successfully uploaded through the n8n webhook to MinIO; the returned URL resolves the file in a mobile browser (or `fetch()` call from the app) without authentication headers." Validates payload size limits, n8n S3 node config, MinIO credentialing, and public read access.
+> - **Drive upload + read validation gate (A6 + second-order mitigation, revised 2026-08-27):** The media entry story (FR-3) must validate the FAB-triggered upload path end-to-end before building UI on top of it. AC must include: "a 5MB test image sent through the n8n webhook is uploaded via n8n's existing Drive node and the returned Drive URL resolves the file without additional app-side authentication." Validates payload size limits and that the Drive node handles an app-sourced trigger correctly, not just the Gmail-sourced one.
 > - FCM infrastructure defines the full message type contract from the start: `round_trip_result` | `invoice_unknown` | `invoice_known` and the full dispatch bridge (AD-3) — prevents surgery in Epic 6.
 > - Context Drum Roller on Confirmation Card is hidden when contexts array is empty (correct UX spec behavior, not a stub) — this is the production behavior for a user with no contexts; activates naturally in Epic 5 when contexts first exist.
 > - FR-9 + FR-10 (basic Home Screen list + list item anatomy) added here so Marc has a browsable entry list after Epic 2 — dogfooding value between epics. FR-11 (cascade animation), FR-12 (swipe-to-reveal), FR-7 (Full Edit), FR-8 (deletion) remain in Epic 3.
@@ -333,6 +333,8 @@ So that every subsequent story is built on a quality foundation that enforces co
 ---
 
 ### Story 1.2: Self-Hosting Infrastructure
+
+*Status: **REJECTED** (2026-08-28). MinIO was built and verified exactly as specified in the AC below, then Marc decided against using it — app-uploaded files use Google Drive instead (see AD-6, revised) and the `self-hosting/` MinIO compose/docs were removed from the repo. Tracked as `done` in sprint-status.yaml (the work was completed and reviewed as planned) but is not part of the shipped product — treat MinIO as never having been adopted. AC below is kept only as an accurate historical record of what was built.*
 
 As Marc the self-hoster,
 I want n8n, PostgreSQL, and MinIO running under Docker Compose and accessible from my development device — with MinIO public-read validated,
@@ -805,9 +807,9 @@ So that I can capture paper receipts and email invoices without manual transcrip
 **When** the picker returns no file
 **Then** the radial fan closes gracefully; no error is shown; no submission is attempted
 
-**Given** the media upload flow (MinIO validation AC)
-**When** a 5 MB test image is sent through the n8n webhook to MinIO
-**Then** the upload succeeds; the returned MinIO URL resolves the file in a `fetch()` call from the app without any `Authorization` header — confirming public read access, payload size support, n8n S3 node config, and MinIO credential configuration
+**Given** the media upload flow (Drive validation AC)
+**When** a 5 MB test image is sent through the n8n webhook
+**Then** the upload succeeds via n8n's existing Drive node; the returned Drive URL resolves the file in a `fetch()` call from the app without any `Authorization` header — confirming payload size support and that the Drive node handles app-sourced uploads correctly
 
 **Given** Conchita's FCM response arrives after a media entry
 **When** the `round_trip_result` is received
