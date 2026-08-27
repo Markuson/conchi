@@ -44,6 +44,8 @@ android/app/google-services.json
 *.p12
 .env
 .env.*
+!.env.example
+!**/.env.example
 
 # node.js / pnpm
 #

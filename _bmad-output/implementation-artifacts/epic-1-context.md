@@ -4,7 +4,7 @@
 
 ## Goal
 
-Produce a production-ready app skeleton deployed to Firebase App Distribution — with working CI/CD, the complete design system, app shell navigation, the Conchi Bubble, and a Settings screen for the two features meaningful from day one: n8n connection configuration and theme selection. Epic 1 closes with a tracer bullet that proves the core causal chain (FAB tap → n8n → Conchita → raw response) works end-to-end before the quality layers of Epic 2 are added. No feature data is persisted in this epic.
+Stand up a production-ready, portfolio-grade React Native app skeleton — CI/CD, the full design system, app shell navigation, the Conchi Bubble, and a Settings screen covering the only two features meaningful before any data exists: n8n connection configuration and theme selection. This is the foundation every later epic builds on, so its conventions (routing, state, secrets, folder structure) must be right from the first commit — they are expensive to change later and are the part a hiring manager reading the repo will judge first. The epic closes with a tracer bullet: typing an expense and seeing Conchita's raw response, proving the FAB → n8n → Conchita causal chain end-to-end before any quality layer (Confirmation Card, FCM, styling) is built on top of it.
 
 ## Stories
 
@@ -17,132 +17,45 @@ Produce a production-ready app skeleton deployed to Firebase App Distribution �
 
 ## Requirements & Constraints
 
-**Functional (scoped to this epic):**
-- n8n connection: exactly two Settings fields — webhook base URL (all endpoint paths derived from it) and auth secret (password field). No SSE endpoint. Saving triggers a validation ping; HTTP 200 → store; failure → descriptive error, nothing saved.
-- Auth secret stored exclusively in `expo-secure-store` (device secure enclave). Webhook URL in MMKV. Neither ever committed.
-- Theme: Clar / Fosc / Sistema. Switches immediately across the entire app. Persists across sessions.
-- App version (semver from `package.json`) displayed read-only in Settings → SOBRE.
-- Idioma toggle is **not** in V1 Settings — language switching is deferred to V1.1; Catalan is the only language.
-- Analytics TypeScript types (`AnalyticsFilterParams`, `AnalyticsTotals`, `AnalyticsResponse`) must be committed in `lib/types/analytics.ts` as part of Story 1.3 or 1.1 — pure TypeScript, no backend work.
-- `Entry` type in `lib/types/entry.ts` must have `userId: string` as a required field from day one — the compiler enforces this at every callsite.
-
-**Non-functional (must hold for every story in this epic):**
-- `pnpm` is the sole package manager; no `npm` or `yarn` in scripts, CI, or docs.
-- TypeScript strict mode; no `any`; enforced by Husky pre-commit (lint + type check must both pass).
-- ESLint: `@typescript-eslint/recommended-type-checked` + `eslint-plugin-react-native` + `eslint-plugin-react-hooks`; specific rule overrides defined in Story 1.1.
-- All route references import from the typed `ROUTES` constant in `navigation/`; no string literals used as route names.
-- `store/index.ts` aggregates and re-exports feature slices only — no business logic, no state, no selectors.
-- No real VPS URLs, credentials, or tokens in any committed file; all docs use placeholder values.
-
-**CI/CD:**
-- `pr-gate.yml`: lint + type check + unit tests must pass before merge.
-- `deploy-app.yml`: Android APK → Firebase App Distribution (Marc's email only); APK never attached to GitHub Releases.
-- `deploy-docs.yml`: Docusaurus + Storybook web build → GitHub Pages on merge to main.
-- All credentials (signing keystore, Firebase service account, FCM server key) sourced from GitHub Secrets only.
-
-**Self-hosting infrastructure (Story 1.2, non-app-code deliverable):**
-- n8n + PostgreSQL + MinIO under Docker Compose on a single VPS; all three reachable from the dev device.
-- A test file must be uploadable to MinIO via the S3 API, and the returned URL must resolve without an `Authorization` header (public read access validated before Epic 2 media entry begins).
-- Docker Compose setup, MinIO bucket public-read policy, and n8n S3 node credential configuration documented with placeholder values only.
+- n8n connection config has exactly two fields: webhook base URL (all endpoint paths derive from it) and auth secret (Bearer token, password field). No SSE/endpoint field. Saving triggers a validation ping to n8n; only HTTP 200 persists the config; failure shows a descriptive error and saves nothing.
+- Theme (Clar/Fosc/Sistema) applies instantly app-wide with no restart, and persists across sessions, applied before first paint on relaunch.
+- Idioma (language) toggle is explicitly out of scope for V1 — Catalan only, deferred to V1.1.
+- App version (semver from `package.json`) is displayed read-only in Settings.
+- TypeScript strict mode, no `any`, enforced by a Husky pre-commit hook (lint + type check both block the commit). `pnpm` is the sole package manager everywhere (scripts, CI, docs) — no npm/yarn.
+- Three CI workflows are required: PR gate (lint + type check + tests, blocks merge), app deploy (Android APK → Firebase App Distribution, invite-only to Marc's email, never attached to a GitHub Release since the repo is public), and docs deploy (Docusaurus + Storybook → GitHub Pages).
+- All secrets (signing keystore, Firebase service account, FCM key) live only in GitHub Secrets; no real VPS URLs, tokens, or credentials in any committed file — docs use placeholder values throughout.
+- Self-hosted infra (n8n, PostgreSQL, MinIO via Docker Compose) must be reachable from the dev device, with MinIO public-read confirmed (upload + unauthenticated fetch both succeed), before this epic's tracer bullet and before Epic 2's media entry work.
+- The `Entry` type must require `userId: string` at every callsite from day one (multi-user-readiness, no V1.1 rework), and the Analytics API contract types must be committed in `lib/types` even though no Analytics screen exists yet — both are pure type-level deliverables with no backend work.
 
 ## Technical Decisions
 
-**Stack:**
-
-| Package | Version |
-|---|---|
-| React Native | 0.87.x (bare, New Architecture + Bridgeless, no Expo managed workflow) |
-| TypeScript | 5.x strict |
-| pnpm | 9.x |
-| React Navigation | 7.x |
-| Zustand | 5.x |
-| react-native-mmkv | 3.x |
-| expo-secure-store | latest compatible |
-| Detox | 20.x |
-| Storybook for React Native | 7.x |
-| Docusaurus | 3.x |
-| ESLint + @typescript-eslint | 7.x |
-| Husky | 9.x |
-
-**Source tree (established in Story 1.1, never changed after):**
-
-```
-src/
-  components/
-    atoms/        # Button, Icon, Badge (later: DrumRoller, FilterChip)
-    molecules/    # ConchiBubble (later: ExpenseRow, MonthHeader, InputField)
-    organisms/    # (later: ConfirmationCard, FilterBar, ExpenseList)
-  features/
-    entry/        # (later: useEntrySubmit, offlineQueue, entryStore.ts)
-    settings/     # useSettings, n8n config validation, settingsStore.ts
-  screens/        # HomeScreen, AnalyticsScreen, SettingsScreen (placeholders except Settings)
-  store/
-    index.ts      # aggregates + re-exports feature slices only
-    referenceData.ts  # shared read-only slice (populated in Epic 2)
-  lib/
-    api/          # n8n HTTP client (auth header injection)
-    fcm/          # (scaffolded in Epic 2)
-    storage/      # MMKV wrapper, expo-secure-store wrapper
-    types/        # Entry, Category, Context, AnalyticsFilterParams, AnalyticsResponse, AnalyticsTotals
-  navigation/     # navigator, deep link config, typed ROUTES constant
-docs/             # Docusaurus site
-.storybook/       # Storybook configuration
-.github/workflows/
-  pr-gate.yml
-  deploy-app.yml
-  deploy-docs.yml
-```
-
-**Architecture invariants active from day one (AD-2):** `components/` never imports from `features/` or `store/`. Screens import from both; they contain no business logic. Feature hooks are co-located in their feature folder.
-
-**Secrets contract (AD-5):** webhook secret → `expo-secure-store` only; webhook URL → MMKV; both read via `lib/storage/` wrappers; nothing committed.
-
-**Detox setup (AD-10):** configured at project skeleton (Story 1.1), runs on Android emulator in GitHub Actions via `reactivecircus/android-emulator-runner`. Animations disabled in test builds via environment flag.
-
-**Tracer bullet HTTP contract:** Story 1.6 POST uses `Authorization: Bearer <secret>` and sends raw text body to the configured webhook URL. No response parsing, no retry logic — just prove the chain works. Epic 2 replaces the entire flow; no tracer bullet code survives after Story 2.4.
+- Bare React Native (no Expo managed workflow, no EAS) — Expo packages are used as libraries only. This is required so the native widget extensions (later epics) aren't blocked.
+- Feature-sliced architecture: `components/` never imports from `features/` or `store/`; screens hold no business logic; each feature owns its Zustand slice and co-located hooks; `store/index.ts` only aggregates/re-exports. This is CI-enforced (ESLint import rules) starting with the skeleton.
+- Reference data (categories, subcategories, contexts) will live in a shared `store/referenceData.ts` slice, owned by `features/settings/` — the one sanctioned exception to "store holds no business data," since it's read-only lookup data.
+- Secrets contract: auth secret → `expo-secure-store` only, never MMKV/AsyncStorage/`.env`/committed assets. Webhook URL → MMKV. All other local persistence uses MMKV (chosen over AsyncStorage to avoid async-read flicker in later UI, and over SQLite as unnecessary overhead).
+- Routing goes through React Navigation exclusively, with a typed `ROUTES` constant established in the skeleton — no string-literal route names anywhere, ever.
+- Detox (E2E) and the ESLint base ruleset (`@typescript-eslint/recommended-type-checked` + `eslint-plugin-react-native` + `eslint-plugin-react-hooks`) are configured at the skeleton stage, before any feature story, so nothing is retrofitted later.
+- Storybook stories are co-located with components (`ComponentName.stories.tsx`); Storybook web build and Docusaurus both deploy to GitHub Pages on merge.
+- Deployment topology: single VPS running n8n + PostgreSQL + MinIO under Docker Compose; no separate dev/staging — the dev device talks to the live instance.
+- Key stack versions: React Native 0.87.x, TypeScript 5.x, pnpm 9.x, React Navigation 7.x, Zustand 5.x, react-native-mmkv 3.x, Detox 20.x, Husky 9.x.
+- Tracer bullet (Story 1.6) is throwaway: plain POST with `Authorization: Bearer <secret>` and raw text body, raw response rendered unstyled — no retry logic, no parsing beyond display. It must leave zero surviving code once Epic 2 ships the production entry flow.
 
 ## UX & Interaction Patterns
 
-**Color token system (UX-DR1) — 14 tokens per mode:**
-
-| Token | Dark | Light |
-|---|---|---|
-| bg | #18140f | (per DESIGN.md) |
-| surface | #201a13 | |
-| surface-alt | #261e15 | |
-| text-primary | #fdfaf4 | |
-| text-secondary | #b09870 | |
-| text-tertiary | #7a6a50 | |
-| accent | #c8922a | |
-| accent-muted | rgba(200,146,42,0.18) | |
-| accent-underline | rgba(200,146,42,0.55) | |
-| rule | rgba(253,250,244,0.07) | |
-| border | rgba(253,250,244,0.11) | |
-| danger | #8b2020 | |
-| danger-bg | rgba(139,32,32,0.22) | |
-| nav-bg | #18140f | |
-
-All components reference semantic tokens only — never raw hex values.
-
-**Typography (UX-DR2):** Special Elite (hero: home total 32px, month total 13px accent, card amount 28px); Courier Prime (all data surfaces); System UI (shell: nav labels, buttons, section headers, field labels). Load Google Fonts: Special Elite and Courier Prime.
-
-**Spacing (UX-DR3):** xs=4, sm=8, md=12, lg=16, xl=24, 2xl=32px. All screens apply 24px horizontal edge padding.
-
-**Bottom nav (UX-DR4):** notched/cradle Bézier cutout at top-center; FAB elevated above bar surface inside notch; 64px height + safe area; `nav-bg` background; 1px `rule` top edge. Left: Inici (house + "Inici"). Right: Estadístiques (bar chart + "Estadístiques"). Active: `accent`; inactive: `text-tertiary`. Min tap target 44×44px.
-
-**FAB (UX-DR5 — Epic 1 scope):** 56px amber circle. Radial fan with three mini-buttons is Epic 2 (Story 2.6); in Epic 1 the FAB tap opens only the tracer bullet plain text input.
-
-**Conchi Bubble (UX-DR6):** 48px persistent circle, absolute top-right on every screen. Three image states: `conchi-idle.png` (default), `conchi-working.png`, `conchi-error.png`. 200ms crossfade between states. Tap → Settings. Pixel art recolor: dark outlines/jacket/hair → #2c1a0a, amber bow/accents → #c8922a, collar/cuffs → #fdfaf4, book cover → #4a2e12.
-
-**Button component (UX-DR18):** three variants — Primary (accent bg, bg text, 44px, 4px radius, System UI 11px 700 uppercase 0.10em); Secondary (transparent, 1px border, text-secondary, 44px); Danger (danger bg, white, 44px).
-
-**Settings screen (UX-DR14 — Epic 1 scope):** three sections with System UI 10px uppercase section headers (0.14em spacing): CONNEXIÓ (two fields only), VISUALITZACIÓ (Tema picker only; Periode per defecte and Idioma added in later epics), SOBRE (version read-only).
+- Full semantic color token system (14 tokens per mode, dark + light, per the design spec) must be defined and used everywhere — components reference tokens like `tokens.accent`, never raw hex.
+- Three-font system: Special Elite reserved strictly for hero amounts (home total, month total, confirmation amount) and nowhere else; Courier Prime for all data surfaces; System UI for shell chrome (nav, buttons, headers, labels).
+- Spacing is token-based only (xs 4 / sm 8 / md 12 / lg 16 / xl 24 / 2xl 32px), with 24px horizontal edge padding on every screen.
+- Bottom nav has a notched Bézier cutout with the FAB elevated in the notch; Inici (left) and Estadístiques (right) tabs; active state in `accent`, inactive in `text-tertiary`; 44×44px minimum tap targets; safe-area aware.
+- FAB in this epic is scoped to a single tap action only (opens the tracer bullet's plain text input) — the radial fan (Escriure/Càmera/PDF) is out of scope until Epic 2.
+- Conchi Bubble: 48px circle fixed top-right on every screen, tap always navigates to Settings regardless of state; idle/working/error image states with 200ms crossfade (only idle is exercised in this epic).
+- Button component has three variants (Primary/Secondary/Danger), each 44px height, 4px radius, System UI 11px 700 uppercase — used as-is by Settings in this epic.
+- Settings screen shows exactly three sections this epic: CONNEXIÓ (2 fields), VISUALITZACIÓ (Tema only — Periode per defecte and Idioma arrive in later epics), SOBRE (version, read-only). All copy is Catalan.
 
 ## Cross-Story Dependencies
 
-- **1.1 → all:** project skeleton must be committed first; every subsequent story is built on this foundation.
-- **1.2 → 1.6:** self-hosting infrastructure (live n8n reachable from dev device) must be in place before the tracer bullet can be validated.
-- **1.3 → 1.4:** design system tokens must exist before the app shell composes them into nav bar and Conchi Bubble.
-- **1.4 → 1.5:** app shell navigation must exist before the Settings screen can be wired to the Conchi Bubble tap.
-- **1.5 → 1.6:** valid n8n connection must be configurable (and persisted) before the tracer bullet can fire an authenticated POST.
-- **1.6 → Epic 2:** tracer bullet proves the transport works; Epic 2 Story 2.4 replaces the entire tracer flow with the production entry path.
+- Story 1.1 (skeleton, routing, CI) underpins every other story in this epic and all later epics.
+- Story 1.2 (self-hosting infra) must be live before Story 1.6's tracer bullet can make a real request, and before Epic 2's media entry story.
+- Story 1.3 (design tokens) must exist before Story 1.4 composes them into the nav bar and Conchi Bubble.
+- Story 1.4 (app shell) must exist before Story 1.5 can wire the Conchi Bubble tap to Settings.
+- Story 1.5 (a valid, persisted n8n connection) is a precondition for Story 1.6's authenticated POST.
+- Story 1.6's tracer bullet is explicitly disposable: Epic 2 replaces it entirely with the production Confirmation Card and FCM flow, and no tracer code should remain after that epic ships.
