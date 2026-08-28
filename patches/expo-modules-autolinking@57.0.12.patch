@@ -1,0 +1,62 @@
+diff --git a/android/expo-gradle-plugin/build.gradle.kts b/android/expo-gradle-plugin/build.gradle.kts
+index ced05f1ede41908cee1e353dffd4cbf7c5a51e97..e293bfb52ac0d5322c6d35eeedb9d2d9cf02b26a 100644
+--- a/android/expo-gradle-plugin/build.gradle.kts
++++ b/android/expo-gradle-plugin/build.gradle.kts
+@@ -1,4 +1,4 @@
+ plugins {
+-  kotlin("jvm") version "2.1.20" apply false
++  kotlin("jvm") version "2.3.0" apply false
+   id("java-gradle-plugin")
+ }
+diff --git a/android/expo-gradle-plugin/expo-autolinking-plugin/build.gradle.kts b/android/expo-gradle-plugin/expo-autolinking-plugin/build.gradle.kts
+index ba61caf5f6af3b28d246137d669c4f47e470da48..04991e5aaac0f299affe9c314e754b957b47a8ac 100644
+--- a/android/expo-gradle-plugin/expo-autolinking-plugin/build.gradle.kts
++++ b/android/expo-gradle-plugin/expo-autolinking-plugin/build.gradle.kts
+@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+ 
+ plugins {
+-  kotlin("jvm")
++  kotlin("jvm") version "2.3.0"
+   id("java-gradle-plugin")
+ }
+ 
+diff --git a/android/expo-gradle-plugin/expo-autolinking-plugin-shared/build.gradle.kts b/android/expo-gradle-plugin/expo-autolinking-plugin-shared/build.gradle.kts
+index 3aca925b1c8f793092ab6c7d71613aee606a5a0b..00027f592dfc000fd5f33e96652b8e99c4d34bea 100644
+--- a/android/expo-gradle-plugin/expo-autolinking-plugin-shared/build.gradle.kts
++++ b/android/expo-gradle-plugin/expo-autolinking-plugin-shared/build.gradle.kts
+@@ -2,7 +2,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+ 
+ plugins {
+-  kotlin("jvm")
++  kotlin("jvm") version "2.3.0"
+   kotlin("plugin.serialization") version "1.9.24"
+ }
+ 
+diff --git a/android/expo-gradle-plugin/expo-autolinking-settings-plugin/build.gradle.kts b/android/expo-gradle-plugin/expo-autolinking-settings-plugin/build.gradle.kts
+index da66c643608ae34ae9162dfbb9bc3fa48d7678ef..59202a4143fbf42869a9e2302bbb109b41301c65 100644
+--- a/android/expo-gradle-plugin/expo-autolinking-settings-plugin/build.gradle.kts
++++ b/android/expo-gradle-plugin/expo-autolinking-settings-plugin/build.gradle.kts
+@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+ 
+ plugins {
+-  kotlin("jvm")
++  kotlin("jvm") version "2.3.0"
+   id("java-gradle-plugin")
+ }
+ 
+diff --git a/android/expo-gradle-plugin/expo-max-sdk-override-plugin/build.gradle.kts b/android/expo-gradle-plugin/expo-max-sdk-override-plugin/build.gradle.kts
+index 1e09909bb85b6f21dcf4cbfeb796290f797f7027..07a8d8a6e45e347d38f5edb5a07ec913203b2ea9 100644
+--- a/android/expo-gradle-plugin/expo-max-sdk-override-plugin/build.gradle.kts
++++ b/android/expo-gradle-plugin/expo-max-sdk-override-plugin/build.gradle.kts
+@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+ 
+ plugins {
+-  kotlin("jvm")
++  kotlin("jvm") version "2.3.0"
+   id("java-gradle-plugin")
+ }
+ 
