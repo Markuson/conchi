@@ -60,7 +60,7 @@ module.exports = {
       },
     ],
     'react-native/no-raw-text': 'off',
-    'react-native/no-color-literals': 'off',
+    'react-native/no-color-literals': 'error',
     '@typescript-eslint/no-explicit-any': 'error',
   },
   overrides: [
@@ -79,6 +79,14 @@ module.exports = {
       files: ['**/*.test.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}', 'e2e/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
+      },
+    },
+    {
+      // src/theme/colors.ts is the single source of truth for raw color values
+      // (AD: "the only file allowed to contain raw hex/rgba literals").
+      files: ['src/theme/**/*.{ts,tsx}'],
+      rules: {
+        'react-native/no-color-literals': 'off',
       },
     },
   ],

@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/CourierPrime-Bold.ttf",
+      "sha1": "0e31ca908e3886d41fc511001652ec25d8579b2c"
+    },
+    {
+      "path": "src/assets/fonts/CourierPrime-Italic.ttf",
+      "sha1": "d92da4a992b4050da35974e9200168dec4688fcf"
+    },
+    {
+      "path": "src/assets/fonts/CourierPrime-Regular.ttf",
+      "sha1": "35373af34ae33a1022f50904386de8a36323321a"
+    },
+    {
+      "path": "src/assets/fonts/SpecialElite-Regular.ttf",
+      "sha1": "3aae0badce29869643e8a2e09e15056ba2b559d6"
+    }
+  ]
+}
