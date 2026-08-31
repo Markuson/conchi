@@ -13,3 +13,6 @@ allowBuilds:
   detox: true
   dtrace-provider: true
   esbuild: true
+patchedDependencies:
+  expo-modules-autolinking@57.0.12: patches/expo-modules-autolinking@57.0.12.patch
+  expo-modules-core@57.0.13: patches/expo-modules-core@57.0.13.patch
