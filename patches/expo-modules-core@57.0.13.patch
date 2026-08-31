@@ -1,3 +1,19 @@
+diff --git a/android/cmake/main.cmake b/android/cmake/main.cmake
+index 05fae2ce5f25f259eb9de4d6d314d61d252cf89a..8bfccabb95200157a9f357fcbc55ec0a70bf1c5c 100644
+--- a/android/cmake/main.cmake
++++ b/android/cmake/main.cmake
+@@ -35,6 +35,11 @@ target_include_directories(
+   ${REACT_NATIVE_INTERFACE_INCLUDE_DIRECTORIES}/react/fabric
+   # header only imports from jni, e.g. react/turbomodule/CallInvokerHolder.h
+   "${REACT_NATIVE_DIR}/ReactAndroid/src/main/jni"
++  # react-native 0.87's prefab "reactnative" module ships cxxreact/ErrorUtils.h, which
++  # #includes <jserrorhandler/ErrorUtils.h> — but that header isn't part of the prefab's
++  # curated header set (see ReactAndroid/build.gradle.kts's preparePrefab task). It does
++  # exist in the npm package's own C++ source tree, so point at that directly.
++  "${REACT_NATIVE_DIR}/ReactCommon"
+   "${ANDROID_SRC_DIR}/fabric"
+   "${COMMON_DIR}"
+   "${COMMON_DIR}/fabric"
 diff --git a/expo-module-gradle-plugin/build.gradle.kts b/expo-module-gradle-plugin/build.gradle.kts
 index 837bb4ff6a6ea984c7f78f90cf131be46d3e92fa..e01d245c7f19f52b75a7c9e056bc56802741a70e 100644
 --- a/expo-module-gradle-plugin/build.gradle.kts
