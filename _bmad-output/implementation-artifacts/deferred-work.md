@@ -77,3 +77,15 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-3-design-system-foundation.md`
   summary: `ios/Conchi.xcodeproj/project.pbxproj`'s new font `PBXFileReference` entries carry `fileEncoding = undefined;`, `explicitFileType = undefined;`, `lastKnownFileType = unknown;` — `react-native-asset`'s standard auto-generated output for arbitrary binary resources, but unconfirmed against a real Xcode build in this sandbox (no macOS/Xcode available)
   evidence: found by the story's own blind-hunter review. These sentinel values are expected from the tool used and shouldn't block Xcode's Copy Bundle Resources build phase (which is driven by the PBXResourcesBuildPhase file list, not these type-hint fields), but should be confirmed the next time this project is opened on a real Mac — matches this project's existing pattern of deferring native-build verification the sandbox can't perform.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: `ConchiBubble.tsx`'s Idle-state avatar is a simple geometric `react-native-svg` placeholder (circle + collar + brow + bow), not the real hand-drawn character art — swap in `conchi-idle.png` (and add the Working/Error states + their ~200ms crossfade, both out of scope this story) once the real pixel-art assets exist
+  evidence: approved this session as a stand-in for the not-yet-available art; `ConchiBubble.tsx` is deliberately structured (all four `conchiColors` recolor hexes centralized, single render function) so swapping in the real artwork later is a single-file change with zero call-site impact on `App.tsx`
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: Android's `elevation`-based shadow ignores the `shadowColor`/`shadowOpacity`/`shadowRadius` style props, so the FAB's and Conchi Bubble's DESIGN.md-specified amber/dark glow shadows will render as a plain default gray shadow on Android, while iOS renders the correct tinted shadow via those same props
+  evidence: found by this story's edge-case-hunter and blind-hunter reviews, independently. Matching DESIGN.md's colored glow exactly on Android would require a third-party shadow library (e.g. `react-native-shadow-2`) or a custom drop-shadow render, both out of scope for this story's `react-native-svg`-only dependency budget.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: `react-native-svg` (newly added this story) is a native module requiring iOS pod install / Android autolinking — unconfirmed against a real native build in this sandbox (no Xcode/Android Studio available)
+  evidence: found by this story's blind-hunter review. Matches this project's existing pattern (see the Story 1.3 font-linking entries above) of deferring native-build verification the sandbox can't perform; should be confirmed the next time this project is opened and built on a real Mac/Android Studio setup.

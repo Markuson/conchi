@@ -6,13 +6,14 @@ import { ROUTES, type StackParamList, type TabParamList } from './routes';
 import { HomeScreen } from '../screens/HomeScreen';
 import { AnalyticsScreen } from '../screens/AnalyticsScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+import { BottomNavBar } from './BottomNavBar';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<StackParamList>();
 
 function MainTabs(): React.JSX.Element {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator tabBar={(props) => <BottomNavBar {...props} />}>
       <Tab.Screen name={ROUTES.Home} component={HomeScreen} />
       <Tab.Screen name={ROUTES.Analytics} component={AnalyticsScreen} />
     </Tab.Navigator>
