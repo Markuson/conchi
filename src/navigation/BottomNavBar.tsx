@@ -6,7 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { useTheme } from '../theme/ThemeProvider';
 import { darkColors, staticColors } from '../theme/colors';
-import { ROUTES } from './routes';
+import { ROUTES, type TabParamList } from './routes';
 import { HouseIcon } from '../components/icons/HouseIcon';
 import { BarChartIcon } from '../components/icons/BarChartIcon';
 import { PlusIcon } from '../components/icons/PlusIcon';
@@ -30,7 +30,7 @@ const TAB_ICON_SIZE = 22;
  * `descriptors[route.key].options`) is sufficient and keeps this file free of
  * an extra indirection layer.
  */
-const TAB_CONFIG: Record<string, { Icon: React.ComponentType<IconProps>; label: string }> = {
+const TAB_CONFIG: Record<keyof TabParamList, { Icon: React.ComponentType<IconProps>; label: string }> = {
   [ROUTES.Home]: { Icon: HouseIcon, label: 'Inici' },
   [ROUTES.Analytics]: { Icon: BarChartIcon, label: 'Estadístiques' },
 };
@@ -108,7 +108,10 @@ export function BottomNavBar({ state, navigation }: BottomTabBarProps): React.JS
 
       <View style={[styles.tabRow, { height: BAR_HEIGHT }]}>
         {state.routes.map((route, index) => {
-          const config = TAB_CONFIG[route.name];
+          // `BottomTabBarProps.state.routes[].name` is typed as plain `string`
+          // (generic across any tab navigator), but `Tab.Navigator<TabParamList>`
+          // guarantees it's actually always a `TabParamList` key at runtime.
+          const config = TAB_CONFIG[route.name as keyof TabParamList];
           if (!config) {
             return null;
           }

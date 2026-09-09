@@ -26,9 +26,9 @@ type FakeNavigation = {
   navigate: jest.Mock;
 };
 
-function buildFakeNavigation(): FakeNavigation {
+function buildFakeNavigation(defaultPrevented = false): FakeNavigation {
   return {
-    emit: jest.fn(() => ({ defaultPrevented: false })),
+    emit: jest.fn(() => ({ defaultPrevented })),
     navigate: jest.fn(),
   };
 }
@@ -103,6 +103,18 @@ test('tapping the inactive Analytics tab emits tabPress and navigates to it, fli
   const [analyticsIcon] = rerendered.root.findAllByType(BarChartIcon);
   expect(homeIcon.props.color).toBe(darkColors.textTertiary);
   expect(analyticsIcon.props.color).toBe(darkColors.accent);
+});
+
+test('does not navigate when a tabPress listener calls preventDefault', () => {
+  const navigation = buildFakeNavigation(true);
+  const renderer = renderBar(navigation, 0, 0);
+
+  pressByLabel(renderer, 'Estadístiques');
+
+  expect(navigation.emit).toHaveBeenCalledWith(
+    expect.objectContaining({ type: 'tabPress', target: 'analytics-key' }),
+  );
+  expect(navigation.navigate).not.toHaveBeenCalled();
 });
 
 test('bar height grows by the bottom safe-area inset on a notched/dynamic-island device', () => {

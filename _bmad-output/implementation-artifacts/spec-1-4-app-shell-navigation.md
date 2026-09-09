@@ -30,7 +30,9 @@ context: ['{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-conchi-2
 |----------|--------------|---------------------------|----------------|
 | Tab press | User taps Analytics while Home is active | Analytics screen shows; Home dims to `textTertiary`, Analytics turns `accent` | N/A |
 | Notched/dynamic-island device | App renders on a device with a display cutout | Bar height includes bottom safe-area inset; content never obscured | N/A |
-| Conchi Bubble tap | User taps the bubble from Home, Analytics, or Settings itself | Navigation goes to Settings every time | N/A |
+| Conchi Bubble tap | User taps the bubble from Home or Analytics | Navigation goes to Settings | N/A |
+| Conchi Bubble on Settings | App navigates to the Settings screen | Bubble hides (fades/scales out) rather than overlapping the native header | N/A |
+| Conchi Bubble leaving Settings | App navigates away from Settings to Home/Analytics | Bubble fades/scales back in | N/A |
 | FAB tap (this epic) | User taps the FAB | No navigation or action occurs (documented no-op, wired in Story 1.6) | N/A |
 
 </frozen-after-approval>
@@ -67,6 +69,26 @@ context: ['{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-conchi-2
 
 ## Spec Change Log
 
+### Review Findings
+
+- [x] [Review][Decision] Conchi Bubble overlaps the native Settings screen header — resolved by Marc: bubble hides while on Settings and fades/scales back in when leaving. Renegotiates the spec's I/O matrix row "Conchi Bubble tap ... from Settings itself" (bubble is no longer present/tappable on Settings, so that row no longer applies) and the "always visible... of every screen" DESIGN.md line (Settings is now the documented exception).
+
+- [x] [Review][Patch] Hide Conchi Bubble while on the Settings screen; fade/scale it back in on navigating away [`ConchiBubble.tsx`] — per Marc's resolution of the Decision item above
+- [x] [Review][Patch] ConchiBubble's shadow container has no `backgroundColor` [`ConchiBubble.tsx:74`]
+- [x] [Review][Patch] Conchi Bubble `shadowRadius: 8` doesn't match DESIGN.md's `0 2px 12px` blur spec [`ConchiBubble.tsx:84`]
+- [x] [Review][Patch] `TAB_CONFIG` typed `Record<string, ...>` instead of `Record<keyof TabParamList, ...>` [`BottomNavBar.tsx:33`]
+- [x] [Review][Patch] `tabPress`'s `event.defaultPrevented === true` branch is untested [`BottomNavBar.test.tsx:31`]
+- [x] [Review][Patch] Spec's own Verification section claims `pnpm test` (no such script exists; `pnpm test:unit` is what actually runs/passes) [spec-1-4-app-shell-navigation.md, Verification section]
+- [x] [Review][Patch] `ThemeProvider.tsx` doc comment still says it's "NOT mounted in App.tsx by this story" — stale now that this story mounts it [`ThemeProvider.tsx:33`]
+
+- [x] [Review][Defer] FAB is fully interactive despite being a documented no-op this story — no affordance signals it's inert yet [`BottomNavBar.tsx:151`] — deferred, revisit alongside Story 1.6's real FAB wiring
+- [x] [Review][Defer] Hardcoded Catalan UI strings duplicated across files, no i18n module [`BottomNavBar.tsx`, `ConchiBubble.tsx`] — deferred, pre-existing repo-wide pattern
+- [x] [Review][Defer] Cradle-notch path math has no lower-bound guard for windows narrower than 80px [`BottomNavBar.tsx:44`] — deferred, pre-existing
+- [x] [Review][Defer] Nav bar background `Svg` sized via `useWindowDimensions()` instead of measured container width [`BottomNavBar.tsx:85`] — deferred, pre-existing
+- [x] [Review][Defer] `insets.left`/`insets.right` never applied to the bar — could sit under a sensor-housing safe area in landscape [`BottomNavBar.tsx:85`] — deferred, pre-existing
+- [x] [Review][Defer] Decorative SVG glyphs inside Pressables aren't marked non-accessible, risking double screen-reader announcement [`BottomNavBar.tsx`, `ConchiBubble.tsx`] — deferred, pre-existing
+- [x] [Review][Defer] No test locks `conchiColors` hex values to DESIGN.md's recolor mapping [`colors.ts:79`] — deferred, pre-existing
+
 ## Design Notes
 
 The cradle cutout is an SVG `Path` using cubic Bézier commands to carve a semicircular dip sized to the FAB (56px) at top-center of the bar — no plain-View masking approach reproduces a smooth curve, hence the new `react-native-svg` dependency (not needed by Stories 1.1–1.3). Conchi Bubble's placeholder is a simple geometric SVG (not an attempt at the final pixel-art character) tinted with the four DESIGN.md recolor hexes as a literal `conchiColors` palette — swapping in the real `conchi-idle.png` later is a single-file change to `ConchiBubble.tsx` with zero call-site impact. `BottomNavBar` and the FAB mount inside `MainTabs`'s custom `tabBar` prop (Home/Analytics only); `ConchiBubble` instead mounts once at the `App.tsx` root, outside the tab/stack tree, since it must also appear on the stack-level Settings screen, which the tab bar never renders.
@@ -76,7 +98,7 @@ The cradle cutout is an SVG `Path` using cubic Bézier commands to carve a semic
 **Commands:**
 - `pnpm typecheck` -- expected: exits 0
 - `pnpm lint` -- expected: exits 0, including `no-color-literals` and the feature-sliced import-boundary rules
-- `pnpm test` -- expected: existing tests still pass, no regressions to Button/theme
+- `pnpm test:unit` -- expected: existing tests still pass, no regressions to Button/theme
 
 **Manual checks (if no CLI):**
 - Launch the app in a simulator: confirm the cradle shape, FAB position, active/inactive tab coloring, Conchi Bubble tap navigating to Settings from Home/Analytics/Settings itself, and that a simulated notch/dynamic-island safe-area inset doesn't obscure content

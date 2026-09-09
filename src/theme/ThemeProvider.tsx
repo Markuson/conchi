@@ -30,9 +30,8 @@ export type ThemeProviderProps = {
 };
 
 /**
- * Theme context provider. Deliberately usable standalone — it is NOT mounted in
- * `App.tsx` by this story (Story 1.4 owns app-shell wiring); Storybook instantiates
- * it directly for isolated component rendering.
+ * Theme context provider. Also usable standalone — Storybook instantiates it
+ * directly for isolated component rendering, independent of `App.tsx`'s mount.
  */
 export function ThemeProvider({ children, mode }: ThemeProviderProps): React.JSX.Element {
   const systemScheme = useColorScheme();
