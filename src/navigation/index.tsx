@@ -16,7 +16,10 @@ function MainTabs(): React.JSX.Element {
   const { colors } = useTheme();
 
   return (
-    <Tab.Navigator tabBar={(props) => <BottomNavBar {...props} />} screenOptions={{ sceneStyle: { backgroundColor: colors.bg } }}>
+    <Tab.Navigator
+      tabBar={(props) => <BottomNavBar {...props} />}
+      screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.bg } }}
+    >
       <Tab.Screen name={ROUTES.Home} component={HomeScreen} />
       <Tab.Screen name={ROUTES.Analytics} component={AnalyticsScreen} />
     </Tab.Navigator>
