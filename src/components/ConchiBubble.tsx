@@ -18,10 +18,12 @@ const APPEAR_DURATION_MS = 220;
  * tab/stack tree, so it renders above every screen including the stack-level
  * Settings screen (which the bottom tab bar never reaches). Tapping it
  * navigates to Settings from Home or Analytics (DESIGN.md: "Tap: opens
- * Settings"). On Settings itself the bubble hides (fades/scales out) instead
- * of overlapping that screen's native header, and fades/scales back in on
- * leaving — resolved this way during this story's code review, renegotiating
- * the spec's original "tappable from Settings itself too" boundary.
+ * Settings"). On Settings itself the bubble hides (fades/scales out) — a
+ * "go to Settings" affordance is pointless while already there — and
+ * fades/scales back in on leaving; originally resolved this way during
+ * Story 1.4's code review to dodge that screen's native header (since
+ * removed in favor of a custom top-left back button), but the self-reference
+ * reasoning above stands on its own regardless.
  *
  * Renders the real `conchi-idle.png` art (`src/assets/images/`). Only the
  * Idle state is wired this story; `conchi-working.png`/`conchi-error.png`
