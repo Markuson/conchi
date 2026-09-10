@@ -77,3 +77,49 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-3-design-system-foundation.md`
   summary: `ios/Conchi.xcodeproj/project.pbxproj`'s new font `PBXFileReference` entries carry `fileEncoding = undefined;`, `explicitFileType = undefined;`, `lastKnownFileType = unknown;` — `react-native-asset`'s standard auto-generated output for arbitrary binary resources, but unconfirmed against a real Xcode build in this sandbox (no macOS/Xcode available)
   evidence: found by the story's own blind-hunter review. These sentinel values are expected from the tool used and shouldn't block Xcode's Copy Bundle Resources build phase (which is driven by the PBXResourcesBuildPhase file list, not these type-hint fields), but should be confirmed the next time this project is opened on a real Mac — matches this project's existing pattern of deferring native-build verification the sandbox can't perform.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: RESOLVED — `ConchiBubble.tsx` now renders the real `conchi-idle.png` art (was a `react-native-svg` placeholder). Adding the Working/Error states + their ~200ms crossfade is still out of scope — nothing in the app triggers those states yet (needs the SSE/push plumbing from a later epic) — but `conchi-working.png`/`conchi-error.png` already exist in `src/assets/images/` ready to wire in when that lands.
+  evidence: real assets provided by Marc this session, originally exported without a true alpha channel (a checkerboard "transparent area" indicator baked into the pixels instead of real transparency) — fixed via an automated color/connected-component analysis (grayscale checkerboard cells vs. genuine character colors, using each file's own natural size gap between small real-artwork regions and large background regions) rather than manual re-export. `hasAlpha` confirmed true post-fix. Not committed to this repo's tooling (no image-processing dependency added) — a one-off script run against the provided source files.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: RESOLVED — app icon replaced (was the default React Native template icon). `src/assets/images/app-icon-master.png` (Marc's source, same checkerboard-transparency issue as the bubble assets, plus the face was originally left in the background's near-white tone instead of the accent amber DESIGN.md/the bubble art uses) was cleaned the same way, recolored, and used to generate: Android legacy `mipmap-*/ic_launcher.png`/`ic_launcher_round.png`, a proper adaptive icon (`mipmap-anydpi-v26/ic_launcher.xml` + `ic_launcher_round.xml`, `@color/ic_launcher_background` = DESIGN.md's amber, `ic_launcher_foreground.png` per density), an Android 13+ `<monochrome>` themed-icon layer (`ic_launcher_monochrome.png` per density — needed for Nothing OS/Material You icon theming to show Conchi's silhouette instead of an auto-generated blob), and the iOS `AppIcon.appiconset` (all required sizes + `Contents.json` filenames).
+  evidence: unconfirmed against a real Android Studio/Xcode build in this sandbox (no native tooling available) — matches this project's existing pattern of deferring native-build verification. Two known quality gaps worth revisiting with better source material: (1) one small residual light-gray artifact speck near the icon's top-right, from the same automated cleanup, not worth chasing further with the current source; (2) the iOS App Store marketing icon (`Icon-1024.png`) is upscaled 2x from the 512×512 master, so it's somewhat soft — fine for on-device icons (max ~180px) but a higher-resolution source (1024×1024+) would sharpen it if this ever ships to the App Store.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: Android's `elevation`-based shadow ignores the `shadowColor`/`shadowOpacity`/`shadowRadius` style props, so the FAB's and Conchi Bubble's DESIGN.md-specified amber/dark glow shadows will render as a plain default gray shadow on Android, while iOS renders the correct tinted shadow via those same props
+  evidence: found by this story's edge-case-hunter and blind-hunter reviews, independently. Matching DESIGN.md's colored glow exactly on Android would require a third-party shadow library (e.g. `react-native-shadow-2`) or a custom drop-shadow render, both out of scope for this story's `react-native-svg`-only dependency budget.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: `react-native-svg` (newly added this story) is a native module requiring iOS pod install / Android autolinking — unconfirmed against a real native build in this sandbox (no Xcode/Android Studio available)
+  evidence: found by this story's blind-hunter review. Matches this project's existing pattern (see the Story 1.3 font-linking entries above) of deferring native-build verification the sandbox can't perform; should be confirmed the next time this project is opened and built on a real Mac/Android Studio setup.
+
+## Deferred from: code review of spec-1-4-app-shell-navigation (2026-09-09)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: `BottomNavBar`'s FAB is fully interactive (press-dim feedback, real `accessibilityLabel`/`accessibilityRole="button"`) even though `handleFabPress` is a documented no-op this story — nothing signals to sighted or screen-reader users that it currently does nothing
+  evidence: found by blind-hunter review. Deferred rather than patched blind, since the right no-op affordance (disabled styling? no accessibility change at all?) is easier to judge once Story 1.6 wires the FAB's real radial-fan action and the before/after contrast is visible.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: user-facing strings ("Inici", "Estadístiques", "Acció ràpida", "Conchi, obre Configuració") are hardcoded Catalan literals duplicated across `BottomNavBar.tsx`, `ConchiBubble.tsx`, and their test files, with no shared strings/i18n module
+  evidence: found by blind-hunter review. Pre-existing pattern across the whole codebase (no i18n framework exists anywhere yet), not a regression introduced by this story specifically — introducing one is a bigger architectural decision than this review should force.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: the cradle-notch path math (`buildBarFillPath`/`buildTopRulePath`, `NOTCH_WIDTH = FAB_SIZE + 24 = 80`) has no lower-bound guard — on a window narrower than 80px (e.g. extreme Android split-screen/multi-window), `left`/`right` go negative and the cutout path is malformed
+  evidence: found by edge-case-hunter review. No split-screen/multi-window support is claimed anywhere in this project; revisit if that ever becomes a target form factor.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: `BottomNavBar`'s background `Svg` is sized via `useWindowDimensions()` rather than the container's own measured width (`onLayout`) — on tablet/foldable split-screen, window width can differ from the actual rendered container width, misaligning the notch cutout from the real bar bounds
+  evidence: found by blind-hunter review. Same tablet/split-screen scope question as the notch-math entry above; DESIGN.md doesn't address tablet or foldable layouts at all.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: `BottomNavBar` only reads `insets.bottom`; `insets.left`/`insets.right` are never applied, so on a landscape notched/cutout device the tab row and FAB could sit under a sensor-housing safe area
+  evidence: found by blind-hunter review. Confirmed technically reachable — iPad explicitly supports landscape (`Info.plist`'s `UISupportedInterfaceOrientations~ipad`) and Android has no `screenOrientation` lock — but DESIGN.md and this spec's I/O matrix only address the bottom inset; no landscape/tablet layout has been designed at all, so a real fix needs a design decision first.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: decorative SVG glyphs inside Pressables (`HouseIcon`, `BarChartIcon`, `PlusIcon`, `ConchiBubble`'s avatar) aren't marked non-accessible, risking a screen reader announcing both the parent's `accessibilityLabel` and the raw SVG content
+  evidence: found by blind-hunter review. Matches this project's existing pattern of deferring findings that need real screen-reader/device verification the sandbox can't perform.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
+  summary: no test asserts that `conchiColors`' hex values (`outline`/`accent`/`collar`/`bookCover`) match DESIGN.md's recolor mapping table
+  evidence: found by blind-hunter review; manually confirmed correct by this review's acceptance-auditor pass. Low-value tautological test (would duplicate the same literals), but worth adding if this palette is ever revisited.
