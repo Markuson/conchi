@@ -138,6 +138,9 @@ export function SettingsScreen(): React.JSX.Element {
     buttonSpacer: {
       marginHorizontal: spacing.xs,
     },
+    container: {
+      backgroundColor: colors.bg,
+    },
     content: {
       padding: spacing.xl,
     },
@@ -166,7 +169,7 @@ export function SettingsScreen(): React.JSX.Element {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, dynamicStyles.container]}>
       <ScrollView contentContainerStyle={dynamicStyles.content}>
         <View style={[styles.section, dynamicStyles.section]}>
           <Text style={[typography.sectionHeader, dynamicStyles.sectionHeader]}>CONNEXIÓ</Text>

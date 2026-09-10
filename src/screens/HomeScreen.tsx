@@ -2,9 +2,14 @@ import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useTheme } from '../theme/ThemeProvider';
+
 export function HomeScreen(): React.JSX.Element {
+  const { colors } = useTheme();
+  const dynamicStyles = StyleSheet.create({ container: { backgroundColor: colors.bg } });
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, dynamicStyles.container]}>
       <Text>Home</Text>
     </SafeAreaView>
   );
