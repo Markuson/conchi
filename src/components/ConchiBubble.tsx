@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet } from 'react-native';
+import { Animated, Image, Pressable, StyleSheet } from 'react-native';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Path } from 'react-native-svg';
 
 import { conchiColors, staticColors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { ROUTES, type StackParamList } from '../navigation/routes';
+import conchiIdle from '../assets/images/conchi-idle.png';
 
 /** Bubble diameter (DESIGN.md's Conchi Bubble spec: "circle, 48px diameter"). */
 const BUBBLE_SIZE = 48;
@@ -23,12 +23,10 @@ const APPEAR_DURATION_MS = 220;
  * leaving — resolved this way during this story's code review, renegotiating
  * the spec's original "tappable from Settings itself too" boundary.
  *
- * The SVG below is a simple geometric placeholder (approved this session as a
- * stand-in for the not-yet-available `conchi-idle.png`), tinted with DESIGN.md's
- * exact four recolor hexes (`conchiColors`). Only this file needs to change once
- * the real hand-drawn art is available — see `deferred-work.md`. This story only
- * renders the Idle state; Working/Error states and their crossfade are out of
- * scope (spec-1-4's "Never" boundary).
+ * Renders the real `conchi-idle.png` art (`src/assets/images/`). Only the
+ * Idle state is wired this story; `conchi-working.png`/`conchi-error.png`
+ * already exist alongside it but have no trigger yet (that needs the SSE/push
+ * plumbing from a later epic) — see `deferred-work.md`.
  */
 export function ConchiBubble(): React.JSX.Element {
   const insets = useSafeAreaInsets();
@@ -91,34 +89,29 @@ export function ConchiBubble(): React.JSX.Element {
           pressed && styles.pressed,
         ]}
       >
-        <Svg width={BUBBLE_SIZE} height={BUBBLE_SIZE} viewBox="0 0 48 48">
-          <Circle cx={24} cy={24} r={23} fill={conchiColors.bookCover} stroke={conchiColors.outline} strokeWidth={2} />
-          <Circle cx={24} cy={30} r={11} fill={conchiColors.collar} />
-          <Path
-            d="M17 19c2-3 5-4.5 7-4.5s5 1.5 7 4.5"
-            stroke={conchiColors.outline}
-            strokeWidth={2}
-            strokeLinecap="round"
-            fill="none"
-          />
-          <Circle cx={24} cy={19} r={3} fill={conchiColors.accent} />
-        </Svg>
+        <Image source={conchiIdle} style={styles.art} resizeMode="contain" />
       </Pressable>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  art: {
+    height: '100%',
+    width: '100%',
+  },
   bubble: {
     alignItems: 'center',
-    // Matches the SVG's own circle fill exactly (visually identical) — gives
-    // iOS's shadow renderer an opaque layer to anchor to instead of a fully
-    // transparent container, whose shadow rendering is otherwise unreliable.
+    // Backdrop behind the art's transparent margin, and gives iOS's shadow
+    // renderer an opaque layer to anchor to (a fully transparent container's
+    // shadow rendering is otherwise unreliable).
     backgroundColor: conchiColors.bookCover,
     borderRadius: BUBBLE_SIZE / 2,
     elevation: 6,
     height: BUBBLE_SIZE,
     justifyContent: 'center',
+    // Clips the art to the circle — DESIGN.md: "Shape: circle, 48px diameter".
+    overflow: 'hidden',
     position: 'absolute',
     right: spacing.xl,
     shadowOffset: { width: 0, height: 2 },
