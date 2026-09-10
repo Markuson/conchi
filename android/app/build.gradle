@@ -82,7 +82,12 @@ android {
         applicationId "com.markuson.conchi"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        // CI passes -PVERSION_CODE=<github-run-number> so each distributed build
+        // gets a distinct, increasing code — Firebase App Distribution (and
+        // Android's installer) key "is this a new version?" off this number, so
+        // a static value here meant every CI build looked identical and testers
+        // could silently stay on a stale install. Local/non-CI builds fall back to 1.
+        versionCode project.hasProperty('VERSION_CODE') ? (project.property('VERSION_CODE') as Integer) : 1
         versionName "1.0"
         // Referenced by AndroidManifest.xml's usesCleartextTraffic placeholder.
         // false in every build type — the app only talks to n8n over HTTPS.

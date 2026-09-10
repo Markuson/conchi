@@ -52,7 +52,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease -PVERSION_CODE=${{ github.run_number }}
 
       - name: Distribute to Firebase App Distribution
         env:
