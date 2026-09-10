@@ -7,9 +7,11 @@
  * Boundary rule (AD-2): `src/components/**` must never import from `src/features/**` or
  * `src/store/**`. The `no-restricted-imports` rule below is defined globally so it applies
  * to every file by default, then the `overrides` block turns it back off for
- * `src/screens/**`, `src/lib/**`, `src/features/**` and `src/store/**` — the directories that
- * legitimately need to import features/store. What remains restricted is `src/components/**`
- * (and anything else that was never given an explicit exemption).
+ * `src/screens/**`, `src/lib/**`, `src/features/**`, `src/store/**` and `src/App.tsx`/
+ * `src/App.test.tsx` — the directories (plus the app-shell entry point, which resolves
+ * `ThemeProvider`'s mode from `useSettingsStore` per Story 1.5, and its own test, which seeds
+ * that same store) that legitimately need to import features/store. What remains restricted
+ * is `src/components/**` (and anything else that was never given an explicit exemption).
  */
 module.exports = {
   root: true,
@@ -32,6 +34,7 @@ module.exports = {
   },
   ignorePatterns: [
     'node_modules/',
+    '__mocks__/',
     'android/',
     'ios/',
     'docs/',
@@ -70,6 +73,8 @@ module.exports = {
         'src/lib/**/*.{ts,tsx}',
         'src/features/**/*.{ts,tsx}',
         'src/store/**/*.{ts,tsx}',
+        'src/App.tsx',
+        'src/App.test.tsx',
       ],
       rules: {
         'no-restricted-imports': 'off',

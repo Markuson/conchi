@@ -123,3 +123,37 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-4-app-shell-navigation.md`
   summary: no test asserts that `conchiColors`' hex values (`outline`/`accent`/`collar`/`bookCover`) match DESIGN.md's recolor mapping table
   evidence: found by blind-hunter review; manually confirmed correct by this review's acceptance-auditor pass. Low-value tautological test (would duplicate the same literals), but worth adding if this palette is ever revisited.
+
+## Deferred from: implementation of spec-1-5-settings-screen (2026-09-10)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-5-settings-screen.md`
+  summary: this story adds more hardcoded Catalan strings (`SettingsScreen`'s section headers, field labels, button labels, and validation/status copy) with no i18n module — mirrors Story 1.4's already-deferred i18n gap
+  evidence: the spec's own Boundaries & Constraints explicitly call for matching the existing hardcoded-Catalan-strings pattern rather than adding i18n scaffolding this story; the app-wide i18n gap (no framework anywhere yet) is pre-existing, not a regression introduced here.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-5-settings-screen.md`
+  summary: no client-side check rejects a blank auth secret before Acceptar sends it — an empty `Authorization: Bearer ` header goes to the server, which then surfaces as a generic HTTP-error message rather than an immediate inline validation error
+  evidence: the spec's I/O matrix only requires format validation on the URL field; a blank-secret check is a reasonable UX improvement but not spec-mandated, and the current fallback (generic error on non-2xx) is not a crash or data-loss path
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-5-settings-screen.md`
+  summary: CONNEXIÓ validation errors (network/HTTP failure) render as one shared status line with a generic message, not attributed to a specific field, and the actual HTTP status code (e.g. 401 vs 500) is discarded in favor of one generic "server error" message
+  evidence: the spec only requires "a descriptive error message is shown" (satisfied); field-level attribution and status-code-specific messaging are UX polish beyond the frozen I/O matrix's wording
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-5-settings-screen.md`
+  summary: `SettingsScreen`'s new section headers have no `accessibilityRole="header"`, and `SegmentedControl`'s options use `accessibilityRole="button"` instead of `"radio"`/`radiogroup` semantics
+  evidence: matches Story 1.4's already-deferred pattern of accessibility polish items (decorative SVGs not marked non-accessible) — pre-existing project-wide gap, not spec-mandated for this story
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-5-settings-screen.md`
+  summary: `SettingsScreen`'s form (CONNEXIÓ fields + Acceptar/Descartar) isn't wrapped in a `KeyboardAvoidingView`, so the on-screen keyboard can cover the secret field/buttons on smaller devices
+  evidence: usability polish, not required by any AC; no existing screen in the codebase wraps forms this way yet either
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-5-settings-screen.md`
+  summary: `settingsStore`'s `setWebhookUrl`/`setTheme` don't catch a `setString` (MMKV write) failure — such a failure would propagate as an unhandled rejection inside `handleAccept` with no user-facing message, unlike the explicit secure-store-write-failure handling the spec does require
+  evidence: MMKV synchronous writes failing is a very low-probability edge case not covered by the frozen I/O matrix (which only calls out secure-store write failure); revisit if MMKV write failures are ever observed in practice
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-5-settings-screen.md`
+  summary: the manual Jest mock `__mocks__/expo-secure-store.js` backs itself with a module-level `Map` that no test file resets between tests — currently harmless since every test mocks `secureStore.ts` directly instead, but a future test that exercises the real wrapper repeatedly in one file could leak state across tests
+  evidence: latent test-infrastructure footgun, not an active bug; worth a `beforeEach` reset whenever a test starts relying on the manual mock directly
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-5-settings-screen.md`
+  summary: `ConchiBubble.test.tsx` now mounts the real `SettingsScreen` (via `RootNavigator`), whose mount effect fires an unawaited `readSecureItem()` call that the test doesn't flush — no warning or failure observed in repeated runs, but the timing is a latent flakiness risk
+  evidence: verified with a verbose run of `ConchiBubble.test.tsx` showing zero act()/warning output today; flagged for awareness rather than fixed blind, since there's nothing currently reproducing to fix against

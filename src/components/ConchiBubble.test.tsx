@@ -80,7 +80,11 @@ function pressByLabel(renderer: Renderer, label: string): void {
   });
 }
 
-/** Placeholder screens (`HomeScreen`/`AnalyticsScreen`/`SettingsScreen`) each render a single distinguishing `<Text>`. */
+/**
+ * `HomeScreen`/`AnalyticsScreen` are still placeholders that each render a single
+ * distinguishing `<Text>`. `SettingsScreen` is real as of Story 1.5 — it's checked
+ * via its "CONNEXIÓ" section header instead of a placeholder label.
+ */
 function screenTextShown(renderer: Renderer, text: string): boolean {
   return renderer.root.findAllByType(Text).some((node) => node.props.children === text);
 }
@@ -103,7 +107,7 @@ test('tapping the Conchi Bubble from Home navigates to Settings', () => {
 
   pressByLabel(renderer, CONCHI_LABEL);
 
-  expect(screenTextShown(renderer, 'Settings')).toBe(true);
+  expect(screenTextShown(renderer, 'CONNEXIÓ')).toBe(true);
 });
 
 test('tapping the Conchi Bubble from Analytics navigates to Settings', () => {
@@ -113,7 +117,7 @@ test('tapping the Conchi Bubble from Analytics navigates to Settings', () => {
 
   pressByLabel(renderer, CONCHI_LABEL);
 
-  expect(screenTextShown(renderer, 'Settings')).toBe(true);
+  expect(screenTextShown(renderer, 'CONNEXIÓ')).toBe(true);
 });
 
 test('Conchi Bubble hides once navigated to Settings, and reappears on leaving', () => {
@@ -121,7 +125,7 @@ test('Conchi Bubble hides once navigated to Settings, and reappears on leaving',
   expect(bubblePointerEvents(renderer)).toBe('auto');
 
   pressByLabel(renderer, CONCHI_LABEL);
-  expect(screenTextShown(renderer, 'Settings')).toBe(true);
+  expect(screenTextShown(renderer, 'CONNEXIÓ')).toBe(true);
   expect(bubblePointerEvents(renderer)).toBe('none');
 
   act(() => {
