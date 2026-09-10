@@ -1,16 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 
 import { version } from '../../package.json';
 import { Button } from '../components/atoms/Button';
 import { SegmentedControl } from '../components/atoms/SegmentedControl';
 import { TextField } from '../components/atoms/TextField';
+import { ChevronLeftIcon } from '../components/icons/ChevronLeftIcon';
 import type { Theme } from '../features/settings/settingsStore';
 import { validateConnection } from '../features/settings/validateConnection';
 import { readSecureItem, writeSecureItem } from '../lib/storage/secureStore';
 import { useSettingsStore } from '../store';
 import { useTheme } from '../theme/ThemeProvider';
+
+/** Matches the tap-target most other controls in this screen use (`TextField`/`Button`, 44px). */
+const BACK_BUTTON_SIZE = 44;
 
 /**
  * The auth secret is intentionally never stored in `settingsStore`/MMKV
@@ -33,6 +38,7 @@ type ConnectionStatus =
 
 export function SettingsScreen(): React.JSX.Element {
   const { colors, typography, spacing } = useTheme();
+  const navigation = useNavigation();
   const webhookUrl = useSettingsStore((state) => state.webhookUrl);
   const setWebhookUrl = useSettingsStore((state) => state.setWebhookUrl);
   const theme = useSettingsStore((state) => state.theme);
@@ -132,6 +138,10 @@ export function SettingsScreen(): React.JSX.Element {
   };
 
   const dynamicStyles = StyleSheet.create({
+    backButton: {
+      marginLeft: spacing.md,
+      marginTop: spacing.sm,
+    },
     buttonRow: {
       marginTop: spacing.xs,
     },
@@ -170,6 +180,15 @@ export function SettingsScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={[styles.container, dynamicStyles.container]}>
+      <Pressable
+        accessibilityLabel="Enrere"
+        accessibilityRole="button"
+        hitSlop={spacing.sm}
+        onPress={() => navigation.goBack()}
+        style={({ pressed }) => [styles.backButton, dynamicStyles.backButton, pressed && styles.backButtonPressed]}
+      >
+        <ChevronLeftIcon color={colors.textPrimary} size={24} />
+      </Pressable>
       <ScrollView contentContainerStyle={dynamicStyles.content}>
         <View style={[styles.section, dynamicStyles.section]}>
           <Text style={[typography.sectionHeader, dynamicStyles.sectionHeader]}>CONNEXIÓ</Text>
@@ -242,6 +261,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  backButton: {
+    alignItems: 'center',
+    height: BACK_BUTTON_SIZE,
+    justifyContent: 'center',
+    width: BACK_BUTTON_SIZE,
+  },
+  backButtonPressed: {
+    opacity: 0.6,
   },
   buttonRow: {
     flexDirection: 'row',

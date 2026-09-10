@@ -15,6 +15,11 @@
  * against a controllable backing store instead of real MMKV — this exercises
  * the real store wiring (not a stand-in) while keeping tests isolated from
  * each other via `useSettingsStore.setState(...)` in `beforeEach`.
+ *
+ * `useNavigation` is mocked too (everything else from `@react-navigation/native`
+ * stays real) — `SettingsScreen` is rendered standalone here, not inside a real
+ * `NavigationContainer`/`Stack.Screen`, so the real hook has no navigation
+ * context to attach to. A `goBack` spy is enough to cover the back button.
  */
 jest.mock('../lib/storage/mmkv', () => ({
   getString: jest.fn(() => undefined),
@@ -28,6 +33,12 @@ jest.mock('../features/settings/validateConnection', () => ({
 jest.mock('../lib/storage/secureStore', () => ({
   readSecureItem: jest.fn(),
   writeSecureItem: jest.fn(),
+}));
+
+const mockGoBack = jest.fn();
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual<typeof import('@react-navigation/native')>('@react-navigation/native'),
+  useNavigation: () => ({ goBack: mockGoBack }),
 }));
 
 import React from 'react';
@@ -56,6 +67,7 @@ beforeEach(() => {
   mockReadSecureItem.mockReset().mockResolvedValue(null);
   mockWriteSecureItem.mockReset();
   mockSetString.mockReset();
+  mockGoBack.mockReset();
   useSettingsStore.setState({ webhookUrl: '', theme: 'system' });
 });
 
@@ -125,6 +137,35 @@ function pressButton(renderer: Renderer, label: string): void {
 function findText(renderer: Renderer, text: string): boolean {
   return renderer.root.findAllByType(Text).some((node) => node.props.children === text);
 }
+
+/**
+ * For icon-only controls (e.g. the back button) that have no `Text` label to
+ * find by, unlike `pressButton`. Matches by `accessibilityLabel` plus having
+ * its own `onPress` (rather than `findAllByType(Pressable)`, which — for
+ * reasons not fully pinned down, possibly a Jest module-instance mismatch —
+ * doesn't match `Pressable` elements by reference in this suite even though
+ * they're visibly present and correctly typed in the rendered tree).
+ */
+function pressByAccessibilityLabel(renderer: Renderer, accessibilityLabel: string): void {
+  const node = renderer.root.findAll(
+    (n) => n.props.accessibilityLabel === accessibilityLabel && typeof n.props.onPress === 'function',
+  )[0];
+  if (!node) {
+    throw new Error(`No pressable node found with accessibilityLabel "${accessibilityLabel}"`);
+  }
+  const onPress = node.props.onPress as () => void;
+  act(() => {
+    onPress();
+  });
+}
+
+test('the top-left back button navigates back', () => {
+  const renderer = renderScreen();
+
+  pressByAccessibilityLabel(renderer, 'Enrere');
+
+  expect(mockGoBack).toHaveBeenCalledTimes(1);
+});
 
 test('happy path: validate ok saves the URL to settingsStore and the secret to secure-store, then shows success', async () => {
   mockValidateConnection.mockResolvedValue({ ok: true });
