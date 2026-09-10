@@ -31,6 +31,7 @@ jest.mock('../features/settings/validateConnection', () => ({
 }));
 
 jest.mock('../lib/storage/secureStore', () => ({
+  AUTH_SECRET_KEY: 'settings.authSecret',
   readSecureItem: jest.fn(),
   writeSecureItem: jest.fn(),
 }));
@@ -47,13 +48,10 @@ import { Text, TextInput } from 'react-native';
 
 import { SettingsScreen } from './SettingsScreen';
 import { validateConnection } from '../features/settings/validateConnection';
-import { readSecureItem, writeSecureItem } from '../lib/storage/secureStore';
+import { AUTH_SECRET_KEY, readSecureItem, writeSecureItem } from '../lib/storage/secureStore';
 import { setString } from '../lib/storage/mmkv';
 import { useSettingsStore } from '../store';
 import { ThemeProvider } from '../theme/ThemeProvider';
-
-/** Matches `SettingsScreen`'s own private `AUTH_SECRET_KEY` constant. */
-const AUTH_SECRET_KEY = 'settings.authSecret';
 
 const mockValidateConnection = validateConnection as jest.MockedFunction<typeof validateConnection>;
 const mockReadSecureItem = readSecureItem as jest.MockedFunction<typeof readSecureItem>;

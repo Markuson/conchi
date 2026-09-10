@@ -157,3 +157,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-5-settings-screen.md`
   summary: `ConchiBubble.test.tsx` now mounts the real `SettingsScreen` (via `RootNavigator`), whose mount effect fires an unawaited `readSecureItem()` call that the test doesn't flush — no warning or failure observed in repeated runs, but the timing is a latent flakiness risk
   evidence: verified with a verbose run of `ConchiBubble.test.tsx` showing zero act()/warning output today; flagged for awareness rather than fixed blind, since there's nothing currently reproducing to fix against
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-6-tracer-bullet.md`
+  summary: `useNavigation<NavigationProp<StackParamList>>()` is a type assertion, not the true composite navigator type (a `CompositeNavigationProp` of `TabParamList` + `StackParamList`) — it works at runtime because React Navigation bubbles unmatched route names up the tree, but would silently hide a real mismatch if the nesting ever changed
+  evidence: pre-existing pattern from `ConchiBubble.tsx` (Story 1.4), reused (not introduced) by Story 1.6's `MainTabs`; code-review surfaced it as a general navigation-typing concern, not something this story caused

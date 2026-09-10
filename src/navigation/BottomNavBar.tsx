@@ -75,14 +75,21 @@ function buildTopRulePath(width: number): string {
   ].join(' ');
 }
 
+type BottomNavBarProps = BottomTabBarProps & {
+  /**
+   * Invoked on FAB tap. Owned by `MainTabs` (`navigation/index.tsx`), which
+   * drives Story 1.6's not-configured Alert / tracer-bullet modal — this
+   * component stays a pure prop-driven tab bar with no feature/store access.
+   */
+  onFabPress: () => void;
+};
+
 /**
  * Custom `tabBar` for `MainTabs` (wired in `navigation/index.tsx`). Renders the
  * notched/cradle bottom bar (DESIGN.md's Bottom Navigation Bar component) plus
- * the elevated FAB nested in the notch. The FAB is visually complete but wired
- * to a no-op `onPress` — the radial fan and any real action are out of scope
- * until Story 1.6 / Epic 2.
+ * the elevated FAB nested in the notch.
  */
-export function BottomNavBar({ state, navigation }: BottomTabBarProps): React.JSX.Element {
+export function BottomNavBar({ state, navigation, onFabPress }: BottomNavBarProps): React.JSX.Element {
   const { colors, typography } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -93,11 +100,6 @@ export function BottomNavBar({ state, navigation }: BottomTabBarProps): React.JS
   // FAB's bottom edge lands exactly at the notch's deepest point, so the cutout
   // visually cradles the circle's underside while most of it floats above the bar.
   const fabTop = -(FAB_SIZE - NOTCH_DEPTH);
-
-  const handleFabPress = (): void => {
-    // No-op by design this story — FAB is visually complete only. Wiring to the
-    // radial fan / real actions is Story 1.6 (see spec-1-4's "Never" boundary).
-  };
 
   return (
     <View style={[styles.container, { height: totalHeight }]}>
@@ -154,7 +156,7 @@ export function BottomNavBar({ state, navigation }: BottomTabBarProps): React.JS
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Acció ràpida"
-        onPress={handleFabPress}
+        onPress={onFabPress}
         // `Pressable` has no default visual press feedback on either platform
         // — dim opacity while pressed, same convention as `Button.tsx`.
         style={({ pressed }) => [

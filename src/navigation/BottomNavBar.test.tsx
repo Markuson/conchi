@@ -1,9 +1,12 @@
 /**
  * Coverage for spec-1-4's I/O & Edge-Case Matrix rows owned by this file:
- * "Tab press" (active/inactive tint + navigation), "Notched/dynamic-island
- * device" (bar height grows by the bottom safe-area inset), and "FAB tap"
- * (documented no-op — no navigation or emit). Uses `react-test-renderer`, this
- * repo's existing convention (see `atoms/Button.test.tsx`).
+ * "Tab press" (active/inactive tint + navigation) and "Notched/dynamic-island
+ * device" (bar height grows by the bottom safe-area inset). "FAB tap" is now
+ * a required `onFabPress` prop (Story 1.6) — this file only proves the
+ * `Pressable` invokes whatever is passed in; the FAB's actual behavior
+ * (configured-check, Alert, modal) is `navigation/index.test.tsx`'s job. Uses
+ * `react-test-renderer`, this repo's existing convention (see
+ * `atoms/Button.test.tsx`).
  */
 import React from 'react';
 import ReactTestRenderer, { act, type ReactTestRenderer as Renderer } from 'react-test-renderer';
@@ -33,7 +36,12 @@ function buildFakeNavigation(defaultPrevented = false): FakeNavigation {
   };
 }
 
-function renderBar(navigation: FakeNavigation, insetsBottom: number, activeIndex: number): Renderer {
+function renderBar(
+  navigation: FakeNavigation,
+  insetsBottom: number,
+  activeIndex: number,
+  onFabPress: () => void = jest.fn(),
+): Renderer {
   const props = {
     state: {
       index: activeIndex,
@@ -55,7 +63,7 @@ function renderBar(navigation: FakeNavigation, insetsBottom: number, activeIndex
             insets: { top: 0, left: 0, right: 0, bottom: insetsBottom },
           }}
         >
-          <BottomNavBar {...props} />
+          <BottomNavBar {...props} onFabPress={onFabPress} />
         </SafeAreaProvider>
       </ThemeProvider>,
     );
@@ -131,12 +139,14 @@ test('bar height has no extra padding on a device with no safe-area inset', () =
   expect(svg.props.height).toBe(BAR_HEIGHT);
 });
 
-test('tapping the FAB is a documented no-op: no emit or navigation occurs', () => {
+test('tapping the FAB invokes the onFabPress prop', () => {
   const navigation = buildFakeNavigation();
-  const renderer = renderBar(navigation, 0, 0);
+  const onFabPress = jest.fn();
+  const renderer = renderBar(navigation, 0, 0, onFabPress);
 
   pressByLabel(renderer, 'Acció ràpida');
 
+  expect(onFabPress).toHaveBeenCalledTimes(1);
   expect(navigation.emit).not.toHaveBeenCalled();
   expect(navigation.navigate).not.toHaveBeenCalled();
 });
