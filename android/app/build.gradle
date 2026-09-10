@@ -78,6 +78,13 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.markuson.conchi"
+
+    // Semver MAJOR.MINOR — bump by hand for a real user-facing release
+    // milestone. PATCH (below) auto-increments per CI build instead, so day
+    // to day builds don't need a manual version edit at all.
+    def semverMajor = 1
+    def semverMinor = 0
+
     defaultConfig {
         applicationId "com.markuson.conchi"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -88,7 +95,13 @@ android {
         // a static value here meant every CI build looked identical and testers
         // could silently stay on a stale install. Local/non-CI builds fall back to 1.
         versionCode project.hasProperty('VERSION_CODE') ? (project.property('VERSION_CODE') as Integer) : 1
-        versionName "1.0"
+        // versionName is the user-visible semver string. CI passes the same
+        // -PVERSION_CODE value as the PATCH component, so e.g. build #42 shows
+        // as "1.0.42" — MAJOR/MINOR only move when bumped above by hand. Local/
+        // non-CI builds get a "-dev" pre-release suffix instead of a patch number.
+        versionName project.hasProperty('VERSION_CODE') \
+            ? "${semverMajor}.${semverMinor}.${project.property('VERSION_CODE')}" \
+            : "${semverMajor}.${semverMinor}.0-dev"
         // Referenced by AndroidManifest.xml's usesCleartextTraffic placeholder.
         // false in every build type — the app only talks to n8n over HTTPS.
         manifestPlaceholders = [usesCleartextTraffic: "false"]

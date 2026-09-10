@@ -69,10 +69,20 @@ export function ConchiBubble(): React.JSX.Element {
   return (
     <Animated.View
       pointerEvents={isOnSettings ? 'none' : 'auto'}
-      style={{
-        opacity: appear,
-        transform: [{ scale: appear.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1] }) }],
-      }}
+      // Position/size live here, not on the inner `Pressable`: a view whose
+      // only child is `position: 'absolute'` contributes no size to normal
+      // flow and collapses to zero height, which (as this wrapper is a flex
+      // sibling of the full-height `RootNavigator`) pushed the whole bubble
+      // off the bottom of the screen. Anchoring the wrapper itself avoids that.
+      style={[
+        styles.wrapper,
+        {
+          top: insets.top + spacing.md,
+          shadowColor: staticColors.conchiBubbleShadow,
+          opacity: appear,
+          transform: [{ scale: appear.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1] }) }],
+        },
+      ]}
     >
       <Pressable
         accessibilityRole="button"
@@ -80,14 +90,7 @@ export function ConchiBubble(): React.JSX.Element {
         onPress={handlePress}
         // `Pressable` has no default visual press feedback on either platform —
         // dim opacity while pressed, same convention as `Button.tsx`.
-        style={({ pressed }) => [
-          styles.bubble,
-          {
-            top: insets.top + spacing.md,
-            shadowColor: staticColors.conchiBubbleShadow,
-          },
-          pressed && styles.pressed,
-        ]}
+        style={({ pressed }) => [styles.bubble, pressed && styles.pressed]}
       >
         <Image source={conchiIdle} style={styles.art} resizeMode="contain" />
       </Pressable>
@@ -107,11 +110,18 @@ const styles = StyleSheet.create({
     // shadow rendering is otherwise unreliable).
     backgroundColor: conchiColors.bookCover,
     borderRadius: BUBBLE_SIZE / 2,
-    elevation: 6,
-    height: BUBBLE_SIZE,
+    height: '100%',
     justifyContent: 'center',
     // Clips the art to the circle — DESIGN.md: "Shape: circle, 48px diameter".
     overflow: 'hidden',
+    width: '100%',
+  },
+  pressed: {
+    opacity: 0.7,
+  },
+  wrapper: {
+    elevation: 6,
+    height: BUBBLE_SIZE,
     position: 'absolute',
     right: spacing.xl,
     shadowOffset: { width: 0, height: 2 },
@@ -119,8 +129,5 @@ const styles = StyleSheet.create({
     // DESIGN.md's Conchi bubble shadow: `0 2px 12px rgba(0,0,0,0.30)`.
     shadowRadius: 12,
     width: BUBBLE_SIZE,
-  },
-  pressed: {
-    opacity: 0.7,
   },
 });
