@@ -57,14 +57,14 @@ jobs:
       - name: Distribute to Firebase App Distribution
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase-service-account.json
         run: |
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-service-account.json
           pnpm dlx firebase-tools@latest appdistribution:distribute \
             android/app/build/outputs/apk/release/app-release.apk \
             --app "1:755020602836:android:38ab7a1ceaeb39789fca41" \
             --groups "testers" \
-            --release-notes "Automated build from ${{ github.sha }}" \
-            --credential-file /tmp/firebase-service-account.json
+            --release-notes "Automated build from ${{ github.sha }}"
 
       # APK is never attached to a GitHub Release — invite-only Firebase App
       # Distribution (group: testers, Marc's email: el.marcuson@gmail.com) is the
