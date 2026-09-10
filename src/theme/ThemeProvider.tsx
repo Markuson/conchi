@@ -22,9 +22,12 @@ const ThemeContext = createContext<Theme | undefined>(undefined);
 export type ThemeProviderProps = {
   children: React.ReactNode;
   /**
-   * Force a mode, bypassing the device color scheme. Used only by the Storybook
-   * decorator to render a specific mode regardless of the host browser's
-   * `prefers-color-scheme`. Not intended for app-shell use.
+   * Force a mode, bypassing the device color scheme. Used by `App.tsx` (via
+   * `resolveThemeProviderMode`) to apply the user's persisted Tema setting —
+   * `'dark'`/`'light'` force that mode, `'system'` resolves to `undefined` so
+   * this falls through to the OS color scheme below — and by the Storybook
+   * decorator, which forces a specific mode regardless of the host browser's
+   * `prefers-color-scheme`.
    */
   mode?: ThemeMode;
 };
