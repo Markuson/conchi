@@ -10,8 +10,12 @@
  * `src/screens/**`, `src/lib/**`, `src/features/**`, `src/store/**` and `src/App.tsx`/
  * `src/App.test.tsx` — the directories (plus the app-shell entry point, which resolves
  * `ThemeProvider`'s mode from `useSettingsStore` per Story 1.5, and its own test, which seeds
- * that same store) that legitimately need to import features/store. What remains restricted
- * is `src/components/**` (and anything else that was never given an explicit exemption).
+ * that same store) that legitimately need to import features/store. `src/navigation/index.tsx`
+ * joins the list in Story 1.6: it's the composition root assembling both the FAB's `onFabPress`
+ * (via `useTracerBullet`) and stack-level `useNavigation` for the not-configured redirect, so it
+ * needs the same store/feature access `App.tsx` already has. `BottomNavBar.tsx` stays pure
+ * prop-driven, no exemption needed. What remains restricted is `src/components/**` (and anything
+ * else that was never given an explicit exemption).
  */
 module.exports = {
   root: true,
@@ -75,6 +79,7 @@ module.exports = {
         'src/store/**/*.{ts,tsx}',
         'src/App.tsx',
         'src/App.test.tsx',
+        'src/navigation/index.tsx',
       ],
       rules: {
         'no-restricted-imports': 'off',

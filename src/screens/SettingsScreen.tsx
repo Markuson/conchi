@@ -10,19 +10,12 @@ import { TextField } from '../components/atoms/TextField';
 import { ChevronLeftIcon } from '../components/icons/ChevronLeftIcon';
 import type { Theme } from '../features/settings/settingsStore';
 import { validateConnection } from '../features/settings/validateConnection';
-import { readSecureItem, writeSecureItem } from '../lib/storage/secureStore';
+import { AUTH_SECRET_KEY, readSecureItem, writeSecureItem } from '../lib/storage/secureStore';
 import { useSettingsStore } from '../store';
 import { useTheme } from '../theme/ThemeProvider';
 
 /** Matches the tap-target most other controls in this screen use (`TextField`/`Button`, 44px). */
 const BACK_BUTTON_SIZE = 44;
-
-/**
- * The auth secret is intentionally never stored in `settingsStore`/MMKV
- * (AD-5) — it lives in local component state during editing and is written
- * directly to `expo-secure-store` on a successful Acceptar (Design Notes).
- */
-const AUTH_SECRET_KEY = 'settings.authSecret';
 
 const THEME_OPTIONS: { label: string; value: Theme }[] = [
   { label: 'Fosc', value: 'dark' },
