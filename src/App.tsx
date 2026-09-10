@@ -1,9 +1,9 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { DefaultTheme, NavigationContainer, type Theme as NavigationTheme } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { RootNavigator } from './navigation';
-import { ThemeProvider, type ThemeMode } from './theme/ThemeProvider';
+import { ThemeProvider, useTheme, type ThemeMode } from './theme/ThemeProvider';
 import { ConchiBubble } from './components/ConchiBubble';
 import type { Theme } from './features/settings/settingsStore';
 import { useSettingsStore } from './store';
@@ -29,12 +29,41 @@ export function App(): React.JSX.Element {
 
   return (
     <ThemeProvider mode={resolveThemeProviderMode(theme)}>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <RootNavigator />
-          <ConchiBubble />
-        </NavigationContainer>
-      </SafeAreaProvider>
+      <AppShell />
     </ThemeProvider>
+  );
+}
+
+/**
+ * Split out from `App` so it can call `useTheme()` — React Navigation has its
+ * own, entirely separate theming system (`NavigationContainer`'s `theme`
+ * prop) that defaults to a light theme regardless of our `ThemeProvider`.
+ * Without mapping our resolved colors into it here, every screen/header/tab
+ * bar renders on React Navigation's default white background no matter what
+ * Tema is selected.
+ */
+function AppShell(): React.JSX.Element {
+  const { mode, colors } = useTheme();
+
+  const navigationTheme: NavigationTheme = {
+    ...DefaultTheme,
+    dark: mode === 'dark',
+    colors: {
+      ...DefaultTheme.colors,
+      background: colors.bg,
+      card: colors.surface,
+      text: colors.textPrimary,
+      border: colors.border,
+      primary: colors.accent,
+    },
+  };
+
+  return (
+    <SafeAreaProvider>
+      <NavigationContainer theme={navigationTheme}>
+        <RootNavigator />
+        <ConchiBubble />
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
