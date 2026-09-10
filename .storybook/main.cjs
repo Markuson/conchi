@@ -32,6 +32,14 @@
  * preset gains a real React 19 case (it currently only auto-detects versions
  * starting with `'18'` — see its `dist/preset.js`) — at that point its default
  * detection will pick the right shim on its own and this override becomes dead code.
+ *
+ * `@react-native/assets-registry/registry` is aliased to `react-native-web`'s own
+ * `AssetRegistry` module (same `getAssetByID`/`registerAsset` interface) because
+ * `react-native-svg` (added in Story 1.4, for `BottomNavBar`'s cradle cutout and the
+ * tab/FAB icons) imports it unconditionally from its asset-URI resolver, even though
+ * nothing in this repo actually uses that code path — `@react-native/assets-registry`
+ * itself is a Metro-bundler-only package, never installed for a web build, so without
+ * this alias the module fails to resolve and the whole Storybook build fails.
  */
 module.exports = {
   stories: ['../src/**/*.stories.?(ts|tsx|js|jsx)'],
@@ -47,6 +55,7 @@ module.exports = {
       alias: {
         ...config.resolve?.alias,
         '@storybook/react-dom-shim': '@storybook/react-dom-shim/dist/react-18',
+        '@react-native/assets-registry/registry': 'react-native-web/dist/modules/AssetRegistry',
       },
     },
   }),
