@@ -67,6 +67,12 @@ baseline_commit: '53a10a7e0b81d6d1452069b44781097374cc84b9'
 - Given the FAB is tapped from either the Home or Analytics tab, when configured, then the same modal opens regardless of which tab is active (FAB behavior is global, not Home-scoped)
 - Given TypeScript strict mode and the project's ESLint rules, when the new code is linted/type-checked, then it passes with zero new `any` and zero new color literals outside `theme/`
 
+### Review Findings
+
+- [x] [Review][Patch] `submit()` treats a resolved-`null` secret as an empty bearer token instead of the "not configured" error `checkConfigured()` already defines [src/features/tracerBullet/useTracerBullet.ts:62]
+- [x] [Review][Patch] In-flight `submit()` has no cancellation/staleness guard — closing the modal and resubmitting can surface a stale response/error from an earlier request [src/navigation/index.tsx:55]
+- [x] [Review][Patch] `n8n-webhook-setup.md` claims the app posts "the raw text you type as the request body," but `postToN8n` JSON-stringifies it, so n8n receives a quoted string literal [docs/docs/n8n-webhook-setup.md:88]
+
 ## Verification
 
 **Commands:**

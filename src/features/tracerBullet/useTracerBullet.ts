@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { postToN8n } from '../../lib/api/n8nClient';
 import { AUTH_SECRET_KEY, readSecureItem } from '../../lib/storage/secureStore';
@@ -33,6 +33,8 @@ export function useTracerBullet(): UseTracerBulletResult {
   const [status, setStatus] = useState<TracerBulletStatus>('idle');
   const [responseText, setResponseText] = useState<string | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
+  /** Bumped on every `reset()` so a stale in-flight `submit()` can tell its result no longer applies. */
+  const generationRef = useRef(0);
 
   const checkConfigured = useCallback(async (): Promise<boolean> => {
     const { webhookUrl } = useSettingsStore.getState();
@@ -54,6 +56,8 @@ export function useTracerBullet(): UseTracerBulletResult {
 
   const submit = useCallback(async (text: string): Promise<void> => {
     const { webhookUrl } = useSettingsStore.getState();
+    const generation = ++generationRef.current;
+    const isStale = (): boolean => generation !== generationRef.current;
 
     setStatus('submitting');
     setErrorMessage(undefined);
@@ -63,29 +67,46 @@ export function useTracerBullet(): UseTracerBulletResult {
     try {
       secret = await readSecureItem(AUTH_SECRET_KEY);
     } catch {
-      setStatus('error');
-      setErrorMessage("No s'ha pogut llegir el secret desat.");
+      if (!isStale()) {
+        setStatus('error');
+        setErrorMessage("No s'ha pogut llegir el secret desat.");
+      }
+      return;
+    }
+
+    if (!secret) {
+      if (!isStale()) {
+        setStatus('error');
+        setErrorMessage("No s'ha pogut llegir el secret desat.");
+      }
       return;
     }
 
     try {
-      const response = await postToN8n(webhookUrl, secret ?? '', text);
+      const response = await postToN8n(webhookUrl, secret, text);
       if (!response.ok) {
-        setStatus('error');
-        setErrorMessage(`El servidor ha retornat un error (${response.status}).`);
+        if (!isStale()) {
+          setStatus('error');
+          setErrorMessage(`El servidor ha retornat un error (${response.status}).`);
+        }
         return;
       }
 
       const raw = await response.text();
-      setResponseText(raw);
-      setStatus('success');
+      if (!isStale()) {
+        setResponseText(raw);
+        setStatus('success');
+      }
     } catch {
-      setStatus('error');
-      setErrorMessage("No s'ha pogut connectar. Comprova la connexió i torna-ho a provar.");
+      if (!isStale()) {
+        setStatus('error');
+        setErrorMessage("No s'ha pogut connectar. Comprova la connexió i torna-ho a provar.");
+      }
     }
   }, []);
 
   const reset = useCallback((): void => {
+    generationRef.current += 1;
     setStatus('idle');
     setResponseText(undefined);
     setErrorMessage(undefined);
