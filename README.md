@@ -7,6 +7,8 @@ Conchita, a self-hosted AI accounting agent (n8n + PostgreSQL + Google Drive).
 - React Navigation, Zustand, MMKV / `expo-secure-store`
 - Detox (Android), Docusaurus + Storybook for docs
 
+📚 **[Docs site](https://markuson.github.io/conchi/)** · **[Storybook](https://markuson.github.io/conchi/storybook/)**
+
 ## What is Conchi
 
 Conchi is the mobile companion to **Conchita**, a personal AI accounting agent
@@ -72,6 +74,8 @@ Run all three together to reproduce exactly what `pr-gate.yml` checks (see below
 
 ## Storybook
 
+Published at **https://markuson.github.io/conchi/storybook/** (rebuilt on every push to `master`).
+
 ```bash
 pnpm storybook              # dev server on http://localhost:7007 (web build, via react-native-web)
 pnpm build-storybook        # static build → storybook-static/
@@ -83,6 +87,8 @@ to GitHub Pages. See the comment at the top of that file for what's missing and 
 (a Flow-syntax conflict between RN's on-device addons and the web bundler).
 
 ## Docusaurus (docs site)
+
+Published at **https://markuson.github.io/conchi/** (rebuilt on every push to `master`).
 
 ```bash
 cd docs
