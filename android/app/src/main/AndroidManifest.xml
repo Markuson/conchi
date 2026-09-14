@@ -1,6 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Story 2.1 (FCM spike): required on Android 13+ (targetSdkVersion 36)
+         for `Notifications.requestPermissionsAsync()` to actually show the
+         runtime permission dialog. `expo-notifications` is linked directly
+         via Gradle here, not through an Expo config plugin/prebuild, so this
+         permission is not auto-merged the way it would be in a config-plugin
+         project — it must be declared explicitly. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
       android:name=".MainApplication"

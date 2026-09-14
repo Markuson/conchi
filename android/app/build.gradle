@@ -154,4 +154,18 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // Story 2.1 (FCM spike): Firebase Messaging, added directly rather than via an
+    // Expo config plugin (app.json stays minimal, AD-3). expo-notifications' native
+    // Android module builds on this at runtime; the BoM pins every Firebase
+    // artifact's version so they can't drift apart.
+    implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
+    implementation("com.google.firebase:firebase-messaging")
 }
+
+// Must be applied after the android {} block and the Firebase dependencies above —
+// it reads android/app/google-services.json (gitignored; not present in this repo)
+// to generate the resources Firebase Messaging needs. A missing file fails the
+// build with a clear "File google-services.json is missing" error, which is
+// expected until a developer supplies their own (see docs/docs/fcm-spike-notes.md).
+apply plugin: "com.google.gms.google-services"

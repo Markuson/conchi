@@ -13,13 +13,51 @@
  * real `App` tree with a seeded store theme and reads the `mode` prop
  * `ThemeProvider` actually received, so the reactive selector → resolver →
  * prop chain is covered end to end, not just the resolver in isolation.
+ *
+ * The third block covers Story 2.1's startup FCM wiring end to end: with a
+ * `webhookUrl` and secret seeded, mounting the real `App` must call
+ * `getFcmToken()`, then `registerFcmToken(token, webhookUrl, secret)` with
+ * those three values in that exact order/position. `fcmClient.test.ts` only
+ * calls `registerFcmToken` directly with its own literal args, which
+ * wouldn't catch a transposition bug at the `App.tsx` call site (all three
+ * params are `string`, so a swap still compiles) — this test mocks
+ * `./lib/fcm` instead of the real client so it can assert exactly what
+ * `App.tsx` passes through.
  */
 import React from 'react';
 import ReactTestRenderer, { act, type ReactTestRenderer as Renderer } from 'react-test-renderer';
 
 import { App, resolveThemeProviderMode } from './App';
+import { getFcmToken, onForegroundMessage, registerFcmToken } from './lib/fcm';
+import { AUTH_SECRET_KEY, deleteSecureItem, writeSecureItem } from './lib/storage/secureStore';
 import { useSettingsStore } from './store';
 import { ThemeProvider } from './theme/ThemeProvider';
+
+jest.mock('./lib/fcm', () => ({
+  getFcmToken: jest.fn(),
+  registerFcmToken: jest.fn(),
+  // Every test in this file mounts <App/>, which always runs the FCM
+  // effect — a bare `jest.fn()` here (returning `undefined`) would throw
+  // when `App.tsx` calls `subscription.remove()` on cleanup for every test
+  // that doesn't explicitly configure this mock itself.
+  onForegroundMessage: jest.fn(() => ({ remove: jest.fn() })),
+}));
+
+const mockGetFcmToken = getFcmToken as jest.MockedFunction<typeof getFcmToken>;
+const mockRegisterFcmToken = registerFcmToken as jest.MockedFunction<typeof registerFcmToken>;
+const mockOnForegroundMessage = onForegroundMessage as jest.MockedFunction<typeof onForegroundMessage>;
+
+/**
+ * Advances the microtask queue enough turns for the FCM effect's `await`
+ * chain (`readSecureItem` → `getFcmToken` → `registerFcmToken`) to settle.
+ * None of that chain triggers a React state update, so `act`'s own
+ * "flush pending work" doesn't wait for it — this stands in for that.
+ */
+async function flushMicrotasks(): Promise<void> {
+  for (let i = 0; i < 10; i += 1) {
+    await Promise.resolve();
+  }
+}
 
 test('resolves "system" to undefined, so ThemeProvider derives the OS color scheme', () => {
   expect(resolveThemeProviderMode('system')).toBeUndefined();
@@ -59,5 +97,68 @@ describe('App wires the store theme into ThemeProvider', () => {
 
     const themeProviderNode = renderer!.root.findByType(ThemeProvider);
     expect(themeProviderNode.props.mode).toBe(expectedMode);
+  });
+});
+
+describe('App wires FCM startup registration (Story 2.1)', () => {
+  let renderer: Renderer | undefined;
+
+  beforeEach(async () => {
+    mockGetFcmToken.mockReset();
+    mockRegisterFcmToken.mockReset();
+    mockOnForegroundMessage.mockReset();
+    mockOnForegroundMessage.mockReturnValue({ remove: jest.fn() });
+
+    useSettingsStore.setState({ webhookUrl: 'https://n8n.example.com' });
+    await writeSecureItem(AUTH_SECRET_KEY, 'secret-value');
+  });
+
+  afterEach(async () => {
+    if (renderer) {
+      act(() => {
+        renderer?.unmount();
+      });
+      renderer = undefined;
+    }
+    useSettingsStore.setState({ webhookUrl: '', theme: 'system' });
+    await deleteSecureItem(AUTH_SECRET_KEY);
+  });
+
+  test('fetches and registers the FCM token against the configured webhook + secret, then attaches the foreground listener', async () => {
+    mockGetFcmToken.mockResolvedValue('device-token-abc');
+    mockRegisterFcmToken.mockResolvedValue({ ok: true } as Response);
+
+    await act(async () => {
+      renderer = ReactTestRenderer.create(<App />);
+      await flushMicrotasks();
+    });
+
+    expect(mockGetFcmToken).toHaveBeenCalledTimes(1);
+    expect(mockRegisterFcmToken).toHaveBeenCalledWith('device-token-abc', 'https://n8n.example.com', 'secret-value');
+    expect(mockOnForegroundMessage).toHaveBeenCalledTimes(1);
+  });
+
+  test('skips registration when getFcmToken resolves null (e.g. permission denied)', async () => {
+    mockGetFcmToken.mockResolvedValue(null);
+
+    await act(async () => {
+      renderer = ReactTestRenderer.create(<App />);
+      await flushMicrotasks();
+    });
+
+    expect(mockGetFcmToken).toHaveBeenCalledTimes(1);
+    expect(mockRegisterFcmToken).not.toHaveBeenCalled();
+  });
+
+  test('skips fetching a token entirely when not configured (no webhookUrl)', async () => {
+    useSettingsStore.setState({ webhookUrl: '' });
+
+    await act(async () => {
+      renderer = ReactTestRenderer.create(<App />);
+      await flushMicrotasks();
+    });
+
+    expect(mockGetFcmToken).not.toHaveBeenCalled();
+    expect(mockRegisterFcmToken).not.toHaveBeenCalled();
   });
 });
