@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-25-2026 00:00
-last_updated: 09-13-2026 00:00
+last_updated: 09-14-2026 01:00
 project: conchi
 project_key: NOKEY
 tracking_system: file-system
@@ -43,10 +43,10 @@ development_status:
   1-4-app-shell-navigation: done
   1-5-settings-screen-connexió-tema-sobre: done
   1-6-tracer-bullet-end-to-end-causal-chain: done
-  epic-1-retrospective: optional
+  epic-1-retrospective: done
 
-  epic-2: backlog
-  2-1-fcm-spike-push-delivery-validation: backlog
+  epic-2: in-progress
+  2-1-fcm-spike-push-delivery-validation: review
   2-2-reference-data-categories-subcategories: backlog
   2-3-confirmation-card: backlog
   2-4-text-entry-full-round-trip-flow: backlog
@@ -87,3 +87,39 @@ development_status:
   7-1-native-widget-target-spike: backlog
   7-2-widget-ui-full-state-machine: backlog
   epic-7-retrospective: optional
+action_items:
+  - id: "epic-1-retro-item-1-extract-settingsscreen-s-connection-save"
+    epic: 1
+    action: "Extract SettingsScreen's connection-save logic into a feature hook (mirror
+      useTracerBullet), bundling the hydration-vs-save race fix."
+    owner: "Marc"
+    status: open
+    ref: "/Users/marc/Development/personal/conchi/_bmad-output/implementation-artifacts/epic-1-retro-2026-09-13.md"
+  - id: "epic-1-retro-item-2-introduce-one-shared-async-staleness-gua"
+    epic: 1
+    action: "Introduce one shared async-staleness-guard convention (useIsMounted/generation-counter)
+      instead of each story hand-rolling its own."
+    owner: "Marc"
+    status: open
+    ref: "/Users/marc/Development/personal/conchi/_bmad-output/implementation-artifacts/epic-1-retro-2026-09-13.md"
+  - id: "epic-1-retro-item-3-add-a-test-for-usetracerbullet-s-stalene"
+    epic: 1
+    action: "Add a test for useTracerBullet's staleness guard: reset() during an in-flight
+      submit() must suppress that submit's eventual result."
+    owner: "Marc"
+    status: open
+    ref: "/Users/marc/Development/personal/conchi/_bmad-output/implementation-artifacts/epic-1-retro-2026-09-13.md"
+  - id: "epic-1-retro-item-4-fix-stale-conchicolors-doc-comment-in-th"
+    epic: 1
+    action: "Fix stale conchiColors doc comment in theme/colors.ts (says SVG placeholder;
+      ConchiBubble renders a real Image since Story 1.4)."
+    owner: "Marc"
+    status: open
+    ref: "/Users/marc/Development/personal/conchi/_bmad-output/implementation-artifacts/epic-1-retro-2026-09-13.md"
+  - id: "epic-1-retro-item-5-establish-a-shared-form-screen-keyboard"
+    epic: 1
+    action: "Establish a shared form-screen keyboard-avoidance convention before Epic
+      2 adds more text-input surfaces."
+    owner: "Marc"
+    status: open
+    ref: "/Users/marc/Development/personal/conchi/_bmad-output/implementation-artifacts/epic-1-retro-2026-09-13.md"

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { DefaultTheme, NavigationContainer, type Theme as NavigationTheme } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -6,6 +6,8 @@ import { RootNavigator } from './navigation';
 import { ThemeProvider, useTheme, type ThemeMode } from './theme/ThemeProvider';
 import { ConchiBubble } from './components/ConchiBubble';
 import type { Theme } from './features/settings/settingsStore';
+import { getFcmToken, onForegroundMessage, registerFcmToken } from './lib/fcm';
+import { AUTH_SECRET_KEY, readSecureItem } from './lib/storage/secureStore';
 import { useSettingsStore } from './store';
 
 /**
@@ -26,6 +28,62 @@ export function App(): React.JSX.Element {
   // before the first frame renders, with no restart needed when it's changed
   // from Settings.
   const theme = useSettingsStore((state) => state.theme);
+
+  // Story 2.1 (FCM spike): startup token registration + foreground listener.
+  // Mirrors `useTracerBullet.checkConfigured`'s "sync webhookUrl + async
+  // secret presence" guard rather than reusing the hook itself — that hook
+  // owns tracer-bullet UI state (`status`/`responseText`) this effect has no
+  // use for. No feature-level dispatch yet (Story 2.4+); the foreground
+  // listener only console-logs the typed payload for manual AC2 inspection.
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      const { webhookUrl } = useSettingsStore.getState();
+      if (!webhookUrl) {
+        return;
+      }
+
+      let secret: string | null;
+      try {
+        secret = await readSecureItem(AUTH_SECRET_KEY);
+      } catch {
+        return;
+      }
+      // Checked immediately after the secret read resolves (not just after
+      // `getFcmToken()` below) — `getFcmToken()` can trigger a native
+      // permission prompt, which shouldn't fire once the effect that kicked
+      // this off has already been torn down (e.g. a fast unmount in tests).
+      if (!secret || cancelled) {
+        return;
+      }
+
+      const token = await getFcmToken();
+      if (!token || cancelled) {
+        return;
+      }
+
+      try {
+        const response = await registerFcmToken(token, webhookUrl, secret);
+        if (!response.ok) {
+          console.log(`[fcm] token registration failed: HTTP ${response.status}`);
+        } else {
+          console.log('[fcm] token registration succeeded');
+        }
+      } catch (error) {
+        console.log('[fcm] token registration failed', error);
+      }
+    })();
+
+    const subscription = onForegroundMessage((payload) => {
+      console.log('[fcm] foreground message received', payload.type, payload);
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.remove();
+    };
+  }, []);
 
   return (
     <ThemeProvider mode={resolveThemeProviderMode(theme)}>

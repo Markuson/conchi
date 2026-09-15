@@ -161,3 +161,15 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-6-tracer-bullet.md`
   summary: `useNavigation<NavigationProp<StackParamList>>()` is a type assertion, not the true composite navigator type (a `CompositeNavigationProp` of `TabParamList` + `StackParamList`) — it works at runtime because React Navigation bubbles unmatched route names up the tree, but would silently hide a real mismatch if the nesting ever changed
   evidence: pre-existing pattern from `ConchiBubble.tsx` (Story 1.4), reused (not introduced) by Story 1.6's `MainTabs`; code-review surfaced it as a general navigation-typing concern, not something this story caused
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-1-fcm-spike-push-delivery-validation.md`
+  summary: FCM token registration only runs once at app mount — if `webhookUrl`/the auth secret are configured (or changed) after mount, the token is never (re-)registered and there's no unregister/invalidate path on the old n8n instance without a full app restart
+  evidence: the spec's own AC only requires registration "when the app starts"; mid-session re-registration on a Settings change is a real gap but belongs to whichever future story (2.4 token-refresh or 2.7 notification settings) actually owns Settings-triggered FCM behavior
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-1-fcm-spike-push-delivery-validation.md`
+  summary: `App.tsx`'s foreground FCM listener `console.log`s the entire raw payload; once Story 2.4+ sends real `round_trip_result` messages (carrying a full `Entry` — amount, category, description), this unredacted logging pattern will write real financial data to device Logcat, a real exposure once builds reach testers via Firebase App Distribution
+  evidence: today's spike test payloads are placeholder-only (per `docs/docs/fcm-spike-notes.md`), so there is no live risk yet, but the logging call itself carries forward unguarded unless Story 2.4 revisits it when building the real typed dispatch bridge
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-1-fcm-spike-push-delivery-validation.md`
+  summary: `Entry.origin` (`src/lib/types/entry.ts`) is hardcoded to the single literal `'app'`; `FcmDataPayload`'s `round_trip_result` variant reuses `Entry` as-is, which is correct for this epic (round-trip results are always app-submitted) but will need `origin` to become a union if a future epic (e.g. Epic 7 widget entries) ever routes a different origin through the same FCM payload shape
+  evidence: pre-existing type, not caused by Story 2.1 — surfaced incidentally because this story is the first to reuse `Entry` inside an FCM payload type

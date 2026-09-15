@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "755020602836",
+    "project_id": "conchi-e930c",
+    "storage_bucket": "conchi-e930c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:755020602836:android:38ab7a1ceaeb39789fca41",
+        "android_client_info": {
+          "package_name": "com.markuson.conchi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKJCz9WKfVhB3R-RW0uha06Akiqx5kfgE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
