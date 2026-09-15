@@ -12,6 +12,9 @@ importers:
 
   .:
     dependencies:
+      '@react-native/assets-registry':
+        specifier: 0.87.0
+        version: 0.87.0(react-native@0.87.0(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@6.0.3))(@react-native/metro-config@0.87.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1))
       '@react-navigation/bottom-tabs':
         specifier: ^7.18.17
         version: 7.18.17(3c17e7b1404893edacef5eb94e6c7055)
@@ -2722,6 +2725,12 @@ packages:
   '@react-native/asset-utils@0.87.0':
     resolution: {integrity: sha512-XUSXMnBmQuBMuMWNWaXMGt4tLzb2yraCVO4b7TFCvEqiCg3ByhbQA0QNmPp+cdWgvmPmptCJwOrBWjPxppXgOA==}
     engines: {node: ^22.13.0 || ^24.3.0 || >= 26.0.0}
+
+  '@react-native/assets-registry@0.87.0':
+    resolution: {integrity: sha512-DD2oFjnUIl9HUOpvEC6GvUNsMm+9tMwn1Li9qXFudlOwMR9gRT7O6pjT7GRLbu24JrOZQeBnEts0UPQQ+7bm6w==}
+    engines: {node: ^22.13.0 || ^24.3.0 || >= 26.0.0}
+    peerDependencies:
+      react-native: '*'
 
   '@react-native/babel-plugin-codegen@0.86.2':
     resolution: {integrity: sha512-NNDZqOlNbH5SzgPks1jFDYH3234Rpa5e/nhZymxhIiBH3NcE3uD+rGj/HWXhH7nHF2ToGK6XbUpqy7nmJPeh+g==}
@@ -13716,6 +13725,10 @@ snapshots:
   '@react-native-community/slider@5.2.1': {}
 
   '@react-native/asset-utils@0.87.0': {}
+
+  '@react-native/assets-registry@0.87.0(react-native@0.87.0(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@6.0.3))(@react-native/metro-config@0.87.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1))':
+    dependencies:
+      react-native: 0.87.0(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@6.0.3))(@react-native/metro-config@0.87.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1)
 
   '@react-native/babel-plugin-codegen@0.86.2(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)':
     dependencies:
