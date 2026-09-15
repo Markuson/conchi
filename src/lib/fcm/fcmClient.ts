@@ -33,6 +33,7 @@ export async function getFcmToken(): Promise<string | null> {
     }
 
     if (status !== Notifications.PermissionStatus.GRANTED) {
+      console.log(`[fcm] getFcmToken: permission not granted (status: ${status})`);
       return null;
     }
 
@@ -44,13 +45,18 @@ export async function getFcmToken(): Promise<string | null> {
     // itself to `string` rather than trusting the library's `any`.
     const token = await Notifications.getDevicePushTokenAsync();
     if (token.type !== 'android' || typeof token.data !== 'string') {
+      console.log(`[fcm] getFcmToken: unexpected token shape (type: ${token.type})`);
       return null;
     }
     return token.data;
-  } catch {
-    // A native rejection (e.g. Google Play services missing/outdated) is
-    // treated the same as "permission denied" — registration is skipped,
-    // not surfaced as a crash/unhandled rejection to the caller.
+  } catch (error) {
+    // A native rejection (e.g. Google Play services missing/outdated, or
+    // FirebaseApp not initialized because google-services.json wasn't picked
+    // up by the Gradle build) is treated the same as "permission denied" —
+    // registration is skipped, not surfaced as a crash/unhandled rejection to
+    // the caller. Logged here (rather than silently, as originally shipped)
+    // because this exact silence made a real device failure undiagnosable.
+    console.log('[fcm] getFcmToken threw', error);
     return null;
   }
 }
