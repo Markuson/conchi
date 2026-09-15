@@ -41,25 +41,35 @@ export function App(): React.JSX.Element {
     void (async () => {
       const { webhookUrl } = useSettingsStore.getState();
       if (!webhookUrl) {
+        console.log('[fcm] skipped: no webhookUrl configured');
         return;
       }
 
       let secret: string | null;
       try {
         secret = await readSecureItem(AUTH_SECRET_KEY);
-      } catch {
+      } catch (error) {
+        console.log('[fcm] skipped: secure store read failed', error);
         return;
       }
       // Checked immediately after the secret read resolves (not just after
       // `getFcmToken()` below) — `getFcmToken()` can trigger a native
       // permission prompt, which shouldn't fire once the effect that kicked
       // this off has already been torn down (e.g. a fast unmount in tests).
-      if (!secret || cancelled) {
+      if (!secret) {
+        console.log('[fcm] skipped: no auth secret configured');
+        return;
+      }
+      if (cancelled) {
         return;
       }
 
       const token = await getFcmToken();
-      if (!token || cancelled) {
+      if (!token) {
+        console.log('[fcm] skipped: no token from getFcmToken (see its own log line above for why)');
+        return;
+      }
+      if (cancelled) {
         return;
       }
 
