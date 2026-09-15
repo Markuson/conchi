@@ -39,7 +39,10 @@ local.properties
 
 # Secrets decoded by CI — never committed
 android/app/release.keystore
-android/app/google-services.json
+# Catches google-services.json at any depth under android/ (not just
+# android/app/) — a misplaced copy at android/google-services.json was
+# committed and leaked a real Google API key (2026-09-15); this closes that gap.
+android/**/google-services.json
 *.jks
 *.p12
 .env
