@@ -16,3 +16,11 @@ export const IS_DETOX = process.env['DETOX_TEST'] === 'true';
  */
 export const FCM_REGISTER_PATH = '/register-token';
 export const SEND_EXPENSE_PATH = '/send-expense';
+export const CATEGORIES_PATH = '/get-categories';
+
+/**
+ * Delay before `fetchReferenceData`'s single retry after a failed fetch
+ * (Story 2.2). Named so the retry timing is a documented, greppable
+ * constant rather than a magic number buried in `setTimeout`.
+ */
+export const REFERENCE_DATA_RETRY_DELAY_MS = 5000;

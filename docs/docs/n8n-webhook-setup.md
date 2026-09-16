@@ -92,6 +92,40 @@ error here).
 Until step 3 completes, the app will fail with an HTTP error on every request —
 there's no grace period where both old and new tokens work.
 
+## Categories & subcategories endpoint (Story 2.2, assumed contract)
+
+The app also fetches the categories/subcategories/contexts list it needs for
+the entry picker (Story 2.3) from a second workflow, at startup:
+
+- **Path**: `get-categories` — joined onto the same webhook base as every
+  other endpoint (`CATEGORIES_PATH`, `src/lib/constants.ts`), e.g.
+  `https://your-n8n-instance.example.com/webhook/get-categories`.
+- **HTTP Method**: `POST` (matches every other endpoint in this doc).
+- **Authentication**: `Header Auth`, same credential as step 2 above.
+- **Expected response body** (JSON):
+
+  ```json
+  {
+    "categories": [
+      { "name": "PLACEHOLDER_CATEGORY", "subcategories": ["PLACEHOLDER_SUBCATEGORY"] }
+    ],
+    "contexts": ["PLACEHOLDER_CONTEXT"]
+  }
+  ```
+
+  This is exactly the shape `useReferenceDataStore` holds internally — the
+  app applies no translation layer, so the workflow's response must match
+  field-for-field.
+
+**This contract is an assumption, not a verified spec** — no real n8n
+categories workflow exists yet to confirm it against (flagged unresolved in
+the architecture's adversarial review). A fetch failure here degrades
+gracefully (the app keeps whatever it last cached, or empty lists on first
+launch) and retries once automatically, so wiring this workflow up
+incorrectly won't crash the app — but the app's category/subcategory picker
+(Story 2.3) has nothing to show until a real workflow matching this shape is
+activated at this path.
+
 ## Note on the payload shape (today)
 
 Right now (Story 1.6, the tracer bullet) the app posts the text you type as a

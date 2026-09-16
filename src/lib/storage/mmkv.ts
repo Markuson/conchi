@@ -34,3 +34,26 @@ export function setNumber(key: string, value: number): void {
 export function deleteKey(key: string): void {
   storage.delete(key);
 }
+
+/**
+ * JSON-serialized structured-data read/write, layered on `getString`/
+ * `setString` rather than a separate MMKV API — there isn't one. Returns
+ * `undefined` for a missing key or a value that fails to parse as JSON
+ * (e.g. a corrupted/partial write) so a caller's hydration guard treats both
+ * the same as "no cache" instead of throwing.
+ */
+export function getObject<T>(key: string): T | undefined {
+  const raw = storage.getString(key);
+  if (raw === undefined) {
+    return undefined;
+  }
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return undefined;
+  }
+}
+
+export function setObject<T>(key: string, value: T): void {
+  storage.set(key, JSON.stringify(value));
+}
