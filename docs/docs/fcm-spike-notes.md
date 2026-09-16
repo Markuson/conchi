@@ -28,9 +28,19 @@ configured (mirrors the tracer bullet's `checkConfigured` guard — Story 1.6):
    to FCM directly via the Firebase Admin SDK, never through Expo's push
    relay, so the app must hand over the raw platform token, not an
    Expo-wrapped one.
-3. POSTs `{ token }` to `{webhookUrl}/register-token` with the same
-   `Authorization: Bearer <secret>` header every n8n request carries (AD-5,
-   `postToN8n`).
+3. POSTs `{ token }` to `{webhookUrl}/register-token` (via `joinWebhookUrl`,
+   `src/lib/api/n8nClient.ts`) with the same `Authorization: Bearer <secret>`
+   header every n8n request carries (AD-5, `postToN8n`).
+
+`webhookUrl` (Settings → CONNEXIÓ) is a **base**, not a full route — it must
+be n8n's own `.../webhook` (production) or `.../webhook-test` prefix itself,
+with no workflow-specific path after it (e.g. `https://your-n8n.example.com/
+webhook`, not `.../webhook/send-expense`). Every call site appends its own
+path onto that base: `/register-token` here, `/send-expense` for the tracer
+bullet and `validateConnection`'s ping. Pointing `webhookUrl` at one
+workflow's specific path (a real mistake made while validating this spike)
+makes every *other* endpoint 404, since it appends its own suffix on top of
+whatever's already there.
 
 It also attaches a foreground listener
 (`Notifications.addNotificationReceivedListener`) that `console.log`s the
@@ -99,8 +109,9 @@ through an Expo config plugin (`app.json` stays minimal):
 1. Place your own `google-services.json` under `android/app/`.
 2. Build and install via Firebase App Distribution (existing CI pipeline,
    AD-17) or a local `pnpm android` debug build.
-3. Configure Settings → CONNEXIÓ in the app with your n8n webhook base URL
-   and auth secret (same as the tracer bullet).
+3. Configure Settings → CONNEXIÓ in the app with your n8n **base** URL
+   (`.../webhook`, no workflow-specific path after it — see note above) and
+   auth secret.
 4. Launch the app once so it registers its token — watch Logcat for
    `[fcm] token registration succeeded` (or `[fcm] token registration
    failed` plus the reason, if something's misconfigured).

@@ -35,6 +35,7 @@ mockUseSettingsStore.getState = (): typeof mockSettingsState => mockSettingsStat
 jest.mock('../store', () => ({ useSettingsStore: mockUseSettingsStore }));
 
 jest.mock('../lib/api/n8nClient', () => ({
+  ...jest.requireActual<typeof import('../lib/api/n8nClient')>('../lib/api/n8nClient'),
   postToN8n: jest.fn(),
 }));
 
@@ -166,7 +167,11 @@ test('FAB tap while configured opens the same modal from Home or Analytics, and 
   pressByLabel(renderer, 'Envia');
   await flush();
 
-  expect(mockPostToN8n).toHaveBeenCalledWith('https://n8n.example.com/webhook', 'secret-value', 'hola conchi');
+  expect(mockPostToN8n).toHaveBeenCalledWith(
+    'https://n8n.example.com/webhook/send-expense',
+    'secret-value',
+    'hola conchi',
+  );
   expect(screenTextShown(renderer, 'pong')).toBe(true);
 });
 

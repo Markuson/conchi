@@ -8,10 +8,11 @@
 export const IS_DETOX = process.env['DETOX_TEST'] === 'true';
 
 /**
- * Story 2.1 (FCM spike): path appended to the Settings `webhookUrl` to build the
- * device-token registration endpoint (`{webhookUrl}${FCM_REGISTER_PATH}`). This is
- * the first call site to treat `webhookUrl` as a base rather than a literal,
- * full endpoint (AD-15 going forward) — the existing tracer-bullet call site
- * (Story 1.6) keeps posting to `webhookUrl` as-is until Story 2.4.
+ * Endpoint-specific paths joined onto the Settings `webhookUrl` (a base —
+ * n8n's own `.../webhook` production prefix, per AD-15) via `joinWebhookUrl`.
+ * `webhookUrl` alone is never a real n8n route; every caller appends one of
+ * these. `SEND_EXPENSE_PATH` also backs `validateConnection`'s ping, since
+ * that's the same n8n node the tracer bullet posts real text to.
  */
 export const FCM_REGISTER_PATH = '/register-token';
+export const SEND_EXPENSE_PATH = '/send-expense';

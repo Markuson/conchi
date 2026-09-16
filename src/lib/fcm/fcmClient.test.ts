@@ -15,6 +15,7 @@ import { getFcmToken, onForegroundMessage, registerFcmToken } from './fcmClient'
 import type { FcmDataPayload } from './types';
 
 jest.mock('../api/n8nClient', () => ({
+  ...jest.requireActual<typeof import('../api/n8nClient')>('../api/n8nClient'),
   postToN8n: jest.fn(),
 }));
 

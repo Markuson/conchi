@@ -4,12 +4,26 @@
  * (AD-5). `validateConnection.test.ts` mocks this module entirely, so this is
  * the one place the real header-building logic actually runs under test.
  */
-import { postToN8n } from './n8nClient';
+import { joinWebhookUrl, postToN8n } from './n8nClient';
 
 const originalFetch = global.fetch;
 
 afterEach(() => {
   global.fetch = originalFetch;
+});
+
+describe('joinWebhookUrl', () => {
+  test('joins a base with no trailing slash to a path', () => {
+    expect(joinWebhookUrl('https://n8n.example.com/webhook', '/send-expense')).toBe(
+      'https://n8n.example.com/webhook/send-expense',
+    );
+  });
+
+  test('strips a trailing slash on the base so the join never doubles up', () => {
+    expect(joinWebhookUrl('https://n8n.example.com/webhook/', '/send-expense')).toBe(
+      'https://n8n.example.com/webhook/send-expense',
+    );
+  });
 });
 
 test('POSTs to the given URL with a Bearer auth header and JSON body', async () => {

@@ -20,6 +20,7 @@ import { useSettingsStore } from '../../store';
 import { useTracerBullet, type UseTracerBulletResult } from './useTracerBullet';
 
 jest.mock('../../lib/api/n8nClient', () => ({
+  ...jest.requireActual<typeof import('../../lib/api/n8nClient')>('../../lib/api/n8nClient'),
   postToN8n: jest.fn(),
 }));
 
@@ -135,7 +136,11 @@ describe('submit', () => {
 
     await act(async () => hook.current.submit('hola conchi'));
 
-    expect(mockPostToN8n).toHaveBeenCalledWith('https://n8n.example.com/webhook', 'secret-value', 'hola conchi');
+    expect(mockPostToN8n).toHaveBeenCalledWith(
+      'https://n8n.example.com/webhook/send-expense',
+      'secret-value',
+      'hola conchi',
+    );
     expect(hook.current.status).toBe('success');
     expect(hook.current.responseText).toBe('pong');
     expect(hook.current.errorMessage).toBeUndefined();

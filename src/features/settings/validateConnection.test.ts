@@ -8,6 +8,7 @@ import { postToN8n } from '../../lib/api/n8nClient';
 import { validateConnection } from './validateConnection';
 
 jest.mock('../../lib/api/n8nClient', () => ({
+  ...jest.requireActual<typeof import('../../lib/api/n8nClient')>('../../lib/api/n8nClient'),
   postToN8n: jest.fn(),
 }));
 
@@ -30,7 +31,7 @@ test('accepts an HTTP 200 response', async () => {
   const result = await validateConnection('https://n8n.example.com/webhook', 'secret');
 
   expect(result).toEqual({ ok: true });
-  expect(mockPostToN8n).toHaveBeenCalledWith('https://n8n.example.com/webhook', 'secret', {});
+  expect(mockPostToN8n).toHaveBeenCalledWith('https://n8n.example.com/webhook/send-expense', 'secret', {});
 });
 
 test('reports an "http" reason on a non-2xx response', async () => {

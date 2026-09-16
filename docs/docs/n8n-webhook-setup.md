@@ -18,7 +18,9 @@ token to this repo or any doc (AD-5).
 1. In n8n, create a new workflow (e.g. `Conchi — App Gateway`).
 2. Add a **Webhook** node as the trigger:
    - **HTTP Method**: `POST`
-   - **Path**: anything stable, e.g. `conchi`
+   - **Path**: `send-expense` — the app hardcodes this exact suffix (`SEND_EXPENSE_PATH`,
+     `src/lib/constants.ts`) when it posts tracer-bullet text and pings the
+     connection from Settings, so the workflow must live at this path.
    - **Authentication**: `Header Auth`
    - **Respond**: `Immediately` (simplest for now — see [Note on the payload shape](#note-on-the-payload-shape-today) below)
 3. Give the Webhook node a **Response Data** of type `Text` with something like
@@ -55,23 +57,30 @@ responds on the **Test URL** (and only while the editor is open and "listening")
 never on the **Production URL** the app needs.
 
 Once active, copy the **Production** webhook URL from the node (not the Test
-URL) — it looks like `https://your-n8n-instance.example.com/webhook/conchi`.
+URL) — it looks like `https://your-n8n-instance.example.com/webhook/send-expense`.
 
 ## 4. Configure the app
 
 In the app: **Settings → CONNEXIÓ**.
 
-- **URL del webhook**: the production webhook URL from step 3, used as-is — the
-  app doesn't append any path to it.
+- **URL del webhook**: the **base** URL only — everything up to and including
+  `/webhook` (e.g. `https://your-n8n-instance.example.com/webhook`), **without**
+  the `/send-expense` suffix from step 3. The app is what appends
+  endpoint-specific paths onto this base (`/send-expense` for this workflow and
+  the connection check, `/register-token` for FCM device-token registration —
+  `joinWebhookUrl`, `src/lib/api/n8nClient.ts`); pointing this field at one
+  workflow's full path instead of the shared base makes every other endpoint
+  404.
 - **Secret d'autenticació**: the raw token from step 2, *without* the `Bearer `
   prefix — the app adds that prefix itself on every request.
 
-Tap **Acceptar**. This sends an empty POST to the URL and expects any `2xx`
-response — your workflow doesn't need to inspect the request body to pass this
-check, just respond successfully. On success the secret is written to the
-device's secure storage (`expo-secure-store`) and the URL to local storage
-(MMKV); on failure the screen shows whether the problem was the URL format, the
-network, or an HTTP error from n8n (e.g. a token mismatch shows up as an HTTP
+Tap **Acceptar**. This sends an empty POST to `{URL del webhook}/send-expense`
+and expects any `2xx` response — your workflow doesn't need to inspect the
+request body to pass this check, just respond successfully. On success the
+secret is written to the device's secure storage (`expo-secure-store`) and the
+base URL to local storage (MMKV); on failure the screen shows whether the
+problem was the URL format, the network, or an HTTP error from n8n (e.g. a
+token mismatch, or a missing `/send-expense` workflow, shows up as an HTTP
 error here).
 
 ## Rotating the token
