@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 
-import { postToN8n } from '../../lib/api/n8nClient';
+import { joinWebhookUrl, postToN8n } from '../../lib/api/n8nClient';
+import { SEND_EXPENSE_PATH } from '../../lib/constants';
 import { AUTH_SECRET_KEY, readSecureItem } from '../../lib/storage/secureStore';
 import { useSettingsStore } from '../../store';
 
@@ -83,7 +84,7 @@ export function useTracerBullet(): UseTracerBulletResult {
     }
 
     try {
-      const response = await postToN8n(webhookUrl, secret, text);
+      const response = await postToN8n(joinWebhookUrl(webhookUrl, SEND_EXPENSE_PATH), secret, text);
       if (!response.ok) {
         if (!isStale()) {
           setStatus('error');

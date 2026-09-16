@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications';
 
-import { postToN8n } from '../api/n8nClient';
+import { joinWebhookUrl, postToN8n } from '../api/n8nClient';
 import { FCM_REGISTER_PATH } from '../constants';
 import type { FcmDataPayload } from './types';
 
@@ -71,11 +71,7 @@ export async function getFcmToken(): Promise<string | null> {
  * has no user-facing error UI yet.
  */
 export async function registerFcmToken(token: string, webhookUrl: string, secret: string): Promise<Response> {
-  // `webhookUrl` may already end with a trailing slash (Settings doesn't
-  // enforce a format) — stripped here so the joined URL never doubles up
-  // (`.../` + `/register-token` → `...//register-token`).
-  const base = webhookUrl.endsWith('/') ? webhookUrl.slice(0, -1) : webhookUrl;
-  return postToN8n(`${base}${FCM_REGISTER_PATH}`, secret, { token });
+  return postToN8n(joinWebhookUrl(webhookUrl, FCM_REGISTER_PATH), secret, { token });
 }
 
 /**

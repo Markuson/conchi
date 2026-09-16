@@ -18,6 +18,19 @@
  */
 const REQUEST_TIMEOUT_MS = 15000;
 
+/**
+ * Joins the Settings `webhookUrl` (a base — e.g. `https://host/webhook`,
+ * n8n's own production-webhook prefix) with an endpoint-specific path (e.g.
+ * `/send-expense`, `/register-token`). `base` may or may not already end in
+ * `/` — stripped here so the join never doubles a slash. Every call site that
+ * treats `webhookUrl` as a base goes through this one function so the join
+ * logic isn't re-implemented per call site.
+ */
+export function joinWebhookUrl(base: string, path: string): string {
+  const trimmedBase = base.endsWith('/') ? base.slice(0, -1) : base;
+  return `${trimmedBase}${path}`;
+}
+
 export async function postToN8n(url: string, secret: string, body: unknown): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);

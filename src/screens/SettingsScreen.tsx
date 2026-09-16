@@ -195,7 +195,7 @@ export function SettingsScreen(): React.JSX.Element {
               setUrlError(undefined);
               setStatus({ kind: 'idle' });
             }}
-            placeholder="https://el-teu-n8n.example.com"
+            placeholder="https://el-teu-n8n.example.com/webhook"
             value={urlDraft}
           />
           <TextField
