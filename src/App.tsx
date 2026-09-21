@@ -6,6 +6,7 @@ import { RootNavigator } from './navigation';
 import { ThemeProvider, useTheme, type ThemeMode } from './theme/ThemeProvider';
 import { ConchiBubble } from './components/ConchiBubble';
 import type { Theme } from './features/settings/settingsStore';
+import { fetchReferenceData } from './features/settings/referenceDataFetch';
 import { getFcmToken, onForegroundMessage, registerFcmToken } from './lib/fcm';
 import { AUTH_SECRET_KEY, readSecureItem } from './lib/storage/secureStore';
 import { useSettingsStore } from './store';
@@ -37,6 +38,15 @@ export function App(): React.JSX.Element {
   // listener only console-logs the typed payload for manual AC2 inspection.
   useEffect(() => {
     let cancelled = false;
+
+    // Story 2.2: reference-data (categories/subcategories/contexts) fetch.
+    // Independent of the FCM registration flow below — hydration from the
+    // MMKV cache already happened synchronously at `referenceData.ts`
+    // module load, so this call is a background refresh, never a render
+    // blocker. `fetchReferenceData` never throws and sets no component
+    // state itself, so there's nothing for a `cancelled` guard to protect
+    // here.
+    void fetchReferenceData();
 
     void (async () => {
       const { webhookUrl } = useSettingsStore.getState();

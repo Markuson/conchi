@@ -28,6 +28,7 @@ import React from 'react';
 import ReactTestRenderer, { act, type ReactTestRenderer as Renderer } from 'react-test-renderer';
 
 import { App, resolveThemeProviderMode } from './App';
+import { fetchReferenceData } from './features/settings/referenceDataFetch';
 import { getFcmToken, onForegroundMessage, registerFcmToken } from './lib/fcm';
 import { AUTH_SECRET_KEY, deleteSecureItem, writeSecureItem } from './lib/storage/secureStore';
 import { useSettingsStore } from './store';
@@ -42,6 +43,18 @@ jest.mock('./lib/fcm', () => ({
   // that doesn't explicitly configure this mock itself.
   onForegroundMessage: jest.fn(() => ({ remove: jest.fn() })),
 }));
+
+// Every test in this file mounts <App/>, which now also runs the Story 2.2
+// reference-data fetch effect. Left un-mocked, a test that seeds a real
+// webhookUrl (the FCM describe block below) would trigger a real network
+// call via the real `postToN8n`/`fetch`, plus a real 5s retry `setTimeout`
+// on its failure — neither of which any test in this file cares about or
+// cleans up.
+jest.mock('./features/settings/referenceDataFetch', () => ({
+  fetchReferenceData: jest.fn().mockResolvedValue(undefined),
+}));
+
+const mockFetchReferenceData = fetchReferenceData as jest.MockedFunction<typeof fetchReferenceData>;
 
 const mockGetFcmToken = getFcmToken as jest.MockedFunction<typeof getFcmToken>;
 const mockRegisterFcmToken = registerFcmToken as jest.MockedFunction<typeof registerFcmToken>;
@@ -108,6 +121,8 @@ describe('App wires FCM startup registration (Story 2.1)', () => {
     mockRegisterFcmToken.mockReset();
     mockOnForegroundMessage.mockReset();
     mockOnForegroundMessage.mockReturnValue({ remove: jest.fn() });
+    mockFetchReferenceData.mockClear();
+    mockFetchReferenceData.mockResolvedValue(undefined);
 
     useSettingsStore.setState({ webhookUrl: 'https://n8n.example.com' });
     await writeSecureItem(AUTH_SECRET_KEY, 'secret-value');
@@ -136,6 +151,9 @@ describe('App wires FCM startup registration (Story 2.1)', () => {
     expect(mockGetFcmToken).toHaveBeenCalledTimes(1);
     expect(mockRegisterFcmToken).toHaveBeenCalledWith('device-token-abc', 'https://n8n.example.com', 'secret-value');
     expect(mockOnForegroundMessage).toHaveBeenCalledTimes(1);
+    // Story 2.2: the startup effect also kicks off the reference-data fetch,
+    // independently of the FCM flow above.
+    expect(mockFetchReferenceData).toHaveBeenCalledTimes(1);
   });
 
   test('skips registration when getFcmToken resolves null (e.g. permission denied)', async () => {
