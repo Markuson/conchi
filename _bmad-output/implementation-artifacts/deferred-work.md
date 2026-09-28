@@ -173,3 +173,11 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-2-1-fcm-spike-push-delivery-validation.md`
   summary: `Entry.origin` (`src/lib/types/entry.ts`) is hardcoded to the single literal `'app'`; `FcmDataPayload`'s `round_trip_result` variant reuses `Entry` as-is, which is correct for this epic (round-trip results are always app-submitted) but will need `origin` to become a union if a future epic (e.g. Epic 7 widget entries) ever routes a different origin through the same FCM payload shape
   evidence: pre-existing type, not caused by Story 2.1 — surfaced incidentally because this story is the first to reuse `Entry` inside an FCM payload type
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-2-reference-data-categories-subcategories.md`
+  summary: reference-data fetch (like the FCM token registration it mirrors) only runs once, at `App` mount — if `webhookUrl` is configured for the first time from Settings after launch, neither fetch runs until the next app restart
+  evidence: same limitation already accepted for FCM registration in Story 2.1 ("no feature-level dispatch yet"); best fixed once, by triggering both from the Settings save action, rather than patched per-story
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-2-reference-data-categories-subcategories.md`
+  summary: `src/lib/storage/mmkv.ts`'s functions (including the new `getObject`/`setObject`) have never been exercised against a real `react-native-mmkv` instance — every test mocks the module entirely, so a broken JSON serializer would silently degrade to "no cache" with the whole suite still green
+  evidence: pre-existing pattern since Story 1.5's `settingsStore.test.ts`, not introduced by Story 2.2 — surfaced incidentally because this story adds the first structured-data (JSON) read/write pair to that module; a `__mocks__/react-native-mmkv.js` in-memory fake would let a real round-trip be verified directly

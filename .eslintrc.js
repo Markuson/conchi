@@ -16,7 +16,52 @@
  * needs the same store/feature access `App.tsx` already has. `BottomNavBar.tsx` stays pure
  * prop-driven, no exemption needed. What remains restricted is `src/components/**` (and anything
  * else that was never given an explicit exemption).
+ *
+ * AD-16 (Story 2.2): `setReferenceData` (`src/store/referenceData.ts`) is
+ * restricted to `src/features/settings/**` — the slice's sole writer — via a
+ * second `no-restricted-imports` pattern matching that one export name,
+ * scoped (via a glob `group`, see `AD16_NO_SET_REFERENCE_DATA_PATTERN` below
+ * for the literal pattern) to import specifiers ending in
+ * `store/referenceData` specifically —
+ * `src/lib/types/referenceData.ts` (an unrelated file, just the type
+ * definition) happens to share the `referenceData` basename, and ESLint
+ * flags every namespace import (`import * as x`, including a type-only one)
+ * whose source matches `group` regardless of which names are actually used,
+ * so a bare `referenceData` glob false-positives on that file's own barrel
+ * re-export and on this store's own test file. Because a single
+ * `no-restricted-imports` rule value can't be "half off" per override, the
+ * broad AD-2 override below is split into two layers for this rule: the
+ * existing directories keep the AD-16 pattern (re-declared, not turned off)
+ * while `src/features/settings/**` gets its own later override that turns
+ * the whole rule off, since it both needs the AD-2 exemption (already
+ * implied) and is the one place allowed to import `setReferenceData`.
  */
+
+/**
+ * Builds a `no-restricted-imports` pattern enforcing a "sole writer"
+ * convention: only `allowedDir` may import `exportName` from a module
+ * matching `moduleGlob`. AD-16 (below) is the first slice to adopt this;
+ * several other Zustand slices carry the same doc-comment convention
+ * without enforcement, so the next one to enforce it calls this instead of
+ * hand-copying a new pattern object.
+ */
+function soleWriterRestriction(moduleGlob, exportName, allowedDir) {
+  return {
+    group: [moduleGlob],
+    importNames: [exportName],
+    message: `${exportName} is restricted to ${allowedDir}/** — it is the sole writer of this slice. Read its state via the slice's exported hook instead.`,
+  };
+}
+
+// Shared by the base `rules` block and the re-declaring override below
+// (`src/screens/**`/`src/lib/**`/etc.) so the pattern is defined once, not
+// hand-copied in two places that would otherwise need to be kept in sync.
+const AD16_NO_SET_REFERENCE_DATA_PATTERN = soleWriterRestriction(
+  '**/store/referenceData',
+  'setReferenceData',
+  'src/features/settings',
+);
+
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
@@ -63,6 +108,7 @@ module.exports = {
             group: ['**/store', '**/store/*', '**/store/**'],
             message: 'src/components/** must not import from src/store/** (AD-2). Add a hook in the feature folder instead.',
           },
+          AD16_NO_SET_REFERENCE_DATA_PATTERN,
         ],
       },
     ],
@@ -72,6 +118,11 @@ module.exports = {
   },
   overrides: [
     {
+      // AD-2 exemption: these directories may import from src/features/**
+      // and src/store/** freely. The AD-16 setReferenceData restriction is
+      // re-declared (not turned off) here, since every one of these
+      // directories except src/features/settings/** must still be blocked
+      // from importing it — see the more specific override below.
       files: [
         'src/screens/**/*.{ts,tsx}',
         'src/lib/**/*.{ts,tsx}',
@@ -81,6 +132,15 @@ module.exports = {
         'src/App.test.tsx',
         'src/navigation/index.tsx',
       ],
+      rules: {
+        'no-restricted-imports': ['error', { patterns: [AD16_NO_SET_REFERENCE_DATA_PATTERN] }],
+      },
+    },
+    {
+      // The one place AD-16 allows importing setReferenceData. Declared
+      // after (and so takes precedence over) the broad override above,
+      // which would otherwise still block it here too.
+      files: ['src/features/settings/**/*.{ts,tsx}'],
       rules: {
         'no-restricted-imports': 'off',
       },
