@@ -1,6 +1,6 @@
 /**
  * Covers the I/O & Edge-Case Matrix's hydration expectations: the store
- * hydrates `categories`/`contexts` from the MMKV JSON cache synchronously at
+ * hydrates `categories`/`contexts` from the single MMKV JSON cache entry at
  * module load, before any fetch resolves. Mirrors
  * `settingsStore.test.ts`'s hoisted-mock + `jest.resetModules()` pattern,
  * since this store also reads MMKV at top-level `create(...)` evaluation
@@ -9,9 +9,9 @@
  * `setReferenceData` is deliberately NOT exercised here — AD-16 restricts
  * importing it to `src/features/settings/**`, and this file lives in
  * `src/store/**`, so an import here would itself violate the rule this story
- * adds. Its effect on the store is covered instead by
- * `features/settings/referenceDataFetch.test.ts`, which is allowed to import
- * it.
+ * adds. Its effect on the store (including the actual state-merge logic) is
+ * covered instead by `features/settings/referenceDataFetch.test.ts`, which
+ * is allowed to import it.
  */
 const mockGetObject = jest.fn<unknown, [string]>();
 
@@ -32,13 +32,13 @@ beforeEach(() => {
   mockGetObject.mockReset();
 });
 
-test('hydrates categories and contexts from the MMKV cache at module load', () => {
+test('hydrates categories and contexts from the single MMKV cache entry at module load', () => {
   mockGetObject.mockImplementation((key: string) => {
-    if (key === 'referenceData.categories') {
-      return [{ name: 'Menjar', subcategories: ['Restaurant', 'Supermercat'] }];
-    }
-    if (key === 'referenceData.contexts') {
-      return ['Personal', 'Feina'];
+    if (key === 'referenceData.v1') {
+      return {
+        categories: [{ name: 'Menjar', subcategories: ['Restaurant', 'Supermercat'] }],
+        contexts: ['Personal', 'Feina'],
+      };
     }
     return undefined;
   });
@@ -71,10 +71,10 @@ test('defaults to empty arrays when the cache read throws (e.g. a corrupted stor
   expect(useReferenceDataStore.getState().contexts).toEqual([]);
 });
 
-test('the hook state has no setter — setReferenceData is not part of its returned state', () => {
+test('the exported hook has no setState — setReferenceData is the sole writer (AD-16)', () => {
   mockGetObject.mockReturnValue(undefined);
 
   const useReferenceDataStore = freshStore();
 
-  expect(useReferenceDataStore.getState()).toEqual({ categories: [], contexts: [] });
+  expect((useReferenceDataStore as unknown as { setState?: unknown }).setState).toBeUndefined();
 });

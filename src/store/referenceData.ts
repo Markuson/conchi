@@ -19,12 +19,13 @@ export type ReferenceDataState = {
 };
 
 /**
- * Exported (unlike `settingsStore.ts`'s equivalent keys) so
- * `features/settings/referenceDataFetch.ts` writes the exact same MMKV keys
- * this store hydrates from on the next launch, without redeclaring them.
+ * Categories and contexts are always fetched and written together
+ * (`referenceDataFetch.ts`), so they're cached under one MMKV entry rather
+ * than two — one native read/write instead of two, and no window where a
+ * partial write could pair fresh categories with stale contexts (or vice
+ * versa).
  */
-export const CATEGORIES_KEY = 'referenceData.categories';
-export const CONTEXTS_KEY = 'referenceData.contexts';
+export const REFERENCE_DATA_KEY = 'referenceData.v1';
 
 /**
  * Mirrors `settingsStore.ts`'s `safeGetString` guard: this hydration read
@@ -41,22 +42,44 @@ function safeGetObject<T>(key: string): T | undefined {
   }
 }
 
-const cachedCategories = safeGetObject<Category[]>(CATEGORIES_KEY);
-const cachedContexts = safeGetObject<string[]>(CONTEXTS_KEY);
+const cached = safeGetObject<ReferenceDataState>(REFERENCE_DATA_KEY);
 
-export const useReferenceDataStore = create<ReferenceDataState>(() => ({
-  categories: cachedCategories ?? [],
-  contexts: cachedContexts ?? [],
+const referenceDataStore = create<ReferenceDataState>(() => ({
+  categories: cached?.categories ?? [],
+  contexts: cached?.contexts ?? [],
 }));
+
+/**
+ * `no-restricted-imports`'s `importNames` option (AD-16) can only block
+ * importing `setReferenceData` by name — it can't stop a file that already
+ * imports `useReferenceDataStore` for reads from calling `.setState(...)` on
+ * it directly, since that's a method call on an otherwise-permitted import,
+ * not a named import the rule can see. So the publicly exported hook below
+ * is a thin wrapper around the real zustand store that forwards calls and
+ * `getState()` but deliberately never exposes `setState` — the real store
+ * (and its `setState`) stays private to this module, reachable only through
+ * `setReferenceData`.
+ */
+function readReferenceDataStore(): ReferenceDataState;
+function readReferenceDataStore<T>(selector: (state: ReferenceDataState) => T): T;
+function readReferenceDataStore<T>(selector?: (state: ReferenceDataState) => T): T | ReferenceDataState {
+  return selector ? referenceDataStore(selector) : referenceDataStore();
+}
+
+export const useReferenceDataStore = readReferenceDataStore as typeof readReferenceDataStore & {
+  getState: () => ReferenceDataState;
+};
+useReferenceDataStore.getState = referenceDataStore.getState;
 
 /**
  * The sole writer of this slice (AD-16), restricted to
  * `src/features/settings/**` by the `no-restricted-imports` `importNames`
- * override in `.eslintrc.js`. Callers (today, only
- * `features/settings/referenceDataFetch.ts`) own writing the same data to
- * the MMKV cache (`CATEGORIES_KEY`/`CONTEXTS_KEY` above) themselves — this
- * function only updates in-memory state.
+ * override in `.eslintrc.js`, and the only place with a reference to the
+ * underlying store's `setState` at all (see `useReferenceDataStore` above).
+ * Callers (today, only `features/settings/referenceDataFetch.ts`) own
+ * writing the same data to the MMKV cache (`REFERENCE_DATA_KEY` above)
+ * themselves — this function only updates in-memory state.
  */
 export function setReferenceData(data: Partial<ReferenceDataState>): void {
-  useReferenceDataStore.setState((state) => ({ ...state, ...data }));
+  referenceDataStore.setState((state) => ({ ...state, ...data }));
 }

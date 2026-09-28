@@ -37,15 +37,30 @@
  * implied) and is the one place allowed to import `setReferenceData`.
  */
 
+/**
+ * Builds a `no-restricted-imports` pattern enforcing a "sole writer"
+ * convention: only `allowedDir` may import `exportName` from a module
+ * matching `moduleGlob`. AD-16 (below) is the first slice to adopt this;
+ * several other Zustand slices carry the same doc-comment convention
+ * without enforcement, so the next one to enforce it calls this instead of
+ * hand-copying a new pattern object.
+ */
+function soleWriterRestriction(moduleGlob, exportName, allowedDir) {
+  return {
+    group: [moduleGlob],
+    importNames: [exportName],
+    message: `${exportName} is restricted to ${allowedDir}/** — it is the sole writer of this slice. Read its state via the slice's exported hook instead.`,
+  };
+}
+
 // Shared by the base `rules` block and the re-declaring override below
 // (`src/screens/**`/`src/lib/**`/etc.) so the pattern is defined once, not
 // hand-copied in two places that would otherwise need to be kept in sync.
-const AD16_NO_SET_REFERENCE_DATA_PATTERN = {
-  group: ['**/store/referenceData'],
-  importNames: ['setReferenceData'],
-  message:
-    'setReferenceData is restricted to src/features/settings/** (AD-16) — it is the sole writer of the reference-data slice. Read categories/contexts via useReferenceDataStore instead.',
-};
+const AD16_NO_SET_REFERENCE_DATA_PATTERN = soleWriterRestriction(
+  '**/store/referenceData',
+  'setReferenceData',
+  'src/features/settings',
+);
 
 module.exports = {
   root: true,

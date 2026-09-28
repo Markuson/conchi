@@ -7,8 +7,8 @@ import { ThemeProvider, useTheme, type ThemeMode } from './theme/ThemeProvider';
 import { ConchiBubble } from './components/ConchiBubble';
 import type { Theme } from './features/settings/settingsStore';
 import { fetchReferenceData } from './features/settings/referenceDataFetch';
+import { resolveConfiguredCredentials } from './lib/api/connection';
 import { getFcmToken, onForegroundMessage, registerFcmToken } from './lib/fcm';
-import { AUTH_SECRET_KEY, readSecureItem } from './lib/storage/secureStore';
 import { useSettingsStore } from './store';
 
 /**
@@ -30,46 +30,36 @@ export function App(): React.JSX.Element {
   // from Settings.
   const theme = useSettingsStore((state) => state.theme);
 
-  // Story 2.1 (FCM spike): startup token registration + foreground listener.
-  // Mirrors `useTracerBullet.checkConfigured`'s "sync webhookUrl + async
-  // secret presence" guard rather than reusing the hook itself — that hook
-  // owns tracer-bullet UI state (`status`/`responseText`) this effect has no
-  // use for. No feature-level dispatch yet (Story 2.4+); the foreground
-  // listener only console-logs the typed payload for manual AC2 inspection.
+  // Story 2.1 (FCM spike) + Story 2.2 (reference-data fetch): both gate on
+  // the exact same "webhookUrl configured + secret present" check, resolved
+  // once here (`resolveConfiguredCredentials`, shared with
+  // `useTracerBullet.checkConfigured` and `referenceDataFetch.ts`) rather
+  // than each flow independently reading secure storage for the same key on
+  // every cold start. No feature-level dispatch yet (Story 2.4+); the
+  // foreground listener only console-logs the typed payload for manual AC2
+  // inspection.
   useEffect(() => {
     let cancelled = false;
 
-    // Story 2.2: reference-data (categories/subcategories/contexts) fetch.
-    // Independent of the FCM registration flow below — hydration from the
-    // MMKV cache already happened synchronously at `referenceData.ts`
-    // module load, so this call is a background refresh, never a render
-    // blocker. `fetchReferenceData` never throws and sets no component
-    // state itself, so there's nothing for a `cancelled` guard to protect
-    // here.
-    void fetchReferenceData();
-
     void (async () => {
-      const { webhookUrl } = useSettingsStore.getState();
-      if (!webhookUrl) {
-        console.log('[fcm] skipped: no webhookUrl configured');
+      const credentials = await resolveConfiguredCredentials('startup');
+      if (!credentials) {
         return;
       }
 
-      let secret: string | null;
-      try {
-        secret = await readSecureItem(AUTH_SECRET_KEY);
-      } catch (error) {
-        console.log('[fcm] skipped: secure store read failed', error);
-        return;
-      }
-      // Checked immediately after the secret read resolves (not just after
+      // Story 2.2: reference-data (categories/subcategories/contexts)
+      // fetch. Independent of the FCM registration flow below — hydration
+      // from the MMKV cache already happened synchronously at
+      // `referenceData.ts` module load, so this call is a background
+      // refresh, never a render blocker. `fetchReferenceData` never throws
+      // and sets no component state itself, so there's nothing for a
+      // `cancelled` guard to protect here.
+      void fetchReferenceData(credentials);
+
+      // Checked immediately after credentials resolve (not just after
       // `getFcmToken()` below) — `getFcmToken()` can trigger a native
       // permission prompt, which shouldn't fire once the effect that kicked
       // this off has already been torn down (e.g. a fast unmount in tests).
-      if (!secret) {
-        console.log('[fcm] skipped: no auth secret configured');
-        return;
-      }
       if (cancelled) {
         return;
       }
@@ -84,7 +74,7 @@ export function App(): React.JSX.Element {
       }
 
       try {
-        const response = await registerFcmToken(token, webhookUrl, secret);
+        const response = await registerFcmToken(token, credentials.webhookUrl, credentials.secret);
         if (!response.ok) {
           console.log(`[fcm] token registration failed: HTTP ${response.status}`);
         } else {

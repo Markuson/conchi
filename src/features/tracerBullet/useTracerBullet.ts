@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 
+import { resolveConfiguredCredentials } from '../../lib/api/connection';
 import { joinWebhookUrl, postToN8n } from '../../lib/api/n8nClient';
 import { SEND_EXPENSE_PATH } from '../../lib/constants';
 import { AUTH_SECRET_KEY, readSecureItem } from '../../lib/storage/secureStore';
@@ -38,21 +39,9 @@ export function useTracerBullet(): UseTracerBulletResult {
   const generationRef = useRef(0);
 
   const checkConfigured = useCallback(async (): Promise<boolean> => {
-    const { webhookUrl } = useSettingsStore.getState();
-    if (!webhookUrl) {
-      return false;
-    }
-
-    let secret: string | null;
-    try {
-      secret = await readSecureItem(AUTH_SECRET_KEY);
-    } catch {
-      // Secure storage unavailable — treat the same as "not configured"
-      // rather than throwing out of a guard check.
-      return false;
-    }
-
-    return Boolean(secret);
+    // No `logPrefix` — this is polled on every screen focus (navigation's
+    // not-configured redirect), and was never logged before extraction.
+    return Boolean(await resolveConfiguredCredentials());
   }, []);
 
   const submit = useCallback(async (text: string): Promise<void> => {
