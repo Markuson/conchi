@@ -21,5 +21,18 @@ module.exports = {
   transformIgnorePatterns: [
     `node_modules/(?!\\.pnpm/|(${transformablePackages.join('|')})/)`,
   ],
-  testPathIgnorePatterns: ['/node_modules/', '/e2e/', '/android/', '/ios/', '/docs/'],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/e2e/',
+    '/android/',
+    '/ios/',
+    '/docs/',
+  ],
+  // Reanimated v4 (first use in Story 2.3) ships its own Jest module resolver
+  // (`react-native-reanimated/jest/resolver.js`, chaining to
+  // `react-native-worklets/jest/resolver.js`) that redirects the library's
+  // internal imports to their web-only variants under Jest — without it,
+  // `react-native-reanimated/mock`'s own source pulls in the real native
+  // Worklets module and crashes at import time.
+  resolver: 'react-native-reanimated/jest/resolver.js',
 };

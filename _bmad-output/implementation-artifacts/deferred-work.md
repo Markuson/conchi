@@ -181,3 +181,23 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-2-2-reference-data-categories-subcategories.md`
   summary: `src/lib/storage/mmkv.ts`'s functions (including the new `getObject`/`setObject`) have never been exercised against a real `react-native-mmkv` instance — every test mocks the module entirely, so a broken JSON serializer would silently degrade to "no cache" with the whole suite still green
   evidence: pre-existing pattern since Story 1.5's `settingsStore.test.ts`, not introduced by Story 2.2 — surfaced incidentally because this story adds the first structured-data (JSON) read/write pair to that module; a `__mocks__/react-native-mmkv.js` in-memory fake would let a real round-trip be verified directly
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: if `categories` is passed as an empty array (e.g. reference-data fetch never succeeded), Acceptar is permanently disabled with no escape path — the card can never be accepted, only discarded
+  evidence: `resolveCategory`'s empty-input branch and `canAccept = category !== ''` both correctly disable Acceptar, but nothing in this story's spec addresses the all-categories-missing case specifically (only "no category selected" with categories available); this is a cross-story bootstrap concern (Story 2.2's reference-data fetch/retry) more than a Confirmation Card defect
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: `ConfirmationCard` only seeds its internal edit state from `data`/`categories`/`contexts` via `useState` initializers — if a parent re-renders the same mounted instance with new props (rather than remounting via a `key`), the card keeps showing and can submit the previous entry's now-stale edited values
+  evidence: confirmed by reading the state-init code (no prop-sync `useEffect`); whether this is reachable depends on how Story 2.4/2.6 mount the card (the idiomatic React fix — a `key={entryId}` at the call site forcing a remount per entry — is a call-site decision those stories haven't made yet)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: unlike category, an unrecognized `data.currency` (not present in the fixed `CURRENCY_OPTIONS` list) is silently defaulted to the first option with no `warning` indicator — an asymmetric treatment of the two "value not in the known list" cases
+  evidence: real inconsistency confirmed by reading `ConfirmationCard.tsx`'s currency-init logic vs. `resolveCategory`'s explicit `mismatched` flag; not required by this story's ACs (only category mismatch is specced), so left as-is rather than freelanced
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: the sheet's `ScrollView` (Import/Data/Descripció inputs) has no `KeyboardAvoidingView` or equivalent — the on-screen keyboard can obscure lower fields on real devices
+  evidence: connects to the still-open epic-1 retro action item "establish a shared form-screen keyboard-avoidance convention before Epic 2 adds more text-input surfaces" (`epic-1-retro-item-5`, `epic-1-retro-2026-09-13.md`) — a one-off fix here would likely diverge from that convention once it's built, so left for that item to resolve
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: the `NO_CONTEXT` sentinel is the literal string `'—'`; if `contexts` ever contained a real context genuinely named `'—'`, it would be indistinguishable from "no context selected" in both the picker UI and `buildData()`'s payload conversion
+  evidence: confirmed by reading `ConfirmationCard.tsx`'s `NO_CONTEXT` constant and its `context === NO_CONTEXT ? undefined : context` check; contexts are Epic-5 user-managed data with no reserved-name validation yet, so this is currently only a theoretical collision
