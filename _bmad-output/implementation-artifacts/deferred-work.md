@@ -181,3 +181,45 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-2-2-reference-data-categories-subcategories.md`
   summary: `src/lib/storage/mmkv.ts`'s functions (including the new `getObject`/`setObject`) have never been exercised against a real `react-native-mmkv` instance — every test mocks the module entirely, so a broken JSON serializer would silently degrade to "no cache" with the whole suite still green
   evidence: pre-existing pattern since Story 1.5's `settingsStore.test.ts`, not introduced by Story 2.2 — surfaced incidentally because this story adds the first structured-data (JSON) read/write pair to that module; a `__mocks__/react-native-mmkv.js` in-memory fake would let a real round-trip be verified directly
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: if `categories` is passed as an empty array (e.g. reference-data fetch never succeeded), Acceptar is permanently disabled with no escape path — the card can never be accepted, only discarded
+  evidence: `resolveCategory`'s empty-input branch and `canAccept = category !== ''` both correctly disable Acceptar, but nothing in this story's spec addresses the all-categories-missing case specifically (only "no category selected" with categories available); this is a cross-story bootstrap concern (Story 2.2's reference-data fetch/retry) more than a Confirmation Card defect
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: `ConfirmationCard` only seeds its internal edit state from `data`/`categories`/`contexts` via `useState` initializers — if a parent re-renders the same mounted instance with new props (rather than remounting via a `key`), the card keeps showing and can submit the previous entry's now-stale edited values
+  evidence: confirmed by reading the state-init code (no prop-sync `useEffect`); whether this is reachable depends on how Story 2.4/2.6 mount the card (the idiomatic React fix — a `key={entryId}` at the call site forcing a remount per entry — is a call-site decision those stories haven't made yet)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: unlike category, an unrecognized `data.currency` (not present in the fixed `CURRENCY_OPTIONS` list) is silently defaulted to the first option with no `warning` indicator — an asymmetric treatment of the two "value not in the known list" cases
+  evidence: real inconsistency confirmed by reading `ConfirmationCard.tsx`'s currency-init logic vs. `resolveCategory`'s explicit `mismatched` flag; not required by this story's ACs (only category mismatch is specced), so left as-is rather than freelanced
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: the sheet's `ScrollView` (Import/Data/Descripció inputs) has no `KeyboardAvoidingView` or equivalent — the on-screen keyboard can obscure lower fields on real devices
+  evidence: connects to the still-open epic-1 retro action item "establish a shared form-screen keyboard-avoidance convention before Epic 2 adds more text-input surfaces" (`epic-1-retro-item-5`, `epic-1-retro-2026-09-13.md`) — a one-off fix here would likely diverge from that convention once it's built, so left for that item to resolve
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: the `NO_CONTEXT` sentinel is the literal string `'—'`; if `contexts` ever contained a real context genuinely named `'—'`, it would be indistinguishable from "no context selected" in both the picker UI and `buildData()`'s payload conversion
+  evidence: confirmed by reading `ConfirmationCard.tsx`'s `NO_CONTEXT` constant and its `context === NO_CONTEXT ? undefined : context` check; contexts are Epic-5 user-managed data with no reserved-name validation yet, so this is currently only a theoretical collision
+
+## Deferred from: code review of spec-2-3-confirmation-card (2026-10-02)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: a category literally named `''` (empty string) would collide with `resolveCategory`'s "no selection yet" sentinel — the same class of risk already deferred for the `NO_CONTEXT` ('—') sentinel above, just on the category side
+  evidence: confirmed by reading `resolveCategory` (`ConfirmationCard.tsx:93-104`) — its `category === ''` branch is indistinguishable from a genuinely empty-named category; categories are Story-2.2-managed reference data with no reserved-name validation, so this is currently only theoretical
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: `DrumRoller`'s option rows use `key={option.value}` with no dedup — if `categories`/`contexts` ever contained two entries with the same name, React would see colliding keys and could misrender or warn
+  evidence: confirmed by reading `DrumRoller.tsx:109`; reference data (categories from Story 2.2, contexts from the future Epic 5) isn't currently validated for name uniqueness, so this is a cross-story data-integrity assumption rather than a Confirmation Card defect
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: the frozen I/O & Edge-Case Matrix has no "Currency" row at all, yet the implementation adds a full `CURRENCY_OPTIONS` fallback/defaulting mechanism (silently defaults to the first option, no warning indicator) for an unrecognized `data.currency` — the matrix is incomplete relative to what was actually built
+  evidence: confirmed by reading the frozen matrix (six rows, none mention currency) against `ConfirmationCard.tsx:160-164`'s currency-init logic; independent of the already-deferred currency/category warning-asymmetry entry above, this is a spec-documentation gap, not a behavior bug
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: `react-native-gesture-handler` is installed (per the Design Notes, intentionally unconsumed this story) but no `GestureHandlerRootView` is wired at the app root — nothing yet confirms the bare dependency presence is harmless for Reanimated's worklet runtime or for whichever story first adds a drag gesture
+  evidence: confirmed via `package.json`/`pnpm-lock.yaml` diff (dependency added) and a repo-wide grep for `GestureHandlerRootView` (no match); ready for Story 2.4+ to resolve when it actually consumes the library
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: the card's backdrop + sheet overlay (`View`/`Pressable`, not RN's `Modal`) has no `accessibilityViewIsModal`-equivalent containment — screen-reader focus can navigate to whatever UI exists behind/under the overlay instead of staying inside the sheet
+  evidence: confirmed by reading `ConfirmationCard.tsx:276-284` (the `overlay`/`backdrop` tree); `TracerBulletModal.tsx` (Story 1.6) used RN's own `Modal`, which handles this natively — switching to a custom overlay for the bottom-sheet design dropped that containment, and no later story has restored it yet

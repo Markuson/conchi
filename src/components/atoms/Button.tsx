@@ -14,13 +14,18 @@ export type ButtonProps = {
 };
 
 /**
- * Buttons table (DESIGN.md):
+ * Buttons table (DESIGN.md, overridden per Story 2.3's Confirmation Card):
  *
  * | Variant                | Background | Border               | Text        |
  * |-------------------------|------------|----------------------|-------------|
  * | Primary (Acceptar)     | accent     | accent +10% lighter  | bg (dark)   |
- * | Secondary (Descartar)  | transparent| border               | text-secondary |
- * | Danger (Eliminar)      | danger     | danger               | white       |
+ * | Secondary              | transparent| border               | text-secondary |
+ * | Danger (Descartar, Eliminar) | danger | danger             | white       |
+ *
+ * DESIGN.md's original table put Descartar under Secondary — Story 2.3 confirmed
+ * an override: Confirmation Card's Descartar uses `variant="danger"` (Acceptar stays
+ * `variant="primary"`), so Danger now covers both Descartar and Eliminar. Secondary
+ * remains available for any future non-destructive, non-primary action.
  *
  * Primary's text is dark-locked to `darkColors.bg` in BOTH themes (amber needs dark
  * ink regardless of active mode). Primary/Danger borders are NOT dark-locked — they
@@ -31,13 +36,32 @@ export type ButtonProps = {
  * Danger's "white" text is DESIGN.md's own literal choice (not a mode-dependent
  * token), so it reads `staticColors.white` rather than an inline hex.
  */
-export function Button({ variant, label, onPress, disabled = false }: ButtonProps): React.JSX.Element {
+export function Button({
+  variant,
+  label,
+  onPress,
+  disabled = false,
+}: ButtonProps): React.JSX.Element {
   const { colors, typography, spacing } = useTheme();
 
   const backgroundColor =
-    variant === 'primary' ? colors.accent : variant === 'danger' ? colors.danger : undefined;
-  const borderColor = variant === 'secondary' ? colors.border : variant === 'primary' ? colors.accent : colors.danger;
-  const textColor = variant === 'primary' ? darkColors.bg : variant === 'danger' ? staticColors.white : colors.textSecondary;
+    variant === 'primary'
+      ? colors.accent
+      : variant === 'danger'
+      ? colors.danger
+      : undefined;
+  const borderColor =
+    variant === 'secondary'
+      ? colors.border
+      : variant === 'primary'
+      ? colors.accent
+      : colors.danger;
+  const textColor =
+    variant === 'primary'
+      ? darkColors.bg
+      : variant === 'danger'
+      ? staticColors.white
+      : colors.textSecondary;
 
   // Built per-render (not module scope) because it depends on the current theme /
   // variant / disabled state — still routed through StyleSheet.create so the JSX
@@ -64,9 +88,16 @@ export function Button({ variant, label, onPress, disabled = false }: ButtonProp
       // `Pressable` (unlike `TouchableOpacity`) has no default visual press
       // feedback on either platform — the function-as-child `style` form dims
       // opacity while actually pressed so a tap has a real visible affordance.
-      style={({ pressed }) => [styles.base, dynamicStyles.button, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.base,
+        dynamicStyles.button,
+        pressed && styles.pressed,
+      ]}
     >
-      <Text numberOfLines={1} style={[typography.buttonText, dynamicStyles.label]}>
+      <Text
+        numberOfLines={1}
+        style={[typography.buttonText, dynamicStyles.label]}
+      >
         {label}
       </Text>
     </Pressable>
