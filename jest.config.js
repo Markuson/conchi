@@ -28,11 +28,9 @@ module.exports = {
     '/ios/',
     '/docs/',
   ],
-  // Reanimated v4 (first use in Story 2.3) ships its own Jest module resolver
-  // (`react-native-reanimated/jest/resolver.js`, chaining to
-  // `react-native-worklets/jest/resolver.js`) that redirects the library's
-  // internal imports to their web-only variants under Jest — without it,
-  // `react-native-reanimated/mock`'s own source pulls in the real native
-  // Worklets module and crashes at import time.
-  resolver: 'react-native-reanimated/jest/resolver.js',
+  // react-native-reanimated's mock (`react-native-reanimated/mock`) pulls in
+  // react-native-worklets, whose native entry point crashes under Jest's Node
+  // environment unless its own Jest resolver redirects internal imports to
+  // non-native variants.
+  resolver: 'react-native-worklets/jest/resolver.js',
 };
