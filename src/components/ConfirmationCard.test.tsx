@@ -92,11 +92,19 @@ function findDrumRollerProps(
 }
 
 function findAmountInputProps(renderer: Renderer): TextInputProps {
+  return findTextInputProps(renderer, 'Import');
+}
+
+/** Locates any `TextInput` by its `accessibilityLabel` prop (set to the `TextField`'s `label`). */
+function findTextInputProps(
+  renderer: Renderer,
+  accessibilityLabel: string,
+): TextInputProps {
   const input = renderer.root
     .findAllByType(TextInput)
-    .find(node => node.props.accessibilityLabel === 'Import');
+    .find(node => node.props.accessibilityLabel === accessibilityLabel);
   if (!input) {
-    throw new Error('No amount TextInput found');
+    throw new Error(`No TextInput found with accessibilityLabel "${accessibilityLabel}"`);
   }
   return input.props;
 }
@@ -325,6 +333,78 @@ test('"Editar" fires onEdit with the current data and does not call onAccept', (
     context: 'Casa',
   });
   expect(onAccept).not.toHaveBeenCalled();
+});
+
+test('an edited amount, description, and date reach onAccept, not the original data', () => {
+  const onAccept = jest.fn();
+  const renderer = renderCard({ onAccept });
+
+  act(() => {
+    findAmountInputProps(renderer).onChangeText?.('42.75');
+  });
+
+  act(() => {
+    findTextInputProps(renderer, 'Data').onChangeText?.('2026-10-01');
+  });
+  act(() => {
+    findTextInputProps(renderer, 'Descripció').onChangeText?.(
+      'Sopar amb amics',
+    );
+  });
+
+  act(() => {
+    findButtonProps(renderer, 'Acceptar').onPress();
+  });
+
+  expect(onAccept).toHaveBeenCalledWith({
+    amount: 42.75,
+    currency: 'EUR',
+    category: 'Alimentació',
+    subcategory: 'Supermercat',
+    description: 'Sopar amb amics',
+    date: '2026-10-01',
+    context: 'Casa',
+  });
+});
+
+test('a comma decimal separator in the amount is parsed, not discarded', () => {
+  const onAccept = jest.fn();
+  const renderer = renderCard({ onAccept });
+
+  act(() => {
+    findAmountInputProps(renderer).onChangeText?.('24,50');
+  });
+  act(() => {
+    findButtonProps(renderer, 'Acceptar').onPress();
+  });
+
+  expect(onAccept).toHaveBeenCalledWith(
+    expect.objectContaining({ amount: 24.5 }),
+  );
+});
+
+test('a non-finite amount (e.g. Infinity) is clamped to 0, not submitted as-is', () => {
+  const renderer = renderCard({
+    data: { ...BASE_DATA, amount: Infinity },
+  });
+
+  expect(findAmountInputProps(renderer).value).toBe('0.00');
+});
+
+test('opening one Drum Roller closes any other that was already open', () => {
+  const renderer = renderCard();
+
+  act(() => {
+    findDrumRollerProps(renderer, 'Categoria').onOpenChange?.(true);
+  });
+  expect(findDrumRollerProps(renderer, 'Categoria').open).toBe(true);
+  expect(findDrumRollerProps(renderer, 'Subcategoria').open).toBe(false);
+
+  act(() => {
+    findDrumRollerProps(renderer, 'Subcategoria').onOpenChange?.(true);
+  });
+  expect(findDrumRollerProps(renderer, 'Subcategoria').open).toBe(true);
+  expect(findDrumRollerProps(renderer, 'Categoria').open).toBe(false);
 });
 
 test('tapping the backdrop fires onDiscard', () => {

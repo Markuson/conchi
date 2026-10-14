@@ -82,6 +82,21 @@ context: []
 - Given the "Editar" link is tapped, when pressed, then `onEdit(data)` fires with current values and the card dismisses without calling `onAccept`
 - Given `pnpm storybook` runs, then `ConfirmationCard` stories show: context visible, context hidden, pre-filled mock data
 
+### Review Findings
+
+- [x] [Review][Patch] Coordinate the four `DrumRoller` instances (Divisa/Categoria/Subcategoria/Context) so only one is open at a time — decided: lift `open` state to `ConfirmationCard`. [`DrumRoller.tsx:46`]
+
+- [x] [Review][Patch] Comma decimal separator is silently discarded — typing `"24,50"` (a normal Catalan input on many devices' decimal-pad keyboards) parses to `NaN`, which `clampAmount` silently zeroes to `0.00` with no error shown. [`ConfirmationCard.tsx:210`]
+- [x] [Review][Patch] `clampAmount` doesn't guard `Infinity`/`-Infinity` — neither is `NaN` nor `< 0`, so either would render/submit as the literal value `Infinity`. [`ConfirmationCard.tsx:78`]
+- [x] [Review][Patch] No test verifies an edited amount, description, or date actually reaches `onAccept`/`onEdit` — existing tests only assert the initial display value or submit the unedited default `BASE_DATA`. [`ConfirmationCard.test.tsx`]
+- [x] [Review][Patch] `DrumRoller`'s trigger `Pressable` sets `accessibilityLabel={label}`, which overrides the accessible name derived from its `Text` child — screen readers announce only the field name ("Categoria"), never the current selection. [`DrumRoller.tsx:90`]
+
+- [x] [Review][Defer] A category literally named `''` would collide with the "no selection" sentinel — same class of risk as the already-deferred `NO_CONTEXT` ('—') collision. [`ConfirmationCard.tsx:97`] — deferred, pre-existing-pattern risk
+- [x] [Review][Defer] `DrumRoller`'s `key={option.value}` has no dedup — duplicate category/context names (reference data isn't validated for uniqueness) would collide React keys. [`DrumRoller.tsx:109`] — deferred, pre-existing
+- [x] [Review][Defer] The frozen I/O matrix has no "Currency" row despite full currency-mismatch-defaulting being implemented — spec/implementation documentation gap. [`ConfirmationCard.tsx:160`] — deferred, spec documentation gap
+- [x] [Review][Defer] `react-native-gesture-handler` is installed with no `GestureHandlerRootView` wired at the app root yet. [`package.json`] — deferred, pre-existing (unconsumed this story per Design Notes)
+- [x] [Review][Defer] The backdrop overlay has no `accessibilityViewIsModal`-equivalent containment — screen-reader focus isn't contained to the sheet, unlike the RN `Modal` it replaces. [`ConfirmationCard.tsx:278`] — deferred, pre-existing
+
 ## Spec Change Log
 
 - **Review loop 1 (patch findings only, no spec change):** Blind-hunter, edge-case-hunter, and verification-gap review layers ran against the diff since baseline. Two real code findings (amount-clamp bypass in `buildData()` bypassing `clampAmount`'s null/negative guard; `clampAmount` missing a `NaN` guard) and two real test-coverage gaps (unselected-context payload not asserted; mismatched-category warning-clears-on-change not asserted) were classified `patch` and auto-fixed by the implementation agent, re-verified independently (lint/typecheck/full suite green, 134/134). One stale doc-comment (`babel.config.js` naming the wrong plugin) was also patched. Five additional findings (empty-`categories` no-escape-path, stale-props-on-remount, currency-mismatch asymmetry, missing keyboard-avoidance, `NO_CONTEXT` sentinel collision risk) were classified `defer` — real but out of this story's frozen scope — and appended to `deferred-work.md`. No `intent_gap`/`bad_spec` findings; the frozen Intent/Boundaries/I-O-Matrix were not touched.
@@ -153,6 +168,19 @@ The card's data prop is a local type (not the persisted `Entry`), since this sto
 
 - `roundTripSuccess` placeholder quote array, picked at random on mount.
   [`conchiCopy.ts:12`](../../src/lib/conchiCopy.ts#L12)
+
+**Code review fixes (round 2)**
+
+- `clampAmount` now also guards `Infinity`/`-Infinity` via `Number.isFinite`; a new `parseAmountText` accepts a comma decimal separator (`"24,50"`) before parsing, instead of silently zeroing it as `NaN`.
+  [`ConfirmationCard.tsx:78`](../../src/components/ConfirmationCard.tsx#L78)
+
+- Drum Rollers now coordinate: a new `openRollerLabel` state in `ConfirmationCard` + controlled `open`/`onOpenChange` props on `DrumRoller` (optional — falls back to its own internal state when omitted) ensure only one of the four rollers (Divisa/Categoria/Subcategoria/Context) is open at a time.
+  [`ConfirmationCard.tsx`](../../src/components/ConfirmationCard.tsx), [`DrumRoller.tsx:38`](../../src/components/atoms/DrumRoller.tsx#L38)
+
+- `DrumRoller`'s trigger now sets `accessibilityValue={{ text: ... }}` alongside `accessibilityLabel` — the current selection is announced to screen readers, which previously only heard the field name.
+  [`DrumRoller.tsx:90`](../../src/components/atoms/DrumRoller.tsx#L90)
+
+- [`ConfirmationCard.test.tsx:330`](../../src/components/ConfirmationCard.test.tsx#L330) onward — 4 new tests: edited amount/description/date reaching `onAccept`, comma-separator parsing, `Infinity` clamping, single-open-roller coordination.
 
 **Peripherals**
 

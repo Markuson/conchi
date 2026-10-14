@@ -20,6 +20,14 @@ export type DrumRollerProps<T extends string> = {
    * any of `options` because it's been auto-defaulted.
    */
   warning?: boolean;
+  /**
+   * Controlled open state — when provided (alongside `onOpenChange`), the
+   * parent owns whether this roller's options list is shown, letting it
+   * coordinate several `DrumRoller`s (e.g. closing one when another opens).
+   * Omit both to fall back to the roller's own internal open state.
+   */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 /**
@@ -41,9 +49,21 @@ export function DrumRoller<T extends string>({
   selected,
   onChange,
   warning = false,
+  open: controlledOpen,
+  onOpenChange,
 }: DrumRollerProps<T>): React.JSX.Element {
   const { colors, typography, spacing } = useTheme();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+
+  const setOpen = (value: boolean): void => {
+    if (isControlled) {
+      onOpenChange?.(value);
+    } else {
+      setInternalOpen(value);
+    }
+  };
 
   const selectedOption = options.find(option => option.value === selected);
   const selectedLabel = selectedOption?.label ?? selected;
@@ -90,7 +110,14 @@ export function DrumRoller<T extends string>({
         accessibilityLabel={label}
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
-        onPress={() => setOpen(value => !value)}
+        // `accessibilityLabel` on this trigger overrides the accessible name
+        // a screen reader would otherwise derive from the `Text` child below,
+        // so the current selection is surfaced separately via
+        // `accessibilityValue` rather than silently going unannounced.
+        accessibilityValue={{
+          text: warning ? `⚠️ ${selectedLabel}` : selectedLabel,
+        }}
+        onPress={() => setOpen(!open)}
         style={[styles.trigger, dynamicStyles.trigger]}
       >
         <Text

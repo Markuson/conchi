@@ -70,16 +70,26 @@ const SPRING_CONFIG = { damping: 18, stiffness: 180 };
 
 /**
  * Clamps a possibly-null/negative/non-finite amount to a safe, always-displayable
- * value (I/O matrix row: "Null/negative amount"). `NaN` is a valid `number` at the
- * type level (e.g. `Number('abc')`), so it's guarded explicitly alongside null/negative
- * — without this, `NaN < 0` is `false`, letting `NaN` slip through and render as the
- * literal string `"NaN"`.
+ * value (I/O matrix row: "Null/negative amount"). `Number.isFinite` rejects `NaN`
+ * (a valid `number` at the type level, e.g. `Number('abc')`) and `Infinity`/`-Infinity`
+ * alike — without it, either could slip through `amount < 0` and render as the
+ * literal string `"NaN"` or `"Infinity"`.
  */
 function clampAmount(amount: number | null): number {
-  if (amount === null || Number.isNaN(amount) || amount < 0) {
+  if (amount === null || !Number.isFinite(amount) || amount < 0) {
     return 0;
   }
   return amount;
+}
+
+/**
+ * Parses user-typed amount text, accepting a comma as the decimal separator
+ * alongside a dot — the on-screen decimal-pad keyboard shows "," for many
+ * device locales (Catalan/Spanish included), and `Number("24,50")` would
+ * otherwise be `NaN`, silently zeroing a validly-typed amount.
+ */
+function parseAmountText(text: string): number {
+  return Number(text.replace(',', '.'));
 }
 
 /**
@@ -170,6 +180,10 @@ export function ConfirmationCard({
       : NO_CONTEXT,
   );
 
+  // Tracks which of the four Drum Rollers below (by `label`) is currently
+  // open, so opening one closes any other that was already open.
+  const [openRollerLabel, setOpenRollerLabel] = useState<string | null>(null);
+
   // Picked once on mount; stable for the card's lifetime (I/O rows don't
   // require re-rolling it, and re-picking on every render would be jarring).
   const [quote] = useState(
@@ -207,7 +221,7 @@ export function ConfirmationCard({
   const buildData = (): ConfirmationCardData => ({
     // Routed through the same `clampAmount` guard applied at mount — a pasted or
     // typed negative/non-finite value must not reach `onAccept`/`onEdit` unclamped.
-    amount: clampAmount(Number(amountText)),
+    amount: clampAmount(parseAmountText(amountText)),
     currency,
     category,
     subcategory,
@@ -303,6 +317,10 @@ export function ConfirmationCard({
           <DrumRoller
             label="Divisa"
             onChange={setCurrency}
+            onOpenChange={isOpen =>
+              setOpenRollerLabel(isOpen ? 'Divisa' : null)
+            }
+            open={openRollerLabel === 'Divisa'}
             options={CURRENCY_OPTIONS}
             selected={currency}
           />
@@ -312,6 +330,10 @@ export function ConfirmationCard({
               <DrumRoller
                 label="Categoria"
                 onChange={handleCategoryChange}
+                onOpenChange={isOpen =>
+                  setOpenRollerLabel(isOpen ? 'Categoria' : null)
+                }
+                open={openRollerLabel === 'Categoria'}
                 options={categoryOptions}
                 selected={category}
                 warning={categoryMismatched}
@@ -322,6 +344,10 @@ export function ConfirmationCard({
               <DrumRoller
                 label="Subcategoria"
                 onChange={setSubcategory}
+                onOpenChange={isOpen =>
+                  setOpenRollerLabel(isOpen ? 'Subcategoria' : null)
+                }
+                open={openRollerLabel === 'Subcategoria'}
                 options={subcategoryOptions}
                 selected={subcategory}
               />
@@ -356,6 +382,10 @@ export function ConfirmationCard({
             <DrumRoller
               label="Context"
               onChange={setContext}
+              onOpenChange={isOpen =>
+                setOpenRollerLabel(isOpen ? 'Context' : null)
+              }
+              open={openRollerLabel === 'Context'}
               options={contextOptions}
               selected={context}
             />

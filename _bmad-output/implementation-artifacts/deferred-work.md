@@ -201,3 +201,25 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
   summary: the `NO_CONTEXT` sentinel is the literal string `'—'`; if `contexts` ever contained a real context genuinely named `'—'`, it would be indistinguishable from "no context selected" in both the picker UI and `buildData()`'s payload conversion
   evidence: confirmed by reading `ConfirmationCard.tsx`'s `NO_CONTEXT` constant and its `context === NO_CONTEXT ? undefined : context` check; contexts are Epic-5 user-managed data with no reserved-name validation yet, so this is currently only a theoretical collision
+
+## Deferred from: code review of spec-2-3-confirmation-card (2026-10-02)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: a category literally named `''` (empty string) would collide with `resolveCategory`'s "no selection yet" sentinel — the same class of risk already deferred for the `NO_CONTEXT` ('—') sentinel above, just on the category side
+  evidence: confirmed by reading `resolveCategory` (`ConfirmationCard.tsx:93-104`) — its `category === ''` branch is indistinguishable from a genuinely empty-named category; categories are Story-2.2-managed reference data with no reserved-name validation, so this is currently only theoretical
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: `DrumRoller`'s option rows use `key={option.value}` with no dedup — if `categories`/`contexts` ever contained two entries with the same name, React would see colliding keys and could misrender or warn
+  evidence: confirmed by reading `DrumRoller.tsx:109`; reference data (categories from Story 2.2, contexts from the future Epic 5) isn't currently validated for name uniqueness, so this is a cross-story data-integrity assumption rather than a Confirmation Card defect
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: the frozen I/O & Edge-Case Matrix has no "Currency" row at all, yet the implementation adds a full `CURRENCY_OPTIONS` fallback/defaulting mechanism (silently defaults to the first option, no warning indicator) for an unrecognized `data.currency` — the matrix is incomplete relative to what was actually built
+  evidence: confirmed by reading the frozen matrix (six rows, none mention currency) against `ConfirmationCard.tsx:160-164`'s currency-init logic; independent of the already-deferred currency/category warning-asymmetry entry above, this is a spec-documentation gap, not a behavior bug
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: `react-native-gesture-handler` is installed (per the Design Notes, intentionally unconsumed this story) but no `GestureHandlerRootView` is wired at the app root — nothing yet confirms the bare dependency presence is harmless for Reanimated's worklet runtime or for whichever story first adds a drag gesture
+  evidence: confirmed via `package.json`/`pnpm-lock.yaml` diff (dependency added) and a repo-wide grep for `GestureHandlerRootView` (no match); ready for Story 2.4+ to resolve when it actually consumes the library
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
+  summary: the card's backdrop + sheet overlay (`View`/`Pressable`, not RN's `Modal`) has no `accessibilityViewIsModal`-equivalent containment — screen-reader focus can navigate to whatever UI exists behind/under the overlay instead of staying inside the sheet
+  evidence: confirmed by reading `ConfirmationCard.tsx:276-284` (the `overlay`/`backdrop` tree); `TracerBulletModal.tsx` (Story 1.6) used RN's own `Modal`, which handles this natively — switching to a custom overlay for the bottom-sheet design dropped that containment, and no later story has restored it yet
