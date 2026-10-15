@@ -131,6 +131,11 @@ module.exports = {
         'src/App.tsx',
         'src/App.test.tsx',
         'src/navigation/index.tsx',
+        // Story 2.4: this test mounts the real `useEntrySubmission()` hook
+        // (via a `Harness` wrapper) to exercise `RootNavigator`'s actual
+        // wiring end to end, mirroring why `src/App.test.tsx` already has
+        // this same exemption.
+        'src/navigation/index.test.tsx',
       ],
       rules: {
         'no-restricted-imports': ['error', { patterns: [AD16_NO_SET_REFERENCE_DATA_PATTERN] }],
