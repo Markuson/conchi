@@ -6,31 +6,69 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { conchiColors, staticColors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { ROUTES, type StackParamList } from '../navigation/routes';
+import { IS_DETOX } from '../lib/constants';
+import { roundTripError } from '../lib/conchiCopy';
 import conchiIdle from '../assets/images/conchi-idle.png';
+import conchiWorking from '../assets/images/conchi-working.png';
+import conchiError from '../assets/images/conchi-error.png';
 
 /** Bubble diameter (DESIGN.md's Conchi Bubble spec: "circle, 48px diameter"). */
 const BUBBLE_SIZE = 48;
 /** Fade/scale duration for hiding on Settings and reappearing on leaving it. */
 const APPEAR_DURATION_MS = 220;
+/** Crossfade duration between the three state images (Story 2.4's frozen boundary: "~200ms crossfade"). */
+const CROSSFADE_DURATION_MS = 200;
+/** Error state auto-reverts to idle after this long (Story 2.4's frozen boundary), independent of whatever `state` the caller keeps feeding in. */
+const ERROR_AUTO_REVERT_MS = 10000;
+
+export type ConchiBubbleState = 'idle' | 'working' | 'error';
+
+export type ConchiBubbleProps = {
+  /**
+   * Story 2.4's round-trip lifecycle. Driven by `App.tsx`'s single
+   * `useEntrySubmission` instance (its only call site) — `'idle'` while
+   * nothing is in flight or a result has just been shown, `'working'` while
+   * Phase 2 (awaiting the FCM `round_trip_result`) is in progress, `'error'`
+   * on a Phase 1 failure or Phase 2 timeout.
+   */
+  state: ConchiBubbleState;
+};
+
+const STATE_ART: Record<ConchiBubbleState, typeof conchiIdle> = {
+  idle: conchiIdle,
+  working: conchiWorking,
+  error: conchiError,
+};
+
+/**
+ * `ConchiBubble` has no text UI of its own — the accessibility label is the
+ * only place Story 2.4's Error-state copy (`lib/conchiCopy.ts`) actually
+ * surfaces, so screen-reader users learn about a failure the same way
+ * sighted users do (the art switching to `conchi-error.png`).
+ */
+const STATE_ACCESSIBILITY_LABEL: Record<ConchiBubbleState, string> = {
+  idle: 'Conchi, obre Configuració',
+  working: 'Conchi: treballant-hi.',
+  error: `Conchi: ${roundTripError}`,
+};
 
 /**
  * Persistent floating avatar mounted once at `App.tsx`'s root, outside the
  * tab/stack tree, so it renders above every screen including the stack-level
- * Settings screen (which the bottom tab bar never reaches). Tapping it
- * navigates to Settings from Home or Analytics (DESIGN.md: "Tap: opens
- * Settings"). On Settings itself the bubble hides (fades/scales out) — a
+ * Settings screen (which the bottom tab bar never reaches). Tapping it always
+ * navigates to Settings (DESIGN.md: "Tap: opens Settings"), regardless of
+ * `state`. On Settings itself the bubble hides (fades/scales out) — a
  * "go to Settings" affordance is pointless while already there — and
- * fades/scales back in on leaving; originally resolved this way during
- * Story 1.4's code review to dodge that screen's native header (since
- * removed in favor of a custom top-left back button), but the self-reference
- * reasoning above stands on its own regardless.
+ * fades/scales back in on leaving.
  *
- * Renders the real `conchi-idle.png` art (`src/assets/images/`). Only the
- * Idle state is wired this story; `conchi-working.png`/`conchi-error.png`
- * already exist alongside it but have no trigger yet (that needs the SSE/push
- * plumbing from a later epic) — see `deferred-work.md`.
+ * Renders the real `conchi-idle.png`/`conchi-working.png`/`conchi-error.png`
+ * art, crossfading between them over `CROSSFADE_DURATION_MS` as `state`
+ * changes (Story 2.4). An `'error'` display self-reverts to `'idle'` after
+ * `ERROR_AUTO_REVERT_MS` regardless of whether the caller keeps feeding
+ * `'error'` in — that auto-revert is this component's own responsibility,
+ * not `useEntrySubmission`'s.
  */
-export function ConchiBubble(): React.JSX.Element {
+export function ConchiBubble({ state }: ConchiBubbleProps): React.JSX.Element {
   const insets = useSafeAreaInsets();
   // `ConchiBubble` is mounted as a sibling of `RootNavigator`, outside any
   // Screen, so `NavigationProp<StackParamList>` (the honest shape for a
@@ -47,8 +85,8 @@ export function ConchiBubble(): React.JSX.Element {
   );
   useEffect(() => {
     return navigation.addListener('state', () => {
-      const state = navigation.getState();
-      setActiveRouteName(state?.routes[state.index]?.name);
+      const navState = navigation.getState();
+      setActiveRouteName(navState?.routes[navState.index]?.name);
     });
   }, [navigation]);
   const isOnSettings = activeRouteName === ROUTES.Settings;
@@ -63,6 +101,50 @@ export function ConchiBubble(): React.JSX.Element {
       useNativeDriver: true,
     }).start();
   }, [isOnSettings, appear]);
+
+  // The displayed state tracks `state`, except an 'error' display schedules
+  // its own revert back to 'idle' after ERROR_AUTO_REVERT_MS.
+  const [displayState, setDisplayState] = useState<ConchiBubbleState>(state);
+  useEffect(() => {
+    setDisplayState(state);
+    if (state !== 'error') {
+      return undefined;
+    }
+    const timeoutId = setTimeout(() => setDisplayState('idle'), ERROR_AUTO_REVERT_MS);
+    return () => clearTimeout(timeoutId);
+  }, [state]);
+
+  // Crossfade: the previous art stays fully opaque as a static base layer;
+  // the new art fades in on top of it over CROSSFADE_DURATION_MS, which
+  // reads identically to a true cross-dissolve once it completes (both
+  // layers share the same bubble mask/shape). Skipped (set immediately)
+  // under IS_DETOX, mirroring `ConfirmationCard.tsx`'s own convention for
+  // disabling non-deterministic animation timing in Detox builds.
+  const [currentArt, setCurrentArt] = useState<typeof conchiIdle>(STATE_ART[state]);
+  const previousArtRef = useRef<typeof conchiIdle>(STATE_ART[state]);
+  const crossfade = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    const nextArt = STATE_ART[displayState];
+    if (nextArt === currentArt) {
+      return;
+    }
+    previousArtRef.current = currentArt;
+    setCurrentArt(nextArt);
+    if (IS_DETOX) {
+      crossfade.setValue(1);
+      return;
+    }
+    crossfade.setValue(0);
+    Animated.timing(crossfade, {
+      toValue: 1,
+      duration: CROSSFADE_DURATION_MS,
+      useNativeDriver: true,
+    }).start();
+    // `currentArt` is intentionally excluded -- it's set by this same effect
+    // as a derived value, not an independent trigger; including it would
+    // re-run this effect a second time for every state change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayState, crossfade]);
 
   const handlePress = (): void => {
     navigation.navigate(ROUTES.Settings);
@@ -88,13 +170,18 @@ export function ConchiBubble(): React.JSX.Element {
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Conchi, obre Configuració"
+        accessibilityLabel={STATE_ACCESSIBILITY_LABEL[displayState]}
         onPress={handlePress}
         // `Pressable` has no default visual press feedback on either platform —
         // dim opacity while pressed, same convention as `Button.tsx`.
         style={({ pressed }) => [styles.bubble, pressed && styles.pressed]}
       >
-        <Image source={conchiIdle} style={styles.art} resizeMode="contain" />
+        <Image source={previousArtRef.current} style={[styles.art, StyleSheet.absoluteFill]} resizeMode="contain" />
+        <Animated.Image
+          source={currentArt}
+          style={[styles.art, StyleSheet.absoluteFill, { opacity: crossfade }]}
+          resizeMode="contain"
+        />
       </Pressable>
     </Animated.View>
   );

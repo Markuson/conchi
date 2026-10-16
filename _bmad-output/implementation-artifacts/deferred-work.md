@@ -223,3 +223,67 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-2-3-confirmation-card.md`
   summary: the card's backdrop + sheet overlay (`View`/`Pressable`, not RN's `Modal`) has no `accessibilityViewIsModal`-equivalent containment — screen-reader focus can navigate to whatever UI exists behind/under the overlay instead of staying inside the sheet
   evidence: confirmed by reading `ConfirmationCard.tsx:276-284` (the `overlay`/`backdrop` tree); `TracerBulletModal.tsx` (Story 1.6) used RN's own `Modal`, which handles this natively — switching to a custom overlay for the bottom-sheet design dropped that containment, and no later story has restored it yet
+
+## Deferred from: spec planning of spec-2-4-text-entry-full-round-trip-flow (2026-10-15)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: FCM `onTokenRefresh` re-registration (new token silently re-posted to n8n's registration endpoint, replacing the old one) is not implemented — `expo-notifications`' push-token-refresh listener is unused anywhere in the codebase
+  evidence: carved out during spec planning to bring spec-2-4 back under the ~1600-token scope budget; infra resilience (token rotation is rare) rather than part of the user-visible round-trip this spec targets. Reuses the existing `registerFcmToken` (`src/lib/fcm/fcmClient.ts:26-75`) as-is once built — no new registration logic needed, just the listener wiring in `src/App.tsx`.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: the save-entry contract (`amount`, `category`, `subcategory`, `description`, `date`, `currency`, `userId`, `context`, `attachmentUrl`) is not yet documented anywhere — `docs/docs/api-contracts.md` doesn't exist; existing Docusaurus docs (`docs/docs/intro.md`, `n8n-webhook-setup.md`, `fcm-spike-notes.md`) have no equivalent page
+  evidence: carved out during spec planning to bring spec-2-4 back under the ~1600-token scope budget; decoupled from building the round-trip itself, though it should land before Story 3.1 (Full Edit Screen) or Story 6.1 (Gmail invoices) build on top of this same save contract.
+
+## Deferred from: code review of spec-2-4-text-entry-full-round-trip-flow (2026-10-15)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: `ConfirmationCard`'s Acceptar button shows no spinner/disabled state while `saveEntry`'s POST is in flight — the only defense against a double-tap firing two save requests is the hook-level re-entrancy guard (fixed this review), not any user-visible feedback
+  evidence: found by blind-hunter review. `ConfirmationCard`'s props contract (`onAccept`/`onDiscard`/`onEdit` only) is frozen by Story 2.3's own spec — adding a busy/disabled prop crosses into that story's frozen intent, a decision beyond this story's unilateral authority to make during a review loopback
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: `handleFabPress` silently no-ops (no toast/alert/haptic) when the FAB is tapped while `isBusy` (Phase 1/Phase 2/pending review in progress) — unlike the "not configured" case, which shows an `Alert`
+  evidence: found by blind-hunter review; real UX gap but a design decision (what feedback, if any) rather than a mechanical fix
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: "Editar" (`handleEdit`) is a hard no-op this story (Story 3.1 owns the real destination), but the Edit affordance renders as a normal enabled button with no "coming soon"/disabled treatment — reads as broken to a user who taps it
+  evidence: found by blind-hunter review; not required by this story's AC, and the right treatment is easier to judge once Story 3.1 wires the real destination (same reasoning the already-resolved Story 1.4 FAB no-op entry used)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: error-copy strings ("No s'ha pogut llegir el secret desat.", the `El servidor ha retornat un error (${status}).` template, the generic network-failure message) are hardcoded identically in both `runSubmit` and `saveEntry` in `useEntrySubmission.ts`, instead of centralized in `lib/conchiCopy.ts` the way `roundTripSuccess`/`roundTripError` are
+  evidence: found by blind-hunter review; real duplication, not required by any AC — a shared-copy-constants refactor is better done once, not mid-review-loopback
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: `ConchiBubble`'s Working/Error state transitions are only exposed via a changing `accessibilityLabel` on an ambient, unfocused floating element — screen-reader users have no way to learn a transition happened unless they happen to re-focus the bubble; no `AccessibilityInfo.announceForAccessibility`/live-region
+  evidence: found by blind-hunter review. The Error-state copy's own stated reason for existing ("so screen-reader users learn about a failure") isn't actually proactively surfaced; matches this project's existing pattern of deferring accessibility polish needing real screen-reader verification (see Story 1.4's deferred entries)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: the save-error banner (`navigation/index.tsx`'s `saveErrorBanner`, `position: 'absolute', top: 0`) ignores safe-area insets, unlike `ConchiBubble.tsx`'s careful `useSafeAreaInsets()` usage — could render under a notch/status bar on a real device
+  evidence: found by blind-hunter review; cosmetic, not reachable to verify without a real notched device
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: `ConchiBubble`'s crossfade can visibly "pop" if `state` changes again before the prior ~200ms crossfade finishes — the effect reassigns the static opacity-1 base layer to whatever art the interrupted fade was mid-transition to (not necessarily fully opaque yet), causing a snap instead of a smooth dissolve; e.g. a very fast round-trip (Working → Idle within ~200ms) could trigger it
+  evidence: confirmed by reading `ConchiBubble.tsx`'s crossfade `useEffect` (base layer always renders at a hardcoded opacity of 1); found independently by edge-case-hunter review. Cosmetic only, no test exercises the crossfade/art-switching logic itself to pin current behavior first
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: no test covers (a) retrying a save successfully after a prior save failure, (b) pressing "Tanca" while Phase 1 is still `submitting` (relies on the generation-counter staleness guard to silently drop the stale response, unasserted end-to-end), or (c) that changing `ConchiBubble`'s `state` away from `'error'` before the 10s auto-revert cancels the pending timer
+  evidence: found by blind-hunter review; existing coverage proves the adjacent happy/failure paths but not these specific sequences
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: `EscriureOverlay`'s `TextInput` has no `autoFocus` (user must tap the field manually after the FAB opens it), and `handleFabPress`'s `checkConfigured()` call has no caching or loading indicator, so repeated taps during a slow secure-store read get no feedback
+  evidence: found by blind-hunter review; minor UX polish, not required by any AC
+
+## Deferred from: implementation of spec-2-4-text-entry-full-round-trip-flow (2026-10-15)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: Acceptar's save POST (`useEntrySubmission.saveEntry`, `SAVE_ENTRY_PATH = '/save-entry'`) sends only the `ConfirmationCardData` fields (`amount`/`currency`/`category`/`subcategory`/`description`/`date`/`context`) — no `userId` (no client-side identity/auth-user concept exists anywhere in this codebase; the bearer secret is the only "who" the server has) and no `attachmentUrl` (no media this story). Unverified against a real n8n workflow — this story's own AC requires that manual test, which hasn't been run in this sandbox (no live n8n instance available).
+  evidence: `src/features/entry/useEntrySubmission.ts`'s `saveEntry`; the field list is the one `deferred-work.md`'s own spec-planning entry above names as the eventual full contract, minus the two fields this story has no source for.
+  risk: if the real n8n save workflow expects `userId` embedded in the body (rather than deriving it server-side from the auth header), every save will fail until that workflow is adjusted or this payload is extended once a real identity source exists.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: the frozen I/O matrix's "Phase 2 timeout ... Catalan copy" and "Phase 1 failure ... Bubble -> Error" rows don't specify where the Error-state copy (`roundTripError`, `src/lib/conchiCopy.ts`) is actually displayed. `EscriureOverlay` auto-closes right after Phase 1 succeeds (so the user can navigate freely during Phase 2, per this story's own AC), so by the time a Phase 2 timeout fires, no screen is showing that text. Implemented as `ConchiBubble`'s accessibility label while `state === 'error'` — screen-reader-only; a sighted user only sees the art swap to `conchi-error.png`, not the copy string itself.
+  evidence: `src/components/ConchiBubble.tsx`'s `STATE_ACCESSIBILITY_LABEL`; no toast/snackbar component exists anywhere in this codebase to reuse instead.
+  risk: a sighted user who isn't watching the Bubble when a Phase 2 timeout happens (e.g. background app, different screen) has no persistent on-screen explanation for why nothing arrived — only the Bubble's momentary art change, auto-reverting after 10s.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-text-entry-full-round-trip-flow.md`
+  summary: Acceptar's save-POST failure banner (I/O matrix: "Card stays open, inline error, no dismiss") is a small `Text` in an absolutely-positioned `View` anchored at `top: 0` in `navigation/index.tsx`, layered above `ConfirmationCard` — it ignores the top safe-area inset, so on a notched/cutout device it could render partly under the status bar/notch.
+  evidence: `src/navigation/index.tsx`'s `styles.saveErrorBanner`; `ConfirmationCard`'s own props contract (`onAccept`/`onDiscard`/`onEdit`, frozen per this story's Code Map) has no error-display slot, so this couldn't be added inside the card itself without extending that contract.
