@@ -92,7 +92,11 @@ export function onForegroundMessage(
 ): ReturnType<typeof Notifications.addNotificationReceivedListener> {
   return Notifications.addNotificationReceivedListener((event) => {
     const data: unknown = event.request.content.data;
+    // Temporary debug logging (real-device FCM round-trip verification in
+    // progress) -- remove once the n8n -> app delivery is confirmed working.
+    console.log('[fcm] raw notification data received:', JSON.stringify(data));
     if (!data || typeof data !== 'object' || !('type' in data)) {
+      console.log('[fcm] raw data rejected -- missing, not an object, or no "type" key');
       return;
     }
     callback(data as FcmDataPayload);

@@ -119,7 +119,11 @@ export function App(): React.JSX.Element {
     // identity (see its own doc comment), so listing it as this effect's
     // dependency never causes a re-subscribe.
     const subscription = onForegroundMessage((payload) => {
+      // Temporary debug logging (real-device FCM round-trip verification in
+      // progress) -- remove once the n8n -> app delivery is confirmed working.
+      console.log('[fcm] foreground message dispatched, type:', payload.type);
       if (payload.type === 'round_trip_result') {
+        console.log('[fcm] round_trip_result -- entryId:', payload.entryId, 'entry typeof:', typeof payload.entry);
         handleRoundTripResult(payload.entry);
       } else {
         console.log('[fcm] unhandled foreground message type', payload.type);
