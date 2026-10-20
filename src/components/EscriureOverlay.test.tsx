@@ -73,7 +73,7 @@ function pressButton(renderer: Renderer, label: string): void {
   });
 }
 
-test('renders nothing when visible is false', () => {
+test('renders nothing (Modal is not shown) when visible is false', () => {
   const renderer = renderOverlay({ visible: false });
 
   expect(renderer.root.findAllByType(TextInput)).toHaveLength(0);
