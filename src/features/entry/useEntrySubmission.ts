@@ -205,16 +205,11 @@ export function useEntrySubmission(): UseEntrySubmissionResult {
   }, []);
 
   const handleRoundTripResult = useCallback((entry: Entry): void => {
-    // Temporary debug logging (real-device FCM round-trip verification in
-    // progress) -- remove once the n8n -> app delivery is confirmed working.
-    console.log('[entry] handleRoundTripResult called, current status:', statusRef.current, 'raw entry:', entry);
     if (statusRef.current !== 'waiting') {
       return;
     }
     clearPhase2Timeout();
-    const mapped = mapEntryToConfirmationCardData(entry);
-    console.log('[entry] mapped ConfirmationCardData:', mapped);
-    setEntryResult(mapped);
+    setEntryResult(mapEntryToConfirmationCardData(entry));
     setStatusBoth('ready');
   }, []);
 
