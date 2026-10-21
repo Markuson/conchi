@@ -105,20 +105,93 @@ describe('registerFcmToken', () => {
 });
 
 describe('onForegroundMessage', () => {
-  test('narrows the native event to FcmDataPayload and forwards it to the callback', () => {
+  /** Registers `onForegroundMessage(callback)` and returns the native listener the mock captured, so the test can fire it directly with a raw event. */
+  function registerAndCaptureListener(callback: (payload: FcmDataPayload) => void): (event: unknown) => void {
     let capturedListener: ((event: unknown) => void) | undefined;
     mockAddNotificationReceivedListener.mockImplementation(((listener: (event: unknown) => void) => {
       capturedListener = listener;
       return { remove: jest.fn() };
     }) as typeof Notifications.addNotificationReceivedListener);
 
-    const callback = jest.fn<void, [FcmDataPayload]>();
     onForegroundMessage(callback);
 
     expect(capturedListener).toBeDefined();
-    const payload: FcmDataPayload = { type: 'invoice_known', entryId: 'entry-1' };
-    capturedListener!({ request: { content: { data: payload } } });
+    return capturedListener!;
+  }
 
-    expect(callback).toHaveBeenCalledWith(payload);
+  test('narrows the native event to FcmDataPayload and forwards it to the callback', () => {
+    const callback = jest.fn<void, [FcmDataPayload]>();
+    const listener = registerAndCaptureListener(callback);
+
+    listener({ request: { content: { data: { type: 'invoice_known', entryId: 'entry-1' } } } });
+
+    expect(callback).toHaveBeenCalledWith({ type: 'invoice_known', entryId: 'entry-1' });
+  });
+
+  const SAMPLE_ENTRY = {
+    id: 'e1',
+    userId: 'u1',
+    amount: 12.5,
+    currency: 'EUR',
+    category: 'Menjar',
+    subcategory: 'Restaurant',
+    description: 'Sopar',
+    date: '2026-10-21',
+    origin: 'app',
+  };
+
+  test('round_trip_result: parses a JSON-stringified entry field (FCM data payloads are string-only on the wire)', () => {
+    const callback = jest.fn<void, [FcmDataPayload]>();
+    const listener = registerAndCaptureListener(callback);
+
+    listener({
+      request: {
+        content: { data: { type: 'round_trip_result', entryId: 'entry-1', entry: JSON.stringify(SAMPLE_ENTRY) } },
+      },
+    });
+
+    expect(callback).toHaveBeenCalledWith({ type: 'round_trip_result', entryId: 'entry-1', entry: SAMPLE_ENTRY });
+  });
+
+  test('round_trip_result: an already-parsed object entry passes through unchanged', () => {
+    const callback = jest.fn<void, [FcmDataPayload]>();
+    const listener = registerAndCaptureListener(callback);
+
+    listener({
+      request: { content: { data: { type: 'round_trip_result', entryId: 'entry-1', entry: SAMPLE_ENTRY } } },
+    });
+
+    expect(callback).toHaveBeenCalledWith({ type: 'round_trip_result', entryId: 'entry-1', entry: SAMPLE_ENTRY });
+  });
+
+  test('round_trip_result: malformed JSON entry is dropped rather than forwarded or crashing', () => {
+    const callback = jest.fn<void, [FcmDataPayload]>();
+    const listener = registerAndCaptureListener(callback);
+
+    listener({
+      request: { content: { data: { type: 'round_trip_result', entryId: 'entry-1', entry: '{not json' } } },
+    });
+
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  test('round_trip_result: entry missing entirely is dropped rather than forwarded as undefined', () => {
+    const callback = jest.fn<void, [FcmDataPayload]>();
+    const listener = registerAndCaptureListener(callback);
+
+    listener({ request: { content: { data: { type: 'round_trip_result', entryId: 'entry-1' } } } });
+
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  test('round_trip_result: entry that parses to valid JSON but not an object (e.g. "null") is dropped', () => {
+    const callback = jest.fn<void, [FcmDataPayload]>();
+    const listener = registerAndCaptureListener(callback);
+
+    listener({
+      request: { content: { data: { type: 'round_trip_result', entryId: 'entry-1', entry: 'null' } } },
+    });
+
+    expect(callback).not.toHaveBeenCalled();
   });
 });

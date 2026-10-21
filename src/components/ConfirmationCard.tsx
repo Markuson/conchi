@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import Animated, {
+  useAnimatedKeyboard,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -196,8 +197,12 @@ export function ConfirmationCard({
       translateY.value = withSpring(0, SPRING_CONFIG);
     }
   }, [translateY]);
+  // Keeps the "Import" field (and the sheet generally) above the keyboard --
+  // see EscriureOverlay.tsx's own matching fix for why this doesn't come for
+  // free from the Activity's `windowSoftInputMode="adjustResize"` alone.
+  const keyboard = useAnimatedKeyboard();
   const cardAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
+    transform: [{ translateY: translateY.value - keyboard.height.value }],
   }));
 
   const categoryOptions: DrumRollerOption<string>[] = categories.map(item => ({
