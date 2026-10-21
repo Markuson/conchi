@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 
 import { joinWebhookUrl, postToN8n } from '../api/n8nClient';
 import { FCM_REGISTER_PATH } from '../constants';
+import type { Entry } from '../types';
 import type { FcmDataPayload } from './types';
 
 /**
@@ -75,6 +76,43 @@ export async function registerFcmToken(token: string, webhookUrl: string, secret
 }
 
 /**
+ * FCM's native `data` payload is a flat `Map<String, String>` on the wire
+ * (both the Firebase Admin SDK and the FCM v1 HTTP API reject non-string
+ * field values) — AD-3's `round_trip_result` shape (`{ type, entryId, entry:
+ * Entry }`) is the logical contract, but `entry` can only cross the wire as
+ * a JSON-stringified string, not a nested object. n8n is expected to
+ * `JSON.stringify` it before sending; this parses it back, so a caller
+ * reading `payload.entry.amount` etc. never has to know about the wire
+ * encoding. Passes other message types through untouched, and drops a
+ * `round_trip_result` (rather than forwarding a broken payload downstream,
+ * where nothing guards against a missing/malformed `entry` before reading
+ * its fields) whenever `entry` is missing, isn't valid JSON, or parses to
+ * something other than an object (e.g. `"null"`, `"42"`, an array).
+ */
+function parseFcmData(data: Record<string, unknown>): FcmDataPayload | undefined {
+  if (data.type !== 'round_trip_result') {
+    return data as FcmDataPayload;
+  }
+
+  let entry: unknown = data.entry;
+  if (typeof entry === 'string') {
+    try {
+      entry = JSON.parse(entry);
+    } catch (error) {
+      console.log('[fcm] round_trip_result dropped -- entry is not valid JSON', error);
+      return undefined;
+    }
+  }
+
+  if (typeof entry !== 'object' || entry === null) {
+    console.log('[fcm] round_trip_result dropped -- entry is missing or not an object');
+    return undefined;
+  }
+
+  return { ...data, entry: entry as Entry } as FcmDataPayload;
+}
+
+/**
  * Wraps `expo-notifications`' `addNotificationReceivedListener` and narrows
  * the payload to `FcmDataPayload` at the boundary, so callers (here, just
  * `App.tsx`'s `console.log`) never touch the untyped native event shape.
@@ -95,6 +133,9 @@ export function onForegroundMessage(
     if (!data || typeof data !== 'object' || !('type' in data)) {
       return;
     }
-    callback(data as FcmDataPayload);
+    const payload = parseFcmData(data);
+    if (payload) {
+      callback(payload);
+    }
   });
 }

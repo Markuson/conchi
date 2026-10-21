@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   BackHandler,
+  Keyboard,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,7 +10,13 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, {
+  runOnJS,
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 
 import { Button } from './atoms/Button';
 import { IS_DETOX } from '../lib/constants';
@@ -88,6 +95,11 @@ export function EscriureOverlay({
       setRendered(true);
       translateY.value = withSpring(0, SPRING_CONFIG);
     } else {
+      // Dismissed up front (not left to whichever handler triggered the
+      // close) so the keyboard starts collapsing immediately alongside the
+      // slide-down spring, rather than the sheet's keyboard-height offset
+      // (below) staying non-zero and shortening the close animation's travel.
+      Keyboard.dismiss();
       translateY.value = withSpring(OFFSCREEN_TRANSLATE_Y, SPRING_CONFIG, (finished) => {
         if (finished) {
           runOnJS(setRendered)(false);
@@ -95,8 +107,15 @@ export function EscriureOverlay({
       });
     }
   }, [visible, translateY]);
+  // The sheet is anchored to the same bottom edge the keyboard rises from, so
+  // without this it opens directly on top of the sheet's own input/submit
+  // button rather than the layout making room for it (the Activity's
+  // `windowSoftInputMode="adjustResize"` only resizes the native window --
+  // it doesn't reach this absolutely-positioned overlay). Subtracting the
+  // live keyboard height keeps the sheet floating fully above it.
+  const keyboard = useAnimatedKeyboard();
   const sheetAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
+    transform: [{ translateY: translateY.value - keyboard.height.value }],
   }));
 
   // Closes on the Android hardware/gesture back action -- the `Modal` this
