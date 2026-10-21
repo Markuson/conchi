@@ -25,14 +25,38 @@
  * `App.tsx` passes through.
  */
 import React from 'react';
+import { TextInput } from 'react-native';
 import ReactTestRenderer, { act, type ReactTestRenderer as Renderer } from 'react-test-renderer';
 
-import { App, resolveThemeProviderMode } from './App';
+import { App, resolveBubbleState, resolveThemeProviderMode } from './App';
+import { Button, type ButtonProps } from './components/atoms/Button';
+import { ConchiBubble } from './components/ConchiBubble';
 import { fetchReferenceData } from './features/settings/referenceDataFetch';
+import { postToN8n } from './lib/api/n8nClient';
 import { getFcmToken, onForegroundMessage, registerFcmToken } from './lib/fcm';
+import type { FcmDataPayload } from './lib/fcm/types';
 import { AUTH_SECRET_KEY, deleteSecureItem, writeSecureItem } from './lib/storage/secureStore';
+import type { Entry } from './lib/types/entry';
 import { useSettingsStore } from './store';
 import { ThemeProvider } from './theme/ThemeProvider';
+
+// The real `SafeAreaProvider` (mounted by `App.tsx`'s `AppShell`, with no
+// `initialMetrics` override available from the outside) never resolves its
+// native-module-driven insets under Jest and renders `null` children forever
+// — the reason every *other* describe block in this file only proves `App`
+// doesn't throw, never that anything under it actually mounts (see
+// `ConchiBubble.test.tsx`'s own docstring for the same observation). The
+// library ships an official Jest mock for exactly this; only the describe
+// block at the bottom of this file (which needs the real rendered tree)
+// relies on it.
+jest.mock('react-native-safe-area-context', () => {
+  // The shipped mock is Babel-compiled ESM (`exports.default = {...}`) — a
+  // bare `require(...)` factory return nests everything under `.default`,
+  // which named imports elsewhere (`{ SafeAreaProvider }`, `useSafeAreaInsets`)
+  // can't see. Unwrapping `.default` here gives Babel's interop the flat
+  // named-export shape it expects.
+  return jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default;
+});
 
 jest.mock('./lib/fcm', () => ({
   getFcmToken: jest.fn(),
@@ -42,6 +66,15 @@ jest.mock('./lib/fcm', () => ({
   // when `App.tsx` calls `subscription.remove()` on cleanup for every test
   // that doesn't explicitly configure this mock itself.
   onForegroundMessage: jest.fn(() => ({ remove: jest.fn() })),
+}));
+
+// Only the save/send networking boundary is mocked here — `App.tsx`'s own
+// FCM dispatch wiring (the subject of the describe block at the bottom of
+// this file) must stay real, unlike the other describe blocks above which
+// mock `./lib/fcm` wholesale.
+jest.mock('./lib/api/n8nClient', () => ({
+  ...jest.requireActual<typeof import('./lib/api/n8nClient')>('./lib/api/n8nClient'),
+  postToN8n: jest.fn(),
 }));
 
 // Every test in this file mounts <App/>, which now also runs the Story 2.2
@@ -59,6 +92,19 @@ const mockFetchReferenceData = fetchReferenceData as jest.MockedFunction<typeof 
 const mockGetFcmToken = getFcmToken as jest.MockedFunction<typeof getFcmToken>;
 const mockRegisterFcmToken = registerFcmToken as jest.MockedFunction<typeof registerFcmToken>;
 const mockOnForegroundMessage = onForegroundMessage as jest.MockedFunction<typeof onForegroundMessage>;
+const mockPostToN8n = postToN8n as jest.MockedFunction<typeof postToN8n>;
+
+const MOCK_ENTRY: Entry = {
+  id: 'entry-1',
+  userId: 'user-1',
+  amount: 24.5,
+  currency: 'EUR',
+  category: 'Alimentació',
+  subcategory: 'Supermercat',
+  description: 'Cafè',
+  date: '2026-10-15',
+  origin: 'app',
+};
 
 /**
  * Advances the microtask queue enough turns for the FCM effect's `await`
@@ -82,6 +128,30 @@ test('resolves "dark" to a forced "dark" mode', () => {
 
 test('resolves "light" to a forced "light" mode', () => {
   expect(resolveThemeProviderMode('light')).toBe('light');
+});
+
+/**
+ * Covers Story 2.4's I/O & Edge-Case Matrix Bubble-state rows:
+ * "Phase 1 in flight" (Bubble stays Idle), "Phase 1 success"/"Phase 2
+ * result" (Bubble → Working / back to Idle), and "Phase 1 failure"/"Phase 2
+ * timeout" (Bubble → Error). `resolveBubbleState` is a pure function
+ * extracted from `App`'s JSX for exactly this, per its own doc comment.
+ */
+test('"idle" and "submitting" (Phase 1 in flight) both resolve to Idle', () => {
+  expect(resolveBubbleState('idle')).toBe('idle');
+  expect(resolveBubbleState('submitting')).toBe('idle');
+});
+
+test('"waiting" (Phase 2 active) resolves to Working', () => {
+  expect(resolveBubbleState('waiting')).toBe('working');
+});
+
+test('"error" (Phase 1 failure or Phase 2 timeout) resolves to Error', () => {
+  expect(resolveBubbleState('error')).toBe('error');
+});
+
+test('"ready" (a result just arrived, ConfirmationCard takes over) resolves to Idle', () => {
+  expect(resolveBubbleState('ready')).toBe('idle');
 });
 
 describe('App wires the store theme into ThemeProvider', () => {
@@ -178,5 +248,154 @@ describe('App wires FCM startup registration (Story 2.1)', () => {
 
     expect(mockGetFcmToken).not.toHaveBeenCalled();
     expect(mockRegisterFcmToken).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * Covers Story 2.4's "first real dispatch wiring" integration point:
+ * `App.tsx`'s `onForegroundMessage` callback branching on
+ * `payload.type === 'round_trip_result'` and forwarding `payload.entry` into
+ * `useEntrySubmission`'s `handleRoundTripResult`, and `resolveBubbleState`'s
+ * output actually reaching the mounted `ConchiBubble`'s `state` prop.
+ *
+ * Unlike `navigation/index.test.tsx`'s own round-trip tests — which drive
+ * `handleRoundTripResult` directly via a captured ref, explicitly standing
+ * in for this wiring — this suite mounts the real `<App/>` and fires the
+ * FCM result through the actual callback `onForegroundMessage` was
+ * subscribed with, so a regression in the `payload.type` branch or the
+ * `resolveBubbleState(entrySubmission.status)` prop wiring would be caught
+ * here even though neither of those is exercised anywhere else.
+ */
+describe('App wires the real FCM round-trip result into ConfirmationCard and ConchiBubble (Story 2.4)', () => {
+  let renderer: Renderer | undefined;
+
+  function pressByLabel(label: string): void {
+    const [node] = renderer!.root.findAll(
+      (n) => n.props.accessibilityLabel === label && typeof n.props.onPress === 'function',
+    );
+    if (!node) {
+      throw new Error(`No pressable found with accessibilityLabel "${label}"`);
+    }
+    act(() => {
+      (node.props.onPress as () => void)();
+    });
+  }
+
+  function pressButton(label: string): void {
+    const button = renderer!.root.findAllByType(Button).find((n) => (n.props as ButtonProps).label === label);
+    if (!button) {
+      throw new Error(`No Button found with label "${label}"`);
+    }
+    act(() => {
+      (button.props as ButtonProps).onPress();
+    });
+  }
+
+  beforeEach(async () => {
+    mockPostToN8n.mockReset();
+    mockOnForegroundMessage.mockReset();
+    mockOnForegroundMessage.mockReturnValue({ remove: jest.fn() });
+    // No FCM token registration noise for this suite — it's covered by its
+    // own describe block above; here only the foreground-message callback
+    // itself matters.
+    mockGetFcmToken.mockReset();
+    mockGetFcmToken.mockResolvedValue(null);
+    mockFetchReferenceData.mockClear();
+    mockFetchReferenceData.mockResolvedValue(undefined);
+
+    useSettingsStore.setState({ webhookUrl: 'https://n8n.example.com' });
+    await writeSecureItem(AUTH_SECRET_KEY, 'secret-value');
+  });
+
+  afterEach(async () => {
+    if (renderer) {
+      act(() => {
+        renderer?.unmount();
+      });
+      renderer = undefined;
+    }
+    useSettingsStore.setState({ webhookUrl: '', theme: 'system' });
+    await deleteSecureItem(AUTH_SECRET_KEY);
+  });
+
+  test('a round_trip_result delivered through the real subscribed callback mounts ConfirmationCard and flips the Bubble to Working then back to Idle', async () => {
+    mockPostToN8n.mockResolvedValue({ ok: true } as Response);
+
+    await act(async () => {
+      renderer = ReactTestRenderer.create(<App />);
+      await flushMicrotasks();
+    });
+
+    expect(renderer!.root.findByType(ConchiBubble).props.state).toBe('idle');
+
+    // Drive a real Phase 1 submission through the FAB, same as
+    // `navigation/index.test.tsx`, so the hook is actually `'waiting'` when
+    // the FCM result below arrives (`handleRoundTripResult` is a no-op
+    // otherwise).
+    pressByLabel('Acció ràpida');
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    const [input] = renderer!.root.findAllByType(TextInput);
+    act(() => {
+      (input.props.onChangeText as (text: string) => void)('cafè 2,50');
+    });
+    pressButton('Envia');
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(renderer!.root.findByType(ConchiBubble).props.state).toBe('working');
+
+    const fcmCallback = mockOnForegroundMessage.mock.calls[0]?.[0];
+    expect(fcmCallback).toBeDefined();
+
+    act(() => {
+      fcmCallback?.({ type: 'round_trip_result', entryId: 'entry-1', entry: MOCK_ENTRY } satisfies FcmDataPayload);
+    });
+
+    expect(renderer!.root.findByType(ConchiBubble).props.state).toBe('idle');
+    expect(renderer!.root.findAllByType(Button).some((n) => (n.props as ButtonProps).label === 'Acceptar')).toBe(
+      true,
+    );
+  });
+
+  test('a non-round_trip_result payload delivered through the real callback is not dispatched into the hook', async () => {
+    mockPostToN8n.mockResolvedValue({ ok: true } as Response);
+
+    await act(async () => {
+      renderer = ReactTestRenderer.create(<App />);
+      await flushMicrotasks();
+    });
+
+    pressByLabel('Acció ràpida');
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    const [input] = renderer!.root.findAllByType(TextInput);
+    act(() => {
+      (input.props.onChangeText as (text: string) => void)('cafè 2,50');
+    });
+    pressButton('Envia');
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(renderer!.root.findByType(ConchiBubble).props.state).toBe('working');
+
+    const fcmCallback = mockOnForegroundMessage.mock.calls[0]?.[0];
+    act(() => {
+      fcmCallback?.({
+        type: 'invoice_unknown',
+        entryId: 'entry-1',
+        senderName: 'Someone',
+      } satisfies FcmDataPayload);
+    });
+
+    // Untouched: still "waiting" (Working), no card mounted.
+    expect(renderer!.root.findByType(ConchiBubble).props.state).toBe('working');
+    expect(renderer!.root.findAllByType(Button).some((n) => (n.props as ButtonProps).label === 'Acceptar')).toBe(
+      false,
+    );
   });
 });

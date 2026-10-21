@@ -17,3 +17,13 @@ export const roundTripSuccess: string[] = [
   "Anotat al cèntim. No se m'escapa res.",
   "Llest! Torna quan vulguis, aquí t'espero.",
 ];
+
+/**
+ * Story 2.4's Error-state copy: shown whenever `useEntrySubmission`'s round
+ * trip fails (Phase 1 POST failure or a Phase 2 `PHASE2_TIMEOUT_MS` timeout)
+ * and surfaced via `ConchiBubble`'s accessibility label while
+ * `state === 'error'` — the Bubble itself has no text UI, so this is how the
+ * failure reaches assistive technology; sighted users read it from the
+ * Bubble's `conchi-error.png` art switching in.
+ */
+export const roundTripError = 'Alguna cosa ha anat malament. Torna-ho a provar.';

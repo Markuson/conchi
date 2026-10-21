@@ -4,9 +4,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { RootNavigator } from './navigation';
 import { ThemeProvider, useTheme, type ThemeMode } from './theme/ThemeProvider';
-import { ConchiBubble } from './components/ConchiBubble';
+import { ConchiBubble, type ConchiBubbleState } from './components/ConchiBubble';
 import type { Theme } from './features/settings/settingsStore';
 import { fetchReferenceData } from './features/settings/referenceDataFetch';
+import { useEntrySubmission, type EntrySubmissionStatus, type UseEntrySubmissionResult } from './features/entry/useEntrySubmission';
 import { resolveConfiguredCredentials } from './lib/api/connection';
 import { getFcmToken, onForegroundMessage, registerFcmToken } from './lib/fcm';
 import { useSettingsStore } from './store';
@@ -23,6 +24,23 @@ export function resolveThemeProviderMode(theme: Theme): ThemeMode | undefined {
   return theme === 'system' ? undefined : theme;
 }
 
+/**
+ * Maps `useEntrySubmission`'s round-trip status onto `ConchiBubble`'s
+ * three-way `state` prop (Story 2.4). `'submitting'` (Phase 1 in flight)
+ * stays Idle per this story's frozen I/O matrix; only Phase 2's `'waiting'`
+ * shows Working, and `'ready'` (a result just arrived) goes straight back to
+ * Idle as `ConfirmationCard` takes over.
+ */
+export function resolveBubbleState(status: EntrySubmissionStatus): ConchiBubbleState {
+  if (status === 'waiting') {
+    return 'working';
+  }
+  if (status === 'error') {
+    return 'error';
+  }
+  return 'idle';
+}
+
 export function App(): React.JSX.Element {
   // Reading straight from the store (hydrated synchronously from MMKV at
   // module load, see `settingsStore.ts`) means the persisted theme applies
@@ -30,14 +48,22 @@ export function App(): React.JSX.Element {
   // from Settings.
   const theme = useSettingsStore((state) => state.theme);
 
+  // Story 2.4: one `useEntrySubmission` instance for the whole app (not just
+  // `MainTabs`), so its `status` can also drive `ConchiBubble` — a sibling of
+  // the entire navigation tree — without duplicating round-trip state.
+  const entrySubmission = useEntrySubmission();
+  // Destructured so the FCM effect below can depend on this one stable
+  // function directly, rather than a property access off `entrySubmission`
+  // (a fresh object every render) — keeps `react-hooks/exhaustive-deps` happy
+  // without re-subscribing the listener on every render.
+  const { handleRoundTripResult } = entrySubmission;
+
   // Story 2.1 (FCM spike) + Story 2.2 (reference-data fetch): both gate on
   // the exact same "webhookUrl configured + secret present" check, resolved
   // once here (`resolveConfiguredCredentials`, shared with
   // `useTracerBullet.checkConfigured` and `referenceDataFetch.ts`) rather
   // than each flow independently reading secure storage for the same key on
-  // every cold start. No feature-level dispatch yet (Story 2.4+); the
-  // foreground listener only console-logs the typed payload for manual AC2
-  // inspection.
+  // every cold start.
   useEffect(() => {
     let cancelled = false;
 
@@ -85,22 +111,37 @@ export function App(): React.JSX.Element {
       }
     })();
 
+    // Story 2.4: the first real dispatch wiring for `round_trip_result` —
+    // forwarded into the active `useEntrySubmission` instance, which maps
+    // `entry` to `ConfirmationCardData` and (if it's currently waiting on
+    // Phase 2) mounts `ConfirmationCard`. `invoice_unknown`/`invoice_known`
+    // have no consumer yet (Epic 6). `handleRoundTripResult` has a stable
+    // identity (see its own doc comment), so listing it as this effect's
+    // dependency never causes a re-subscribe.
     const subscription = onForegroundMessage((payload) => {
-      console.log('[fcm] foreground message received', payload.type, payload);
+      if (payload.type === 'round_trip_result') {
+        handleRoundTripResult(payload.entry);
+      } else {
+        console.log('[fcm] unhandled foreground message type', payload.type);
+      }
     });
 
     return () => {
       cancelled = true;
       subscription.remove();
     };
-  }, []);
+  }, [handleRoundTripResult]);
 
   return (
     <ThemeProvider mode={resolveThemeProviderMode(theme)}>
-      <AppShell />
+      <AppShell entrySubmission={entrySubmission} />
     </ThemeProvider>
   );
 }
+
+type AppShellProps = {
+  entrySubmission: UseEntrySubmissionResult;
+};
 
 /**
  * Split out from `App` so it can call `useTheme()` — React Navigation has its
@@ -110,7 +151,7 @@ export function App(): React.JSX.Element {
  * bar renders on React Navigation's default white background no matter what
  * Tema is selected.
  */
-function AppShell(): React.JSX.Element {
+function AppShell({ entrySubmission }: AppShellProps): React.JSX.Element {
   const { mode, colors } = useTheme();
 
   const navigationTheme: NavigationTheme = {
@@ -129,8 +170,8 @@ function AppShell(): React.JSX.Element {
   return (
     <SafeAreaProvider>
       <NavigationContainer theme={navigationTheme}>
-        <RootNavigator />
-        <ConchiBubble />
+        <RootNavigator entrySubmission={entrySubmission} />
+        <ConchiBubble state={resolveBubbleState(entrySubmission.status)} />
       </NavigationContainer>
     </SafeAreaProvider>
   );

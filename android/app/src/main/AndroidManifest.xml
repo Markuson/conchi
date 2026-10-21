@@ -18,6 +18,20 @@
       android:theme="@style/AppTheme"
       android:usesCleartextTraffic="${usesCleartextTraffic}"
       android:supportsRtl="true">
+      <!-- Story 2.4 (FCM round trip): without this, FCM falls back to the
+           full-color launcher icon as the notification's small icon.
+           Android then strips all color from it and renders only its alpha
+           channel, which (being a solid filled square/circle, not a
+           silhouette) shows up as a plain blob rather than Conchi's shape.
+           `ic_notification` is derived from the same monochrome silhouette
+           source (`src/assets/images/app-icon-monochrome.png`) already used
+           for the Android 13+ themed launcher icon (Story 1.4). -->
+      <meta-data
+        android:name="com.google.firebase.messaging.default_notification_icon"
+        android:resource="@drawable/ic_notification" />
+      <meta-data
+        android:name="com.google.firebase.messaging.default_notification_color"
+        android:resource="@color/ic_launcher_background" />
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"
